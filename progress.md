@@ -640,3 +640,32 @@
   - Log path: `.ralph-status/iteration-22-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 23 - M1.2 Task 2
+
+- Task ID and description: `M1.2-2` Implement `packages/core/src/models/model-config.ts` — ModelConfig + ModelSettings types with Zod validation.
+- Key decisions made:
+  - Searched the codebase first and confirmed no existing `packages/core/src/models/model-config.ts` implementation.
+  - Implemented `model-config.ts` with contract-aligned runtime validators for `ModelSettings`, `ProviderConfig`, and `ModelConfig` using a Zod-compatible `safeParse` API (`modelSettingsZodSchema`, `modelConfigZodSchema`).
+  - Added bilingual (`zh-CN`/`en`) field-level validation issues with repair suggestions and JSON-pointer paths for strict error reporting.
+  - Enforced cross-field checks: provider ID uniqueness, fallback chain/provider references, `defaultModel` provider/model consistency, and `perModelSettings` key linkage to configured provider models.
+  - Exported model-config validation APIs from `packages/core/src/index.ts` for downstream module use.
+- Files changed:
+  - `packages/core/src/models/model-config.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-23-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add model config zod-like validation module`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.2-2`
+  - Command: `git add packages/core/src/models/model-config.ts packages/core/src/index.ts plan.md progress.md && git commit -m "feat: add model config zod-like validation module"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-23-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

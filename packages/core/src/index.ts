@@ -6,3 +6,4 @@ export * from "./config/backup-manager.js";
 export * from "./config/migrator.js";
 export * from "./secrets/secret-store.js";
 export * from "./models/provider-registry.js";
+export * from "./models/model-config.js";

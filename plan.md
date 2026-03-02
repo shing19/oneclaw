@@ -83,7 +83,7 @@ If blocked, document in `progress.md` and move to the next task.
 > Module: `docs/modules/model-management.md`
 
 - [x] Implement `packages/core/src/models/provider-registry.ts` — ProviderRegistry with 3 preset providers (DeepSeek, 百炼, 智谱)
-- [ ] Implement `packages/core/src/models/model-config.ts` — ModelConfig + ModelSettings types with Zod validation
+- [x] Implement `packages/core/src/models/model-config.ts` — ModelConfig + ModelSettings types with Zod validation
 - [ ] Implement `packages/core/src/models/key-rotator.ts` — API key rotation on 429, round-robin across keys
 - [ ] Implement `packages/core/src/models/fallback-orchestrator.ts` — FallbackOrchestrator with error-type-specific behavior
 - [ ] Implement `packages/core/src/models/quota-tracker.ts` — QuotaTracker for token-based and request-based billing
