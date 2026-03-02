@@ -149,3 +149,32 @@
   - Log path: `.ralph-status/iteration-5-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 6 - M1.0 Task 5
+
+- Task ID and description: `M1.0-5` Configure Vitest (root config + per-package configs).
+- Key decisions made:
+  - Add a shared root Vitest baseline at `vitest.config.ts` for Node test runtime defaults.
+  - Use a Vitest workspace file (`vitest.workspace.ts`) to declare package-level projects explicitly.
+  - Create package-local configs for `packages/core` and `packages/cli` that merge shared defaults and scope test discovery to each package.
+- Files changed:
+  - `vitest.config.ts`
+  - `vitest.workspace.ts`
+  - `packages/core/vitest.config.ts`
+  - `packages/cli/vitest.config.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-6-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: configure vitest workspace and package configs`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.0-5`
+  - Command: `git add vitest.config.ts vitest.workspace.ts packages/core/vitest.config.ts packages/cli/vitest.config.ts plan.md progress.md && git commit -m "feat: configure vitest workspace and package configs"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-6-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

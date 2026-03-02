@@ -259,7 +259,7 @@ check_deps() {
 
 is_complete() {
     if [[ -n "$COMPLETE_WHEN_NO_PATTERN" ]]; then
-        [[ -f "$PLAN_FILE" ]] && ! grep -qF "$COMPLETE_WHEN_NO_PATTERN" "$PLAN_FILE" 2>/dev/null
+        [[ -f "$PLAN_FILE" ]] && ! grep -qF -- "$COMPLETE_WHEN_NO_PATTERN" "$PLAN_FILE" 2>/dev/null
     else
         [[ -f "$PROGRESS_FILE" ]] && grep -qi "<COMPLETE>" "$PROGRESS_FILE" 2>/dev/null
     fi
@@ -268,7 +268,7 @@ is_complete() {
 is_complete_file() {
     local file="$1"
     if [[ -n "$COMPLETE_WHEN_NO_PATTERN" ]]; then
-        [[ -f "$PLAN_FILE" ]] && ! grep -qF "$COMPLETE_WHEN_NO_PATTERN" "$PLAN_FILE" 2>/dev/null
+        [[ -f "$PLAN_FILE" ]] && ! grep -qF -- "$COMPLETE_WHEN_NO_PATTERN" "$PLAN_FILE" 2>/dev/null
     else
         [[ -f "$file" ]] && grep -qi "<COMPLETE>" "$file" 2>/dev/null
     fi
