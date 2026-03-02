@@ -284,3 +284,30 @@
   - Log path: `.ralph-status/iteration-10-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 11 - M1.1 Task 2
+
+- Task ID and description: `M1.1-2` Create `packages/core/src/config/schema.json` — JSON Schema for OneclawConfig.
+- Key decisions made:
+  - Implement schema with draft 2020-12 and strict top-level structure for `version`, `general`, `models`, `channels`, `agent`, `automation`, and `quotas`.
+  - Align model and agent-related schema definitions with contract types (`ProviderConfig`, `ModelSettings`, `ConcurrencySettings`, `MountPoint`, `SkillConfig`).
+  - Keep under-specified sections (`dingtalk`, `wechatWork`, `automation.tasks`) intentionally extensible while preserving required core fields.
+  - Add `credentialRef`/Feishu secret reference patterns to enforce non-plaintext secret usage in config.
+- Files changed:
+  - `packages/core/src/config/schema.json`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-11-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add oneclaw config json schema`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-2`
+  - Command: `git add packages/core/src/config/schema.json plan.md progress.md && git commit -m "feat: add oneclaw config json schema"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-11-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

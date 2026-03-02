@@ -1,0 +1,431 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://oneclaw.dev/schemas/config.schema.json",
+  "title": "OneclawConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "general",
+    "models",
+    "channels",
+    "agent",
+    "automation",
+    "quotas"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "general": {
+      "$ref": "#/$defs/GeneralConfig"
+    },
+    "models": {
+      "$ref": "#/$defs/ModelConfig"
+    },
+    "channels": {
+      "$ref": "#/$defs/ChannelsConfig"
+    },
+    "agent": {
+      "$ref": "#/$defs/AgentConfig"
+    },
+    "automation": {
+      "$ref": "#/$defs/AutomationConfig"
+    },
+    "quotas": {
+      "$ref": "#/$defs/QuotaLimitsConfig"
+    }
+  },
+  "$defs": {
+    "GeneralConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "language",
+        "theme",
+        "workspace"
+      ],
+      "properties": {
+        "language": {
+          "type": "string",
+          "enum": [
+            "zh-CN",
+            "en"
+          ]
+        },
+        "theme": {
+          "type": "string",
+          "enum": [
+            "light",
+            "dark",
+            "system"
+          ]
+        },
+        "workspace": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ModelConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providers",
+        "fallbackChain",
+        "defaultModel",
+        "perModelSettings"
+      ],
+      "properties": {
+        "providers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProviderConfig"
+          }
+        },
+        "fallbackChain": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "defaultModel": {
+          "type": "string",
+          "pattern": "^[^/]+/[^/]+$"
+        },
+        "perModelSettings": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[^/]+/[^/]+$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ModelSettings"
+          }
+        }
+      }
+    },
+    "ProviderConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "enabled",
+        "credentialRef",
+        "baseUrl",
+        "protocol",
+        "models"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-_]*$"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "credentialRef": {
+          "type": "string",
+          "pattern": "^oneclaw\\/[a-z0-9-]+(?:\\/[a-z0-9-]+)+$"
+        },
+        "baseUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "protocol": {
+          "type": "string",
+          "enum": [
+            "openai-completions",
+            "openai-responses",
+            "anthropic-messages",
+            "ollama"
+          ]
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "ModelSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "temperature": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "maxTokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "thinking": {
+          "type": "string",
+          "enum": [
+            "off",
+            "minimal",
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "adaptive"
+          ]
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "sse",
+            "websocket",
+            "auto"
+          ]
+        },
+        "streaming": {
+          "type": "boolean"
+        },
+        "cacheRetention": {
+          "type": "string",
+          "enum": [
+            "none",
+            "short",
+            "long"
+          ]
+        }
+      }
+    },
+    "ChannelsConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "feishu": {
+          "$ref": "#/$defs/FeishuConfig"
+        },
+        "dingtalk": {
+          "$ref": "#/$defs/ExtensibleChannelConfig"
+        },
+        "wechatWork": {
+          "$ref": "#/$defs/ExtensibleChannelConfig"
+        }
+      }
+    },
+    "FeishuConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "appId",
+        "appSecretRef"
+      ],
+      "properties": {
+        "appId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "appSecretRef": {
+          "type": "string",
+          "pattern": "^oneclaw\\/channel\\/feishu\\/[a-z0-9-]+$"
+        },
+        "webhookUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "webhookTokenRef": {
+          "type": "string",
+          "pattern": "^oneclaw\\/channel\\/feishu\\/[a-z0-9-]+$"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ExtensibleChannelConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "AgentConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "concurrency",
+        "skills",
+        "mountPoints",
+        "timeoutSeconds"
+      ],
+      "properties": {
+        "concurrency": {
+          "$ref": "#/$defs/ConcurrencySettings"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkillConfig"
+          }
+        },
+        "mountPoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MountPoint"
+          }
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "ConcurrencySettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxConcurrent",
+        "subagents"
+      ],
+      "properties": {
+        "maxConcurrent": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "subagents": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "maxConcurrent",
+            "maxSpawnDepth",
+            "maxChildrenPerAgent"
+          ],
+          "properties": {
+            "maxConcurrent": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "maxSpawnDepth": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "maxChildrenPerAgent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            }
+          }
+        }
+      }
+    },
+    "SkillConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "enabled"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "MountPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hostPath",
+        "containerPath",
+        "readonly"
+      ],
+      "properties": {
+        "hostPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "containerPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "readonly": {
+          "type": "boolean"
+        }
+      }
+    },
+    "AutomationConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tasks"
+      ],
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AutomationTask"
+          }
+        }
+      }
+    },
+    "AutomationTask": {
+      "type": "object",
+      "required": [
+        "id",
+        "enabled"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "QuotaLimitsConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "warningThreshold"
+      ],
+      "properties": {
+        "dailyLimit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "weeklyLimit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "monthlyLimit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "warningThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    }
+  }
+}
