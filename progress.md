@@ -1039,3 +1039,34 @@
   - Log path: `.ralph-status/iteration-34-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 35 - M1.3 Task 6
+
+- Task ID and description: `M1.3-6` Write unit tests for `config-translator`, `log-parser`.
+- Key decisions made:
+  - Searched the adapter module first and confirmed there were no existing unit tests under `packages/core/src/adapter/__tests__/` for translator/parser behavior.
+  - Added `config-translator` unit coverage for contract-critical mapping rules: enabled-provider filtering, concurrency/timeout mapping, workspace and skill translation, and API key env-var name resolution.
+  - Added mutation-safety coverage by asserting translated skill options are deep-cloned and cannot mutate source `AgentConfig` data.
+  - Added `log-parser` unit coverage for text and JSON line handling, level normalization, trace-id fallback, active-agent extraction, and cost-event extraction guards.
+  - Kept this loop scoped to one task by only completing the M1.3 unit-test checkbox and not touching the integration lifecycle task.
+- Files changed:
+  - `packages/core/src/adapter/__tests__/config-translator.test.ts`
+  - `packages/core/src/adapter/__tests__/log-parser.test.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-35-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `test: add adapter translator and log parser unit tests`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.3-6`
+  - Command: `git add packages/core/src/adapter/__tests__/config-translator.test.ts packages/core/src/adapter/__tests__/log-parser.test.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "test: add adapter translator and log parser unit tests"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-35-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
