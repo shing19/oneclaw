@@ -257,3 +257,30 @@
   - Log path: `.ralph-status/iteration-9-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; M1.0 is complete locally and subsequent work can proceed from M1.1.
+
+## Iteration 10 - M1.1 Task 1
+
+- Task ID and description: `M1.1-1` Implement `packages/core/src/config/paths.ts` — platform-aware config paths (macOS/Linux/Windows).
+- Key decisions made:
+  - Implement `resolveOneclawConfigPaths` with deterministic defaults per platform: macOS (`~/Library/Application Support/oneclaw`), Linux (`~/.config/oneclaw`), and Windows (`%APPDATA%/oneclaw` with fallback to `~/AppData/Roaming/oneclaw`).
+  - Add `ONECLAW_CONFIG_PATH` override support; when the override is a directory-like path it resolves to `<override>/config.json`.
+  - Centralize derived sibling paths for future modules: `backups/`, `data/`, and `secrets.enc`.
+  - Re-export config path utilities from `packages/core/src/index.ts` for package-level consumption.
+- Files changed:
+  - `packages/core/src/config/paths.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add platform-aware config path resolver`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-1`
+  - Command: `git add packages/core/src/config/paths.ts packages/core/src/index.ts plan.md progress.md && git commit -m "feat: add platform-aware config path resolver"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-10-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
