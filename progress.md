@@ -367,3 +367,32 @@
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
   - Optional direct package compile (`pnpm exec tsc -p packages/core/tsconfig.json --noEmit`) currently fails globally because `@types/node` is not installed in this environment.
+
+## Iteration 14 - M1.1 Task 5
+
+- Task ID and description: `M1.1-5` Implement `packages/core/src/config/backup-manager.ts` — auto-backup before save, keep last 20.
+- Key decisions made:
+  - Add a dedicated `BackupManager` with localized (`zh-CN`/`en`) error codes, timestamped backup naming, and retention pruning.
+  - Implement `backupBeforeSave()` to copy the current `config.json` into `backups/` before writes; when config does not exist yet (first save), backup creation safely no-ops.
+  - Enforce retention by listing backups in descending creation order and deleting entries beyond the default max of 20.
+  - Wire `ConfigManager.save()` to invoke backup creation/pruning before atomic write so backup behavior is automatic.
+- Files changed:
+  - `packages/core/src/config/backup-manager.ts`
+  - `packages/core/src/config/config-manager.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-14-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement config backup manager with retention`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-5`
+  - Command: `git add packages/core/src/config/backup-manager.ts packages/core/src/config/config-manager.ts packages/core/src/index.ts plan.md progress.md && git commit -m "feat: implement config backup manager with retention"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-14-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

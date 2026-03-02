@@ -3,6 +3,7 @@ import type { FSWatcher } from "node:fs";
 import { watch as watchFs } from "node:fs";
 import { basename } from "node:path";
 
+import { BackupManager } from "./backup-manager.js";
 import type {
   ConfigPathResolverOptions,
   OneclawConfigPaths,
@@ -25,6 +26,7 @@ export interface ConfigManagerOptions {
   pathResolverOptions?: ConfigPathResolverOptions;
   paths?: OneclawConfigPaths;
   watchDebounceMs?: number;
+  backupManager?: BackupManager;
 }
 
 export interface ConfigWatchOptions {
@@ -77,6 +79,7 @@ export class ConfigManager {
   private readonly locale: ValidationLocale;
   private readonly paths: OneclawConfigPaths;
   private readonly watchDebounceMs: number;
+  private readonly backupManager: BackupManager;
 
   constructor(options: ConfigManagerOptions = {}) {
     this.locale = options.locale ?? "zh-CN";
@@ -85,6 +88,12 @@ export class ConfigManager {
       resolveOneclawConfigPaths(options.pathResolverOptions ?? {});
     this.watchDebounceMs =
       options.watchDebounceMs ?? DEFAULT_CONFIG_WATCH_DEBOUNCE_MS;
+    this.backupManager =
+      options.backupManager ??
+      new BackupManager({
+        locale: this.locale,
+        paths: this.paths,
+      });
   }
 
   getPaths(): OneclawConfigPaths {
@@ -117,6 +126,7 @@ export class ConfigManager {
     const serialized = `${JSON.stringify(config, null, 2)}\n`;
 
     await this.ensureConfigDir();
+    await this.backupManager.backupBeforeSave();
     await this.writeAtomically(serialized);
 
     return config;
