@@ -669,3 +669,34 @@
   - Log path: `.ralph-status/iteration-23-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 24 - M1.2 Task 3
+
+- Task ID and description: `M1.2-3` Implement `packages/core/src/models/key-rotator.ts` — API key rotation on 429, round-robin across keys.
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing `packages/core/src/models/key-rotator.ts` module.
+  - Implemented a per-provider `KeyRotator` with API key de-duplication, deterministic current-key state, and round-robin rotation across available keys.
+  - Enforced contract behavior in `handleError`: only 429-like errors trigger rotation and mark current key rate-limited; non-429 errors do not rotate.
+  - Added cooldown-based key recovery (`60s` default, configurable), retry-after reporting when all keys are rate-limited, and localized (`zh-CN`/`en`) typed errors.
+  - Exported key-rotator APIs from `packages/core/src/index.ts` for downstream fallback orchestration.
+- Files changed:
+  - `packages/core/src/models/key-rotator.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-24-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add key rotator for 429 round-robin failover`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.2-3`
+  - Command: `git add packages/core/src/models/key-rotator.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: add key rotator for 429 round-robin failover"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-24-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
