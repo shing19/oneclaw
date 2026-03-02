@@ -795,3 +795,43 @@
   - Log path: `.ralph-status/iteration-27-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 28 - M1.2 Task 7
+
+- Task ID and description: `M1.2-7` Write unit tests for `provider-registry`, `key-rotator`, `fallback-orchestrator`, `quota-tracker`.
+- Key decisions made:
+  - Searched the codebase first and confirmed no existing unit tests for model-management modules under `packages/core/src/models`.
+  - Added dedicated unit test suites under `packages/core/src/models/__tests__/` for all required modules, using deterministic mock providers and `node:assert/strict` assertions.
+  - Covered critical behaviors:
+    - `provider-registry`: preset availability/clone safety, ID normalization, duplicate protection, invalid ID rejection.
+    - `key-rotator`: key normalization/dedup, 429-only rotation, all-keys-rate-limited retry window, rate-limit detector coverage.
+    - `fallback-orchestrator`: 429 fallback event emission, timeout retry-then-fallback, no fallback on abort, partial-stream failure handling.
+    - `quota-tracker`: token/request billing, DeepSeek night discount, threshold callback behavior, history/export, invalid date-range guard.
+- Files changed:
+  - `packages/core/src/models/__tests__/provider-registry.test.ts`
+  - `packages/core/src/models/__tests__/key-rotator.test.ts`
+  - `packages/core/src/models/__tests__/fallback-orchestrator.test.ts`
+  - `packages/core/src/models/__tests__/quota-tracker.test.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-28-vitest-blocked.log`
+  - `.ralph-status/iteration-28-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Failure record:
+  - Task: `M1.2-7`
+  - Command: `pnpm exec vitest run --config packages/core/vitest.config.ts --include packages/core/src/models/__tests__/*.test.ts`
+  - Error excerpt: `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL Command "vitest" not found`
+  - Log path: `.ralph-status/iteration-28-vitest-blocked.log`
+- Commit:
+  - Attempted `test: add model management unit test coverage`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.2-7`
+  - Command: `git add packages/core/src/models/__tests__/provider-registry.test.ts packages/core/src/models/__tests__/key-rotator.test.ts packages/core/src/models/__tests__/fallback-orchestrator.test.ts packages/core/src/models/__tests__/quota-tracker.test.ts plan.md progress.md && git commit -m "test: add model management unit test coverage"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-28-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+

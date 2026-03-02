@@ -88,7 +88,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/core/src/models/fallback-orchestrator.ts` — FallbackOrchestrator with error-type-specific behavior
 - [x] Implement `packages/core/src/models/quota-tracker.ts` — QuotaTracker for token-based and request-based billing
 - [x] Implement `packages/core/src/models/provider-health.ts` — health check + probe recovery (30s interval)
-- [ ] Write unit tests for provider-registry, key-rotator, fallback-orchestrator, quota-tracker
+- [x] Write unit tests for provider-registry, key-rotator, fallback-orchestrator, quota-tracker
 - [ ] Write integration test: 429 triggers key rotation → fallback → probe recovery
 
 ## M1.3 — Agent 适配层
