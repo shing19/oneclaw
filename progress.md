@@ -339,3 +339,31 @@
 - Blockers or notes for next iteration:
   - Sandbox still blocks npm registry access, so adding upstream `zod` dependency is not currently possible; current validator uses a local Zod-compatible runtime parser plus JSON Schema validation.
   - Sandbox still blocks git index writes and network push; implementation and docs updates are complete locally.
+
+## Iteration 13 - M1.1 Task 4
+
+- Task ID and description: `M1.1-4` Implement `packages/core/src/config/config-manager.ts` — load/save/watch with fs.watch debounce.
+- Key decisions made:
+  - Add a `ConfigManager` class with explicit `load`, `save`, and `watch` APIs, reusing `assertValidConfig` for both read/write validation boundaries.
+  - Implement debounced file watching via `fs.watch` on the config directory, filtering to `config.json` and using a default 500ms debounce.
+  - Use atomic writes (`*.tmp-*` + `rename`) and strict error typing (`ConfigManagerError` + code enum) with bilingual (`zh-CN`/`en`) user-facing messages.
+  - Expose the manager through `@oneclaw/core` root exports for downstream modules.
+- Files changed:
+  - `packages/core/src/config/config-manager.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement config manager load save and watch debounce`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-4`
+  - Command: `git add packages/core/src/config/config-manager.ts packages/core/src/index.ts plan.md progress.md && git commit -m "feat: implement config manager load save and watch debounce"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-13-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+  - Optional direct package compile (`pnpm exec tsc -p packages/core/tsconfig.json --noEmit`) currently fails globally because `@types/node` is not installed in this environment.
