@@ -233,3 +233,27 @@
   - Log path: `.ralph-status/iteration-8-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 9 - M1.0 Task 8
+
+- Task ID and description: `M1.0-8` Verify: `pnpm typecheck && pnpm test && pnpm lint` all pass.
+- Key decisions made:
+  - Execute the full mandatory feedback loop before marking task completion in `plan.md`.
+  - Keep this iteration scoped to verification only (no additional code changes) to satisfy one-task-per-loop.
+- Files changed:
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-9-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `chore: verify m1.0 validation loop`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.0-8`
+  - Command: `git add plan.md progress.md && git commit -m "chore: verify m1.0 validation loop"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-9-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; M1.0 is complete locally and subsequent work can proceed from M1.1.
