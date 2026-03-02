@@ -424,3 +424,32 @@
   - Log path: `.ralph-status/iteration-15-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 16 - M1.1 Task 7
+
+- Task ID and description: `M1.1-7` Implement `packages/core/src/secrets/secret-store.ts` — SecretStore interface + platform backends.
+- Key decisions made:
+  - Implement a `SecretStoreManager` in `packages/core/src/secrets/secret-store.ts` that fulfills the `SecretStore` contract with key validation (`oneclaw/...`), audit logging (operation/key/timestamp only), and localized (`zh-CN`/`en`) typed errors.
+  - Add platform backend selection with `createSecretStore`: macOS Keychain backend via `security` CLI, Linux Secret Service backend via `secret-tool` CLI, and encrypted-file fallback backend.
+  - Implement encrypted fallback storage at `paths.secretsFilePath` (`secrets.enc`) using AES-256-GCM and PBKDF2 key derivation (`100000` iterations) from `machine-id + password`.
+  - Keep cross-module consumption simple by exporting secret-store APIs from `packages/core/src/index.ts`.
+- Files changed:
+  - `packages/core/src/secrets/secret-store.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-16-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement secret store with platform backends`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-7`
+  - Command: `git add packages/core/src/secrets/secret-store.ts packages/core/src/index.ts plan.md progress.md && git commit -m "feat: implement secret store with platform backends"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-16-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+  - Direct typed ESLint on Node-based TypeScript files still reports widespread unsafe-type diagnostics in this environment due missing/partial Node typing setup, consistent with prior iterations.
