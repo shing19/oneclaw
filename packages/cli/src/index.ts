@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
 
 import { registerInitCommand } from "./commands/init.js";
+import { registerStartCommand } from "./commands/start.js";
 
 export type CliLocale = "zh-CN" | "en";
 
@@ -43,6 +44,7 @@ export function createCliProgram(): Command {
   );
 
   registerInitCommand(program);
+  registerStartCommand(program);
 
   return program;
 }

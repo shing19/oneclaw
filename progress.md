@@ -1159,3 +1159,36 @@
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
   - Workspace dependency linking (`pnpm add --filter @oneclaw/cli '@oneclaw/core@workspace:*'`) is blocked by a pnpm store-location mismatch in this environment.
+
+## Iteration 39 - M1.4 Task 3
+
+- Task ID and description: `M1.4-3` Implement `packages/cli/src/commands/start.ts` — start Agent (foreground or daemon mode).
+- Key decisions made:
+  - Searched existing CLI/core modules first and confirmed no existing `packages/cli/src/commands/start.ts` implementation.
+  - Implemented `oneclaw start` with two execution paths:
+    - foreground mode: load validated config, resolve provider API keys from secret store, start `OpenClawAdapter`, stream runtime logs, and stop gracefully on `SIGINT`/`SIGTERM`;
+    - daemon mode: spawn detached CLI runner with an internal hidden command, persist PID/state/log paths under config `dataDir`, and reject duplicate daemon starts when PID is alive.
+  - Added strict config-to-agent translation (`OneclawConfig` → `AgentConfig`) in the command to reuse the adapter lifecycle contract without leaking OpenClaw-specific types.
+  - Added bilingual (`zh-CN`/`en`) user-facing output and JSON output support consistent with global CLI options.
+  - Wired command registration into `packages/cli/src/index.ts` via `registerStartCommand(program)`.
+- Files changed:
+  - `packages/cli/src/commands/start.ts`
+  - `packages/cli/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-39-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli start command with foreground and daemon modes`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-3`
+  - Command: `git add packages/cli/src/commands/start.ts packages/cli/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement cli start command with foreground and daemon modes"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-39-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
