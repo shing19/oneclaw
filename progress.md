@@ -1007,3 +1007,35 @@
   - Log path: `.ralph-status/iteration-33-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 34 - M1.3 Task 5
+
+- Task ID and description: `M1.3-5` Implement `packages/core/src/adapter/event-stream.ts` — EventEmitter for cost/status/error events.
+- Key decisions made:
+  - Searched the adapter codebase before implementation and confirmed there was no existing `packages/core/src/adapter/event-stream.ts`; event listener management was embedded in `agent-kernel.ts`.
+  - Added dedicated `AgentKernelEventStream` in `packages/core/src/adapter/event-stream.ts` with isolated listener registration/disposal and safe event fan-out for log/status/cost/error channels.
+  - Wired `AgentKernelBase` to delegate event subscription and emission to the new event stream module, preserving clone-on-emit behavior and listener failure isolation.
+  - Extended kernel crash handling to emit structured error events internally through the event stream while keeping existing status transitions (`error` with `lastError`) intact.
+  - Exported the new event stream APIs from `packages/core/src/index.ts` for downstream adapter consumers and tests.
+- Files changed:
+  - `packages/core/src/adapter/event-stream.ts`
+  - `packages/core/src/adapter/agent-kernel.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-34-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add adapter event stream emitter module`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.3-5`
+  - Command: `git add packages/core/src/adapter/event-stream.ts packages/core/src/adapter/agent-kernel.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: add adapter event stream emitter module"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-34-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

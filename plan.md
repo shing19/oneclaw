@@ -100,7 +100,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/core/src/adapter/openclaw-adapter.ts` — OpenClaw process management (spawn/kill/restart)
 - [x] Implement `packages/core/src/adapter/config-translator.ts` — OneClaw config → openclaw.json translation
 - [x] Implement `packages/core/src/adapter/log-parser.ts` — OpenClaw stdout/stderr → structured LogEntry stream
-- [ ] Implement `packages/core/src/adapter/event-stream.ts` — EventEmitter for cost/status/error events
+- [x] Implement `packages/core/src/adapter/event-stream.ts` — EventEmitter for cost/status/error events
 - [ ] Write unit tests for config-translator, log-parser
 - [ ] Write integration test: adapter start → status check → stop lifecycle
 

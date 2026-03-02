@@ -10,6 +10,7 @@ import type {
   LogEntry,
 } from "../types/agent-adapter.js";
 import type { Disposable } from "../types/model-config.js";
+import { AgentKernelEventStream } from "./event-stream.js";
 
 export type AgentKernelLocale = "zh-CN" | "en";
 
@@ -49,10 +50,7 @@ export class AgentKernelError extends Error implements AdapterError {
 export abstract class AgentKernelBase implements AgentKernel {
   private readonly locale: AgentKernelLocale;
   private readonly now: () => number;
-
-  private readonly logListeners: Set<(entry: LogEntry) => void>;
-  private readonly statusListeners: Set<(status: KernelStatus) => void>;
-  private readonly costListeners: Set<(event: CostEvent) => void>;
+  private readonly eventStream: AgentKernelEventStream;
 
   private status: KernelStatus;
   private lastConfig: AgentConfig | null;
@@ -61,9 +59,12 @@ export abstract class AgentKernelBase implements AgentKernel {
   protected constructor(options: AgentKernelBaseOptions = {}) {
     this.locale = options.locale ?? "zh-CN";
     this.now = options.now ?? Date.now;
-    this.logListeners = new Set<(entry: LogEntry) => void>();
-    this.statusListeners = new Set<(status: KernelStatus) => void>();
-    this.costListeners = new Set<(event: CostEvent) => void>();
+    this.eventStream = new AgentKernelEventStream({
+      cloneLog: cloneLogEntry,
+      cloneStatus: cloneKernelStatus,
+      cloneCost: cloneCostEvent,
+      cloneError: cloneErrorInfo,
+    });
     this.lastConfig = null;
     this.startedAtMs = null;
     this.status = {
@@ -161,30 +162,19 @@ export abstract class AgentKernelBase implements AgentKernel {
   }
 
   onLog(callback: (entry: LogEntry) => void): Disposable {
-    this.logListeners.add(callback);
-    return {
-      dispose: (): void => {
-        this.logListeners.delete(callback);
-      },
-    };
+    return this.eventStream.onLog(callback);
   }
 
   onStatusChange(callback: (status: KernelStatus) => void): Disposable {
-    this.statusListeners.add(callback);
-    return {
-      dispose: (): void => {
-        this.statusListeners.delete(callback);
-      },
-    };
+    return this.eventStream.onStatus(callback);
   }
 
   onCostEvent(callback: (event: CostEvent) => void): Disposable {
-    this.costListeners.add(callback);
-    return {
-      dispose: (): void => {
-        this.costListeners.delete(callback);
-      },
-    };
+    return this.eventStream.onCost(callback);
+  }
+
+  onError(callback: (error: ErrorInfo) => void): Disposable {
+    return this.eventStream.onError(callback);
   }
 
   protected getLastConfig(): AgentConfig | null {
@@ -206,33 +196,21 @@ export abstract class AgentKernelBase implements AgentKernel {
   }
 
   protected emitLog(entry: LogEntry): void {
-    const entrySnapshot = cloneLogEntry(entry);
-    for (const listener of this.logListeners) {
-      try {
-        listener(cloneLogEntry(entrySnapshot));
-      } catch {
-        // Listener failures are isolated to keep the kernel event loop stable.
-      }
-    }
+    this.eventStream.emitLog(entry);
   }
 
   protected emitCostEvent(event: CostEvent): void {
-    const eventSnapshot = cloneCostEvent(event);
-    for (const listener of this.costListeners) {
-      try {
-        listener(cloneCostEvent(eventSnapshot));
-      } catch {
-        // Listener failures are isolated to keep the kernel event loop stable.
-      }
-    }
+    this.eventStream.emitCost(event);
   }
 
   protected emitKernelCrashed(error: unknown): void {
     const wrappedError = toAdapterError("KERNEL_CRASHED", this.locale, error);
+    const errorInfo = toErrorInfo(wrappedError);
     this.updateStatus({
       state: "error",
-      lastError: toErrorInfo(wrappedError),
+      lastError: errorInfo,
     });
+    this.eventStream.emitError(errorInfo);
   }
 
   protected abstract onStart(config: AgentConfig): Promise<void>;
@@ -264,13 +242,7 @@ export abstract class AgentKernelBase implements AgentKernel {
 
   private emitStatusChange(): void {
     const statusSnapshot = this.getStatus();
-    for (const listener of this.statusListeners) {
-      try {
-        listener(cloneKernelStatus(statusSnapshot));
-      } catch {
-        // Listener failures are isolated to keep the kernel event loop stable.
-      }
-    }
+    this.eventStream.emitStatus(statusSnapshot);
   }
 }
 
@@ -324,15 +296,7 @@ function cloneKernelStatus(status: KernelStatus): KernelStatus {
     state: status.state,
     uptime: status.uptime,
     activeAgents: status.activeAgents,
-    lastError:
-      status.lastError === undefined
-        ? undefined
-        : {
-            code: status.lastError.code,
-            message: status.lastError.message,
-            timestamp: new Date(status.lastError.timestamp.getTime()),
-            stack: status.lastError.stack,
-          },
+    lastError: status.lastError === undefined ? undefined : cloneErrorInfo(status.lastError),
   };
 }
 
@@ -373,6 +337,15 @@ function cloneCostEvent(event: CostEvent): CostEvent {
     estimatedCostYuan: event.estimatedCostYuan,
     timestamp: new Date(event.timestamp.getTime()),
     traceId: event.traceId,
+  };
+}
+
+function cloneErrorInfo(error: ErrorInfo): ErrorInfo {
+  return {
+    code: error.code,
+    message: error.message,
+    timestamp: new Date(error.timestamp.getTime()),
+    stack: error.stack,
   };
 }
 
