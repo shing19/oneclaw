@@ -311,3 +311,31 @@
   - Log path: `.ralph-status/iteration-11-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 12 - M1.1 Task 3
+
+- Task ID and description: `M1.1-3` Implement `packages/core/src/config/validator.ts` — Zod schema + JSON Schema validation.
+- Key decisions made:
+  - Implement a dual-pass validator API in `validator.ts`: `validateWithZodSchema` for typed runtime parsing and `validateWithJsonSchema` for schema-driven structural checks.
+  - Keep validator errors field-level and bilingual (`zh-CN`/`en`) with repair suggestions to match harness requirements.
+  - Add `validateConfig` + `assertValidConfig` entry points and export them from `@oneclaw/core` root.
+  - Due sandbox network restrictions blocking dependency fetch, implement the runtime schema parser locally with a Zod-compatible `safeParse` shape so validation can run without external packages.
+- Files changed:
+  - `packages/core/src/config/validator.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement config validator with runtime and json schema checks`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-3`
+  - Command: `git add packages/core/src/config/validator.ts packages/core/src/index.ts plan.md progress.md && git commit -m "feat: implement config validator with runtime and json schema checks"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-12-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox still blocks npm registry access, so adding upstream `zod` dependency is not currently possible; current validator uses a local Zod-compatible runtime parser plus JSON Schema validation.
+  - Sandbox still blocks git index writes and network push; implementation and docs updates are complete locally.

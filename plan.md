@@ -66,7 +66,7 @@ If blocked, document in `progress.md` and move to the next task.
 
 - [x] Implement `packages/core/src/config/paths.ts` — platform-aware config paths (macOS/Linux/Windows)
 - [x] Create `packages/core/src/config/schema.json` — JSON Schema for OneclawConfig
-- [ ] Implement `packages/core/src/config/validator.ts` — Zod schema + JSON Schema validation
+- [x] Implement `packages/core/src/config/validator.ts` — Zod schema + JSON Schema validation
 - [ ] Implement `packages/core/src/config/config-manager.ts` — load/save/watch with fs.watch debounce
 - [ ] Implement `packages/core/src/config/backup-manager.ts` — auto-backup before save, keep last 20
 - [ ] Implement `packages/core/src/config/migrator.ts` — version-based schema migration
