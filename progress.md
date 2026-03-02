@@ -507,3 +507,29 @@
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; task completion is recorded locally.
 
+## Iteration 19 - M1.1 Task 10
+
+- Task ID and description: `M1.1-10` Fallback backend: AES-256-GCM encrypted file.
+- Key decisions made:
+  - Searched before implementing and confirmed fallback backend is already implemented in `packages/core/src/secrets/secret-store.ts`.
+  - Verified `EncryptedFileSecretDriver` uses `aes-256-gcm` encryption with per-write random salt/IV and auth tag persistence.
+  - Verified PBKDF2 key derivation matches contract requirements: seed=`machine-id + password`, iterations default to `100000`, output key length `32` bytes.
+  - Confirmed fallback file path is contract-aligned (`{configDir}/secrets.enc`) via `paths.secretsFilePath`.
+  - Kept this loop scoped to one task by only marking the fallback backend checkbox complete.
+- Files changed:
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-19-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `chore: mark encrypted fallback secret backend task complete`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-10`
+  - Command: `git add plan.md progress.md && git commit -m "chore: mark encrypted fallback secret backend task complete"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-19-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; task completion is recorded locally.
