@@ -1070,3 +1070,33 @@
   - Log path: `.ralph-status/iteration-35-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 36 - M1.3 Task 7
+
+- Task ID and description: `M1.3-7` Write integration test: adapter start → status check → stop lifecycle.
+- Key decisions made:
+  - Searched the adapter test tree first and confirmed no existing lifecycle integration test for `OpenClawAdapter`.
+  - Added a dedicated integration spec at `packages/core/src/adapter/__tests__/openclaw-adapter.integration.test.ts` that uses a real spawned mock process to validate end-to-end lifecycle behavior.
+  - Captured and asserted critical lifecycle outcomes: successful `start`, status/health checks while running, and clean `stop` transition with final stopped status.
+  - Verified integration wiring for runtime config generation (`--config` path) and API key env injection (`DEEPSEEK_API_KEY`) through `spawnProcess` capture.
+  - Kept this loop scoped to one task by only completing the M1.3 integration-test checkbox.
+- Files changed:
+  - `packages/core/src/adapter/__tests__/openclaw-adapter.integration.test.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-36-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `test: add adapter lifecycle integration coverage`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.3-7`
+  - Command: `git add packages/core/src/adapter/__tests__/openclaw-adapter.integration.test.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "test: add adapter lifecycle integration coverage"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-36-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
