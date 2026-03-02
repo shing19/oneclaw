@@ -1,0 +1,14 @@
+{
+  "name": "@oneclaw/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OneClaw command-line interface",
+  "type": "module",
+  "main": "src/index.ts",
+  "bin": {
+    "oneclaw": "src/index.ts"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "@oneclaw/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Core runtime and domain modules for OneClaw",
+  "type": "module",
+  "main": "src/index.ts"
+}
