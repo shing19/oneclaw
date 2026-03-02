@@ -13,4 +13,5 @@ export * from "./models/quota-tracker.js";
 export * from "./models/provider-health.js";
 export * from "./adapter/agent-kernel.js";
 export * from "./adapter/config-translator.js";
+export * from "./adapter/log-parser.js";
 export * from "./adapter/openclaw-adapter.js";

@@ -975,3 +975,35 @@
   - Log path: `.ralph-status/iteration-32-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 33 - M1.3 Task 4
+
+- Task ID and description: `M1.3-4` Implement `packages/core/src/adapter/log-parser.ts` — OpenClaw stdout/stderr → structured `LogEntry` stream.
+- Key decisions made:
+  - Searched existing adapter code before implementation and found full log parsing logic embedded in `openclaw-adapter.ts`.
+  - Implemented a dedicated parser module `packages/core/src/adapter/log-parser.ts` with a single entry API (`parseOpenClawLogLine`) that handles JSON/text lines and returns structured `logEntry`, optional `costEvent`, and optional `activeAgents`.
+  - Preserved existing parsing semantics for log level normalization, trace ID fallback, message extraction, token/cost extraction, and stderr/text severity defaults to avoid runtime behavior regressions.
+  - Refactored `openclaw-adapter.ts` to delegate stdout/stderr line parsing to the new module and emit kernel events from parsed output.
+  - Exported parser APIs from `packages/core/src/index.ts` for downstream test/integration usage.
+- Files changed:
+  - `packages/core/src/adapter/log-parser.ts`
+  - `packages/core/src/adapter/openclaw-adapter.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-33-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add openclaw log parser module`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.3-4`
+  - Command: `git add packages/core/src/adapter/log-parser.ts packages/core/src/adapter/openclaw-adapter.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: add openclaw log parser module"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-33-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

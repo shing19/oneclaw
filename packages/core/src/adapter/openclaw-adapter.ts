@@ -11,22 +11,22 @@ import { createInterface, type Interface } from "node:readline";
 
 import type {
   AgentConfig,
-  CostEvent,
   HealthReport,
-  LogEntry,
 } from "../types/agent-adapter.js";
 import {
   resolveProviderApiKeyEnvVarName,
   translateAgentConfigToOpenClawConfig,
 } from "./config-translator.js";
 import {
+  parseOpenClawLogLine,
+  type ProcessOutputSource,
+} from "./log-parser.js";
+import {
   AgentKernelBase,
   type AgentKernelBaseOptions,
   type AgentKernelLocale,
   toAdapterError,
 } from "./agent-kernel.js";
-
-type ProcessOutputSource = "stdout" | "stderr";
 
 export interface OpenClawAdapterOptions extends AgentKernelBaseOptions {
   command?: string;
@@ -408,58 +408,19 @@ export class OpenClawAdapter extends AgentKernelBase {
   }
 
   private handleProcessOutput(line: string, source: ProcessOutputSource): void {
-    const trimmed = line.trim();
-    if (trimmed.length === 0) {
+    const parsedLine = parseOpenClawLogLine(line, source);
+    if (parsedLine === null) {
       return;
     }
 
-    const timestamp = new Date();
-    const parsed = tryParseJsonRecord(trimmed);
-
-    if (parsed === null) {
-      this.emitLog({
-        level: source === "stderr" ? "error" : "info",
-        message: trimmed,
-        timestamp,
-        traceId: randomUUID(),
-        metadata: {
-          source,
-          format: "text",
-        },
-      });
-      return;
+    if (parsedLine.activeAgents !== null) {
+      this.setActiveAgents(parsedLine.activeAgents);
     }
 
-    const level = parseLogLevel(parsed.level ?? parsed.severity, source);
-    const traceId =
-      readString(parsed.traceId) ??
-      readString(parsed.trace_id) ??
-      readString(parsed.requestId) ??
-      randomUUID();
-    const message =
-      readString(parsed.message) ??
-      readString(parsed.msg) ??
-      readString(parsed.event) ??
-      trimmed;
+    this.emitLog(parsedLine.logEntry);
 
-    if (readNumber(parsed.activeAgents) !== null) {
-      this.setActiveAgents(readNumber(parsed.activeAgents) ?? 0);
-    }
-
-    this.emitLog({
-      level,
-      message,
-      timestamp,
-      traceId,
-      metadata: {
-        source,
-        payload: parsed,
-      },
-    });
-
-    const costEvent = toCostEvent(parsed, traceId, timestamp);
-    if (costEvent !== null) {
-      this.emitCostEvent(costEvent);
+    if (parsedLine.costEvent !== null) {
+      this.emitCostEvent(parsedLine.costEvent);
     }
   }
 
@@ -652,108 +613,6 @@ async function waitForChildExit(
     child.once("exit", onExit);
     child.once("error", onError);
   });
-}
-
-function toCostEvent(
-  payload: Record<string, unknown>,
-  traceId: string,
-  timestamp: Date,
-): CostEvent | null {
-  const provider =
-    readString(payload.provider) ?? readString(payload.providerId) ?? null;
-  const model = readString(payload.model) ?? readString(payload.modelId) ?? null;
-  const inputTokens =
-    readNumber(payload.inputTokens) ??
-    readNumber(payload.promptTokens) ??
-    readNumber(payload.prompt_tokens);
-  const outputTokens =
-    readNumber(payload.outputTokens) ??
-    readNumber(payload.completionTokens) ??
-    readNumber(payload.completion_tokens);
-  const estimatedCostYuan =
-    readNumber(payload.estimatedCostYuan) ??
-    readNumber(payload.estimated_cost_yuan) ??
-    readNumber(payload.costYuan) ??
-    readNumber(payload.cost_yuan);
-
-  if (
-    provider === null ||
-    model === null ||
-    inputTokens === null ||
-    outputTokens === null ||
-    estimatedCostYuan === null
-  ) {
-    return null;
-  }
-
-  return {
-    provider,
-    model,
-    inputTokens,
-    outputTokens,
-    estimatedCostYuan,
-    timestamp,
-    traceId,
-  };
-}
-
-function parseLogLevel(
-  value: unknown,
-  source: ProcessOutputSource,
-): LogEntry["level"] {
-  if (typeof value !== "string") {
-    return source === "stderr" ? "error" : "info";
-  }
-
-  const normalized = value.toLowerCase();
-  if (normalized === "debug") {
-    return "debug";
-  }
-  if (normalized === "info") {
-    return "info";
-  }
-  if (normalized === "warn" || normalized === "warning") {
-    return "warn";
-  }
-  if (normalized === "error" || normalized === "fatal") {
-    return "error";
-  }
-
-  return source === "stderr" ? "error" : "info";
-}
-
-function tryParseJsonRecord(text: string): Record<string, unknown> | null {
-  try {
-    const parsed: unknown = JSON.parse(text);
-    if (isRecord(parsed)) {
-      return parsed;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function readString(value: unknown): string | null {
-  if (typeof value !== "string") {
-    return null;
-  }
-  const trimmed = value.trim();
-  if (trimmed.length === 0) {
-    return null;
-  }
-  return trimmed;
-}
-
-function readNumber(value: unknown): number | null {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
-    return null;
-  }
-  return value;
 }
 
 function isChildAlive(child: ChildProcessWithoutNullStreams): boolean {
