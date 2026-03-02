@@ -835,3 +835,42 @@
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
 
+
+## Iteration 29 - M1.2 Task 8
+
+- Task ID and description: `M1.2-8` Write integration test: 429 triggers key rotation → fallback → probe recovery.
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing integration test covering the full 429→rotation→fallback→recovery chain.
+  - Added `packages/core/src/models/__tests__/model-management.integration.test.ts` to exercise model-management modules together: `KeyRotator` + `DefaultFallbackOrchestrator` with controlled time.
+  - Implemented a deterministic integration scenario that verifies:
+    - first request hits primary provider 429, rotates key (`key-1` → `key-2`), and falls back to secondary provider;
+    - second request within the 30s probe window skips the rate-limited primary provider;
+    - third request after probe interval retries primary provider and succeeds with the rotated key (probe recovery).
+  - Marked the corresponding plan checkbox complete in `plan.md` without touching any later tasks.
+- Files changed:
+  - `packages/core/src/models/__tests__/model-management.integration.test.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-29-vitest-blocked.log`
+  - `.ralph-status/iteration-29-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Failure record:
+  - Task: `M1.2-8`
+  - Command: `pnpm exec vitest run --config packages/core/vitest.config.ts --include packages/core/src/models/__tests__/model-management.integration.test.ts`
+  - Error excerpt: `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL Command "vitest" not found`
+  - Log path: `.ralph-status/iteration-29-vitest-blocked.log`
+- Commit:
+  - Attempted `test: add model 429 rotation fallback recovery integration test`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.2-8`
+  - Command: `git add packages/core/src/models/__tests__/model-management.integration.test.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "test: add model 429 rotation fallback recovery integration test"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-29-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+  - Direct Vitest execution remains blocked in this environment because the `vitest` binary is unavailable.
