@@ -1100,3 +1100,30 @@
   - Log path: `.ralph-status/iteration-36-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 37 - M1.4 Task 1
+
+- Task ID and description: `M1.4-1` Implement `packages/cli/src/index.ts` — Commander.js program with global options (`--json`, `--quiet`).
+- Key decisions made:
+  - Searched before implementation and confirmed `packages/cli/src/index.ts` only contained the scaffolded Commander bootstrap without global options.
+  - Implemented a reusable CLI entry surface with `createCliProgram`, `resolveCliGlobalOptions`, and `runCli` so future command modules can consume parsed global options consistently.
+  - Added required global options (`--json`, `--quiet`) plus locale selection (`--locale zh-CN|en`) with bilingual command descriptions to satisfy early i18n requirements for user-facing strings.
+  - Added direct-execution guard logic for the CLI entry so the module can be imported in future tests without auto-running argument parsing.
+- Files changed:
+  - `packages/cli/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-37-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli entrypoint global options`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-1`
+  - Command: `git add packages/cli/src/index.ts plan.md progress.md && git commit -m "feat: implement cli entrypoint global options"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-37-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
