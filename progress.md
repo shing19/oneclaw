@@ -700,3 +700,34 @@
   - Log path: `.ralph-status/iteration-24-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 25 - M1.2 Task 4
+
+- Task ID and description: `M1.2-4` Implement `packages/core/src/models/fallback-orchestrator.ts` — FallbackOrchestrator with error-type-specific behavior.
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed `packages/core/src/models/fallback-orchestrator.ts` did not exist.
+  - Implemented `DefaultFallbackOrchestrator` with contract-aligned `execute` and `onFallback` APIs, including typed fallback events and disposable listeners.
+  - Added error-type-specific failover behavior: no fallback for user-abort/context-overflow, timeout retry once before fallback, and fallback classification for rate-limit/auth/billing/model-not-found/unknown.
+  - Added 30s rate-limit probe window tracking so rate-limited providers are temporarily deprioritized and retried after cooldown.
+  - Added provider-aware model selection when switching providers and exported orchestrator APIs from `packages/core/src/index.ts`.
+- Files changed:
+  - `packages/core/src/models/fallback-orchestrator.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-25-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement fallback orchestrator error-aware failover`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.2-4`
+  - Command: `git add packages/core/src/models/fallback-orchestrator.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement fallback orchestrator error-aware failover"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-25-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
