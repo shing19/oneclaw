@@ -56,7 +56,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Configure ESLint + Prettier (flat config, strict rules)
 - [x] Configure Vitest (root config + per-package configs)
 - [x] Add `pnpm typecheck`, `pnpm test`, `pnpm lint` scripts to root
-- [ ] Copy contract TypeScript interfaces from `docs/contracts/` into `packages/core/src/types/`
+- [x] Copy contract TypeScript interfaces from `docs/contracts/` into `packages/core/src/types/`
 - [ ] Verify: `pnpm typecheck && pnpm test && pnpm lint` all pass
 
 ## M1.1 — 配置系统 + 密钥存储

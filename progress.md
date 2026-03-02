@@ -202,3 +202,34 @@
   - Log path: `.ralph-status/iteration-7-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; task completion is recorded locally.
+
+## Iteration 8 - M1.0 Task 7
+
+- Task ID and description: `M1.0-7` Copy contract TypeScript interfaces from `docs/contracts/` into `packages/core/src/types/`.
+- Key decisions made:
+  - Create contract-aligned type files split by domain: `model-config`, `agent-adapter`, and `secret-storage`.
+  - Add a `types/index.ts` barrel and re-export from `packages/core/src/index.ts` so downstream modules can import contracts from `@oneclaw/core`.
+  - Define missing referenced types (`AuthResult`, `ModelInfo`, `ChatRequest`, `ChatChunk`, `ProviderHealth`, `DateRange`, `CostHistory`, `SkillConfig`, `ErrorInfo`) to keep strict type-checking green while preserving the contract API surface.
+  - Reuse `Disposable` from `model-config` in `agent-adapter` to avoid duplicate contract type definitions.
+- Files changed:
+  - `packages/core/src/index.ts`
+  - `packages/core/src/types/model-config.ts`
+  - `packages/core/src/types/agent-adapter.ts`
+  - `packages/core/src/types/secret-storage.ts`
+  - `packages/core/src/types/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-8-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: copy contract interfaces into core types`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.0-7`
+  - Command: `git add packages/core/src/index.ts packages/core/src/types/model-config.ts packages/core/src/types/agent-adapter.ts packages/core/src/types/secret-storage.ts packages/core/src/types/index.ts plan.md progress.md && git commit -m "feat: copy contract interfaces into core types"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-8-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
