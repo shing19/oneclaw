@@ -96,7 +96,7 @@ If blocked, document in `progress.md` and move to the next task.
 > Contract: `docs/contracts/agent-adapter.md`
 > Module: `docs/modules/agent-adapter.md`
 
-- [ ] Implement `packages/core/src/adapter/agent-kernel.ts` — AgentKernel interface (start/stop/restart/status/health)
+- [x] Implement `packages/core/src/adapter/agent-kernel.ts` — AgentKernel interface (start/stop/restart/status/health)
 - [ ] Implement `packages/core/src/adapter/openclaw-adapter.ts` — OpenClaw process management (spawn/kill/restart)
 - [ ] Implement `packages/core/src/adapter/config-translator.ts` — OneClaw config → openclaw.json translation
 - [ ] Implement `packages/core/src/adapter/log-parser.ts` — OpenClaw stdout/stderr → structured LogEntry stream

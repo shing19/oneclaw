@@ -874,3 +874,35 @@
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
   - Direct Vitest execution remains blocked in this environment because the `vitest` binary is unavailable.
+
+## Iteration 30 - M1.3 Task 1
+
+- Task ID and description: `M1.3-1` Implement `packages/core/src/adapter/agent-kernel.ts` — AgentKernel interface (start/stop/restart/status/health).
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing `packages/core/src/adapter/agent-kernel.ts`.
+  - Implemented `AgentKernelBase` as a reusable `AgentKernel` contract implementation covering lifecycle APIs (`start`, `stop`, `restart`, `getStatus`, `getHealth`).
+  - Added status lifecycle management (`starting`/`running`/`stopping`/`stopped`/`error`) with uptime tracking and `lastError` projection.
+  - Added structured event subscription plumbing (`onLog`, `onStatusChange`, `onCostEvent`) with disposable listeners and failure isolation.
+  - Added typed `AgentKernelError` (`AdapterError`) plus bilingual (`zh-CN`/`en`) error messages and helper conversion (`toAdapterError`) for adapter-side error wrapping.
+  - Exported adapter kernel APIs from `packages/core/src/index.ts` for downstream OpenClaw adapter implementation.
+- Files changed:
+  - `packages/core/src/adapter/agent-kernel.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-30-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement agent kernel lifecycle base`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.3-1`
+  - Command: `git add packages/core/src/adapter/agent-kernel.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement agent kernel lifecycle base"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-30-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
