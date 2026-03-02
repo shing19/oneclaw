@@ -396,3 +396,31 @@
   - Log path: `.ralph-status/iteration-14-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 15 - M1.1 Task 6
+
+- Task ID and description: `M1.1-6` Implement `packages/core/src/config/migrator.ts` — version-based schema migration.
+- Key decisions made:
+  - Implement a dedicated `ConfigMigrator` with a step registry keyed by source version, matching the module requirement for registered migrations (`1→2`, `2→3`, ...).
+  - Define `CURRENT_CONFIG_SCHEMA_VERSION` and enforce migration rules for unsupported future versions, missing migration paths, and invalid registry shapes.
+  - Enforce post-migration correctness by validating the migrated output through `assertValidConfig`, with localized (`zh-CN`/`en`) migrator error messages.
+  - Add helper exports (`migrateConfig`, `toMigrationKey`) to keep future config load/save integration straightforward.
+- Files changed:
+  - `packages/core/src/config/migrator.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-15-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement config schema migrator`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-6`
+  - Command: `git add packages/core/src/config/migrator.ts packages/core/src/index.ts plan.md progress.md && git commit -m "feat: implement config schema migrator"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-15-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

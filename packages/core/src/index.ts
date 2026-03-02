@@ -3,3 +3,4 @@ export * from "./config/paths.js";
 export * from "./config/validator.js";
 export * from "./config/config-manager.js";
 export * from "./config/backup-manager.js";
+export * from "./config/migrator.js";

@@ -69,7 +69,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/core/src/config/validator.ts` — Zod schema + JSON Schema validation
 - [x] Implement `packages/core/src/config/config-manager.ts` — load/save/watch with fs.watch debounce
 - [x] Implement `packages/core/src/config/backup-manager.ts` — auto-backup before save, keep last 20
-- [ ] Implement `packages/core/src/config/migrator.ts` — version-based schema migration
+- [x] Implement `packages/core/src/config/migrator.ts` — version-based schema migration
 - [ ] Implement `packages/core/src/secrets/secret-store.ts` — SecretStore interface + platform backends
 - [ ] macOS backend: Keychain via `security` CLI wrapper
 - [ ] Linux backend: Secret Service D-Bus via `secret-tool` CLI wrapper
