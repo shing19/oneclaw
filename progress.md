@@ -453,3 +453,28 @@
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
   - Direct typed ESLint on Node-based TypeScript files still reports widespread unsafe-type diagnostics in this environment due missing/partial Node typing setup, consistent with prior iterations.
+
+## Iteration 17 - M1.1 Task 8
+
+- Task ID and description: `M1.1-8` macOS backend: Keychain via `security` CLI wrapper.
+- Key decisions made:
+  - Searched before implementing and confirmed the backend already exists in `packages/core/src/secrets/secret-store.ts`.
+  - Verified `MacOsKeychainSecretDriver` uses `security` CLI wrapper commands (`add-generic-password`, `find-generic-password`, `delete-generic-password`) and maps CLI failures to typed secret-store errors.
+  - Kept this loop strictly scoped to one task by only marking the macOS backend checkbox complete.
+- Files changed:
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-17-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `chore: mark macos keychain backend task complete`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-8`
+  - Command: `git add plan.md progress.md && git commit -m "chore: mark macos keychain backend task complete"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-17-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; task completion is recorded locally.
