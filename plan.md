@@ -72,7 +72,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/core/src/config/migrator.ts` — version-based schema migration
 - [x] Implement `packages/core/src/secrets/secret-store.ts` — SecretStore interface + platform backends
 - [x] macOS backend: Keychain via `security` CLI wrapper
-- [ ] Linux backend: Secret Service D-Bus via `secret-tool` CLI wrapper
+- [x] Linux backend: Secret Service D-Bus via `secret-tool` CLI wrapper
 - [ ] Fallback backend: AES-256-GCM encrypted file
 - [ ] Write unit tests for validator, config-manager, backup-manager, migrator
 - [ ] Write integration tests for secret-store (platform detection + round-trip)

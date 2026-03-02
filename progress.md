@@ -478,3 +478,32 @@
   - Log path: `.ralph-status/iteration-17-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; task completion is recorded locally.
+
+## Iteration 18 - M1.1 Task 9
+
+- Task ID and description: `M1.1-9` Linux backend: Secret Service D-Bus via `secret-tool` CLI wrapper.
+- Key decisions made:
+  - Searched before implementing and confirmed the backend already exists in `packages/core/src/secrets/secret-store.ts`.
+  - Verified `LinuxSecretServiceDriver` uses `secret-tool` commands (`store`, `lookup`, `clear`) with service/key attributes and stdin secret input for writes.
+  - Confirmed CLI failure mapping and backend auto-detection path (`resolveBackendKind`) already route Linux to `linux-secret-service` when `secret-tool` is available.
+  - Kept this loop scoped to one task by only marking the Linux backend checkbox complete.
+- Files changed:
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-18-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `chore: mark linux secret-tool backend task complete`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-9`
+  - Command: `git add plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "chore: mark linux secret-tool backend task complete"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-18-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; task completion is recorded locally.
+
