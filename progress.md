@@ -906,3 +906,40 @@
   - Log path: `.ralph-status/iteration-30-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 31 - M1.3 Task 2
+
+- Task ID and description: `M1.3-2` Implement `packages/core/src/adapter/openclaw-adapter.ts` — OpenClaw process management (spawn/kill/restart).
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing `packages/core/src/adapter/openclaw-adapter.ts`.
+  - Implemented `OpenClawAdapter` on top of `AgentKernelBase` with end-to-end process lifecycle handling:
+    - process spawn with startup timeout and runtime `openclaw.json` generation;
+    - graceful stop (`SIGTERM` with timeout) and forced kill (`SIGKILL`) fallback;
+    - runtime directory cleanup and stream listener teardown on stop/exit.
+  - Added process monitoring behavior required by the adapter contract:
+    - stdout/stderr line ingestion with JSON/text log normalization to `LogEntry`;
+    - token/cost payload extraction to emit `CostEvent`;
+    - heartbeat probing and health report projection.
+  - Added one-shot crash auto-restart policy (bounded by `maxCrashRestarts`, default `1`) and localized adapter error mapping for config-translation and timeout paths.
+  - Exported adapter APIs from `packages/core/src/index.ts` for downstream CLI/integration usage.
+- Files changed:
+  - `packages/core/src/adapter/openclaw-adapter.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-31-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement openclaw adapter process lifecycle`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.3-2`
+  - Command: `git add packages/core/src/adapter/openclaw-adapter.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement openclaw adapter process lifecycle"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-31-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
