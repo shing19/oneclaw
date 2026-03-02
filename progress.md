@@ -178,3 +178,27 @@
   - Log path: `.ralph-status/iteration-6-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 7 - M1.0 Task 6
+
+- Task ID and description: `M1.0-6` Add `pnpm typecheck`, `pnpm test`, `pnpm lint` scripts to root.
+- Key decisions made:
+  - Verified via repository search before implementation that root scripts already exist in `package.json`; no script changes were needed.
+  - Marked the task complete in `plan.md` based on existing implementation from earlier scaffold work.
+- Files changed:
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-7-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `chore: mark root pnpm scripts task complete`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.0-6`
+  - Command: `git add plan.md progress.md && git commit -m "chore: mark root pnpm scripts task complete"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-7-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; task completion is recorded locally.

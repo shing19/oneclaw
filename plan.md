@@ -55,7 +55,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Create `packages/cli/` package with Commander.js entry point
 - [x] Configure ESLint + Prettier (flat config, strict rules)
 - [x] Configure Vitest (root config + per-package configs)
-- [ ] Add `pnpm typecheck`, `pnpm test`, `pnpm lint` scripts to root
+- [x] Add `pnpm typecheck`, `pnpm test`, `pnpm lint` scripts to root
 - [ ] Copy contract TypeScript interfaces from `docs/contracts/` into `packages/core/src/types/`
 - [ ] Verify: `pnpm typecheck && pnpm test && pnpm lint` all pass
 
