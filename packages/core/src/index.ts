@@ -10,3 +10,4 @@ export * from "./models/model-config.js";
 export * from "./models/key-rotator.js";
 export * from "./models/fallback-orchestrator.js";
 export * from "./models/quota-tracker.js";
+export * from "./models/provider-health.js";

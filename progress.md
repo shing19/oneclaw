@@ -763,3 +763,35 @@
   - Log path: `.ralph-status/iteration-26-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 27 - M1.2 Task 6
+
+- Task ID and description: `M1.2-6` Implement `packages/core/src/models/provider-health.ts` — health check + probe recovery (30s interval).
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing `packages/core/src/models/provider-health.ts` module.
+  - Implemented `ProviderHealthManager` with contract-aligned provider integration (`ModelProvider.getHealth`) and explicit monitoring lifecycle APIs (`start`, `stop`, `dispose`, `check`, `checkAll`).
+  - Set probe recovery default interval to `30_000ms` and run periodic health probes for registered providers (from inline provider map and/or `ProviderRegistry`).
+  - Added status snapshot tracking (`recovering`, `consecutiveFailures`, `recoveryProbeDueAt`, `lastError`) and change subscriptions via `onStatusChange` disposable listeners.
+  - Normalized provider health payloads and converted probe errors into `unreachable` health snapshots to keep monitoring resilient.
+  - Exported provider health APIs from `packages/core/src/index.ts` for package-level consumption.
+- Files changed:
+  - `packages/core/src/models/provider-health.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-27-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add provider health monitor with probe recovery`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.2-6`
+  - Command: `git add packages/core/src/models/provider-health.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: add provider health monitor with probe recovery"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-27-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

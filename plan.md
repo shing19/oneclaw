@@ -87,7 +87,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/core/src/models/key-rotator.ts` — API key rotation on 429, round-robin across keys
 - [x] Implement `packages/core/src/models/fallback-orchestrator.ts` — FallbackOrchestrator with error-type-specific behavior
 - [x] Implement `packages/core/src/models/quota-tracker.ts` — QuotaTracker for token-based and request-based billing
-- [ ] Implement `packages/core/src/models/provider-health.ts` — health check + probe recovery (30s interval)
+- [x] Implement `packages/core/src/models/provider-health.ts` — health check + probe recovery (30s interval)
 - [ ] Write unit tests for provider-registry, key-rotator, fallback-orchestrator, quota-tracker
 - [ ] Write integration test: 429 triggers key rotation → fallback → probe recovery
 
