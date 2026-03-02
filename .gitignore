@@ -2,3 +2,8 @@ node_modules/
 .env
 .DS_Store
 dist/
+.ralph-status/
+ralph-log.txt
+ralph-*.log
+ralph-parallel-summary.txt
+ralph-parallel-trace.log
