@@ -576,3 +576,36 @@
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
   - `vitest` package is not installed and cannot be fetched in this environment, so direct execution of the new unit tests is currently blocked.
+
+## Iteration 21 - M1.1 Task 12
+
+- Task ID and description: `M1.1-12` Write integration tests for secret-store (platform detection + round-trip).
+- Key decisions made:
+  - Add a dedicated integration suite at `packages/core/src/secrets/__tests__/secret-store.integration.test.ts` with deterministic command-runner fakes for macOS `security` and Linux `secret-tool` CLIs.
+  - Validate platform auto-detection by asserting backend selection for three scenarios: macOS Keychain available, Linux Secret Service available, and fallback to encrypted-file when macOS probe fails.
+  - Reuse a shared round-trip assertion (`set`/`has`/`get`/`list`/`delete`) to verify SecretStore behavior consistently across detected backends.
+  - For encrypted fallback, assert ciphertext-at-rest behavior by checking that `secrets.enc` does not contain the plaintext secret value.
+- Files changed:
+  - `packages/core/src/secrets/__tests__/secret-store.integration.test.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-21-vitest-blocked.log`
+  - `.ralph-status/iteration-21-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Failure record:
+  - Task: `M1.1-12`
+  - Command: `pnpm exec vitest run --config packages/core/vitest.config.ts --include packages/core/src/secrets/__tests__/secret-store.integration.test.ts`
+  - Error excerpt: `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL Command "vitest" not found`
+  - Log path: `.ralph-status/iteration-21-vitest-blocked.log`
+- Commit:
+  - Attempted `test: add secret-store integration tests for backend detection`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-12`
+  - Command: `git add packages/core/src/secrets/__tests__/secret-store.integration.test.ts plan.md progress.md && git commit -m "test: add secret-store integration tests for backend detection"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-21-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

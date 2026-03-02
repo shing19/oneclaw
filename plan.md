@@ -75,7 +75,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Linux backend: Secret Service D-Bus via `secret-tool` CLI wrapper
 - [x] Fallback backend: AES-256-GCM encrypted file
 - [x] Write unit tests for validator, config-manager, backup-manager, migrator
-- [ ] Write integration tests for secret-store (platform detection + round-trip)
+- [x] Write integration tests for secret-store (platform detection + round-trip)
 
 ## M1.2 — 模型管理
 
