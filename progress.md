@@ -943,3 +943,35 @@
   - Log path: `.ralph-status/iteration-31-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 32 - M1.3 Task 3
+
+- Task ID and description: `M1.3-3` Implement `packages/core/src/adapter/config-translator.ts` — OneClaw config → openclaw.json translation.
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed translation/mapping logic existed only as private helpers in `openclaw-adapter.ts`.
+  - Added dedicated translator module `packages/core/src/adapter/config-translator.ts` with typed OpenClaw config output interfaces and `translateAgentConfigToOpenClawConfig`.
+  - Moved provider API key environment variable mapping into the translator module (`resolveProviderApiKeyEnvVarName`) to keep adapter wiring centralized around translation concerns.
+  - Updated `openclaw-adapter.ts` to consume translator exports for both `openclaw.json` generation and provider key env-name resolution without changing runtime behavior.
+  - Exported the translator APIs from `packages/core/src/index.ts` for downstream adapter tests and integrations.
+- Files changed:
+  - `packages/core/src/adapter/config-translator.ts`
+  - `packages/core/src/adapter/openclaw-adapter.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-32-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add adapter config translator module`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.3-3`
+  - Command: `git add packages/core/src/adapter/config-translator.ts packages/core/src/adapter/openclaw-adapter.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: add adapter config translator module"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-32-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

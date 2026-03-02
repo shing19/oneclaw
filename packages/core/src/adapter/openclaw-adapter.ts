@@ -16,6 +16,10 @@ import type {
   LogEntry,
 } from "../types/agent-adapter.js";
 import {
+  resolveProviderApiKeyEnvVarName,
+  translateAgentConfigToOpenClawConfig,
+} from "./config-translator.js";
+import {
   AgentKernelBase,
   type AgentKernelBaseOptions,
   type AgentKernelLocale,
@@ -121,7 +125,8 @@ export class OpenClawAdapter extends AgentKernelBase {
     this.translateConfig = async (
       config: AgentConfig,
     ): Promise<Record<string, unknown>> =>
-      options.translateConfig?.(config) ?? defaultTranslateConfig(config);
+      options.translateConfig?.(config) ??
+      translateAgentConfigToOpenClawConfig(config);
     this.spawnProcess =
       options.spawnProcess ??
       ((command, args, spawnOptions) =>
@@ -250,7 +255,7 @@ export class OpenClawAdapter extends AgentKernelBase {
         continue;
       }
 
-      env[mapProviderToApiEnv(provider.id)] = resolvedKey;
+      env[resolveProviderApiKeyEnvVarName(provider.id)] = resolvedKey;
     }
 
     return env;
@@ -512,44 +517,6 @@ export function createOpenClawAdapter(
   return new OpenClawAdapter(options);
 }
 
-function defaultTranslateConfig(config: AgentConfig): Record<string, unknown> {
-  const enabledProviders = config.modelConfig.providers.filter(
-    (provider) => provider.enabled,
-  );
-
-  return {
-    agents: {
-      defaults: {
-        model: config.modelConfig.defaultModel,
-        models: enabledProviders.map((provider) => ({
-          provider: provider.id,
-          baseUrl: provider.baseUrl,
-          protocol: provider.protocol,
-          models: [...provider.models],
-        })),
-        maxConcurrent: config.concurrency.maxConcurrent,
-        subagents: {
-          maxConcurrent: config.concurrency.subagents.maxConcurrent,
-          maxSpawnDepth: config.concurrency.subagents.maxSpawnDepth,
-          maxChildrenPerAgent: config.concurrency.subagents.maxChildrenPerAgent,
-        },
-        timeoutSeconds: config.timeoutSeconds,
-      },
-    },
-    skills: config.skills
-      .filter((skill) => skill.enabled)
-      .map((skill) => ({
-        id: skill.id,
-        options: skill.options ?? {},
-      })),
-    workspace: config.workspacePaths.map((mountPoint) => ({
-      hostPath: mountPoint.hostPath,
-      containerPath: mountPoint.containerPath,
-      readonly: mountPoint.readonly,
-    })),
-  };
-}
-
 async function waitForChildStartup(
   child: ChildProcessWithoutNullStreams,
   timeoutMs: number,
@@ -791,23 +758,6 @@ function readNumber(value: unknown): number | null {
 
 function isChildAlive(child: ChildProcessWithoutNullStreams): boolean {
   return child.exitCode === null && child.signalCode === null;
-}
-
-function mapProviderToApiEnv(providerId: string): string {
-  const normalizedId = providerId.trim().toLowerCase();
-  if (normalizedId === "deepseek") {
-    return "DEEPSEEK_API_KEY";
-  }
-  if (normalizedId === "bailian") {
-    return "BAILIAN_API_KEY";
-  }
-  if (normalizedId === "zhipu") {
-    return "ZHIPU_API_KEY";
-  }
-
-  const sanitized = normalizedId.replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-  const prefix = sanitized.length > 0 ? sanitized.toUpperCase() : "PROVIDER";
-  return `${prefix}_API_KEY`;
 }
 
 function normalizePositiveInteger(value: number | undefined, fallback: number): number {
