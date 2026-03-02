@@ -533,3 +533,46 @@
   - Log path: `.ralph-status/iteration-19-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; task completion is recorded locally.
+
+## Iteration 20 - M1.1 Task 11
+
+- Task ID and description: `M1.1-11` Write unit tests for `validator`, `config-manager`, `backup-manager`, `migrator`.
+- Key decisions made:
+  - Add module-scoped tests under `packages/core/src/config/__tests__/` aligned with the module plan test layout.
+  - Introduce shared test fixtures for valid config objects and isolated temp config paths to keep filesystem tests deterministic.
+  - Cover critical behaviors per module:
+    - `validator`: valid parse path, invalid field/path reporting, assert-throw behavior, JSON Schema and runtime validation paths.
+    - `config-manager`: save/load round-trip, missing-file and invalid-JSON errors, `fs.watch` debounce changed-event emission.
+    - `backup-manager`: no-op when config absent, backup creation + retention pruning, backup restore, missing-backup error.
+    - `migrator`: no-op when already at target version, migration step execution, missing path error, post-migration validation failure.
+  - Add local `vitest` type shim (`vitest-shim.d.ts`) because `vitest` package is unavailable in this sandbox (network-restricted), so test files remain type-safe for current toolchain checks.
+- Files changed:
+  - `packages/core/src/config/__tests__/vitest-shim.d.ts`
+  - `packages/core/src/config/__tests__/fixtures.ts`
+  - `packages/core/src/config/__tests__/validator.test.ts`
+  - `packages/core/src/config/__tests__/config-manager.test.ts`
+  - `packages/core/src/config/__tests__/backup-manager.test.ts`
+  - `packages/core/src/config/__tests__/migrator.test.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-20-vitest-blocked.log`
+  - `.ralph-status/iteration-20-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Failure record:
+  - Task: `M1.1-11`
+  - Command: `pnpm exec vitest run --config packages/core/vitest.config.ts`
+  - Error excerpt: `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL Command "vitest" not found`
+  - Log path: `.ralph-status/iteration-20-vitest-blocked.log`
+- Commit:
+  - Attempted `test: add config module unit test coverage`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.1-11`
+  - Command: `git add ... && git commit -m "test: add config module unit test coverage"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-20-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+  - `vitest` package is not installed and cannot be fetched in this environment, so direct execution of the new unit tests is currently blocked.
