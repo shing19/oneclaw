@@ -1127,3 +1127,35 @@
   - Log path: `.ralph-status/iteration-37-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 38 - M1.4 Task 2
+
+- Task ID and description: `M1.4-2` Implement `packages/cli/src/commands/init.ts` — interactive init wizard (model provider + API key + test connection).
+- Key decisions made:
+  - Searched the CLI module first and confirmed there was no existing `packages/cli/src/commands/init.ts`; only the root CLI scaffold existed.
+  - Implemented `oneclaw init` as a real interactive wizard in `packages/cli/src/commands/init.ts` with bilingual (`zh-CN`/`en`) prompts for provider selection, model selection, API key input, and optional connection testing.
+  - Used `listDefaultProviderPresets()` from core model management so provider/model options come from the existing preset registry instead of hardcoded duplicates.
+  - Added live connection verification against provider `/models` endpoint with timeout/error extraction and continue/cancel confirmation when test fails.
+  - Persisted setup results through existing core modules: API key saved via `SecretStore` (`oneclaw/provider/<id>/api-key-1`) and config saved via `ConfigManager` with a contract-valid initial `OneclawConfig`.
+  - Wired the command into `packages/cli/src/index.ts` via `registerInitCommand(program)` so the new command is reachable from the CLI entrypoint.
+  - Attempted to add a workspace dependency link for `@oneclaw/core`, but local pnpm store mismatch blocked `pnpm add`; kept this iteration unblocked by importing core modules from workspace source paths.
+- Files changed:
+  - `packages/cli/src/commands/init.ts`
+  - `packages/cli/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-38-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add interactive init wizard command`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-2`
+  - Command: `git add packages/cli/src/commands/init.ts packages/cli/src/index.ts plan.md progress.md && git commit -m "feat: add interactive init wizard command"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-38-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+  - Workspace dependency linking (`pnpm add --filter @oneclaw/cli '@oneclaw/core@workspace:*'`) is blocked by a pnpm store-location mismatch in this environment.

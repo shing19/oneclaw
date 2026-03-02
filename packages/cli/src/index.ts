@@ -4,6 +4,8 @@ import { basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
 
+import { registerInitCommand } from "./commands/init.js";
+
 export type CliLocale = "zh-CN" | "en";
 
 export interface CliGlobalOptions {
@@ -39,6 +41,8 @@ export function createCliProgram(): Command {
       .choices(["zh-CN", "en"])
       .default(DEFAULT_CLI_LOCALE),
   );
+
+  registerInitCommand(program);
 
   return program;
 }

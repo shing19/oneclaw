@@ -109,7 +109,7 @@ If blocked, document in `progress.md` and move to the next task.
 > Module: `docs/modules/cli.md`
 
 - [x] Implement `packages/cli/src/index.ts` — Commander.js program with global options (`--json`, `--quiet`)
-- [ ] Implement `packages/cli/src/commands/init.ts` — interactive init wizard (model provider + API key + test connection)
+- [x] Implement `packages/cli/src/commands/init.ts` — interactive init wizard (model provider + API key + test connection)
 - [ ] Implement `packages/cli/src/commands/start.ts` — start Agent (foreground or daemon mode)
 - [ ] Implement `packages/cli/src/commands/stop.ts` — stop running Agent
 - [ ] Implement `packages/cli/src/commands/status.ts` — display Agent status, health, current model
