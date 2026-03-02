@@ -731,3 +731,35 @@
   - Log path: `.ralph-status/iteration-25-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 26 - M1.2 Task 5
+
+- Task ID and description: `M1.2-5` Implement `packages/core/src/models/quota-tracker.ts` — QuotaTracker for token-based and request-based billing.
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing `packages/core/src/models/quota-tracker.ts` module.
+  - Implemented `DefaultQuotaTracker` with contract-aligned APIs: `record`, `getStatus`, `getDailySummary`, `getHistory`, `onThresholdReached`, and `export`.
+  - Added dual billing support through provider policies: token-based cost calculation (input/output per-million pricing) and request-based cost calculation (per-request or monthly-fee amortization).
+  - Implemented windowed quota accounting (`daily`/`weekly`/`monthly`/`none`), threshold-crossing callbacks, and exhaustion detection from effective provider limits.
+  - Added DeepSeek night discount auto-detection (00:30-08:30) with model-aware factors (`R1/reasoner` at 25%, others at 50%).
+  - Exported the new tracker module from `packages/core/src/index.ts` for package-level consumption.
+- Files changed:
+  - `packages/core/src/models/quota-tracker.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-26-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement quota tracker for usage billing`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.2-5`
+  - Command: `git add packages/core/src/models/quota-tracker.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement quota tracker for usage billing"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-26-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
