@@ -256,6 +256,24 @@
   - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
   - `pnpm lint` (pass; 0 errors, 3 warnings)
 
+## 2026-03-04 - Loop: P1-D2
+
+- Scope: Re-run Feishu integration evidence: send + receive confirmation.
+- Search:
+  - Confirmed integration test exists at `packages/core/src/channels/feishu/__tests__/feishu-adapter.integration.test.ts` covering full send + receive roundtrip with real HTTP servers.
+  - Test flow: connect adapter (webhook + event subscription) -> send message via webhook -> mock server posts inbound confirmation event -> verify adapter receives inbound message.
+  - Existing test only covered `locale: "en"`.
+- Implementation:
+  - Refactored integration test to extract `runSendReceiveRoundtrip(locale)` shared helper.
+  - Added `zh-CN` locale test case alongside existing `en` test case for bilingual coverage.
+  - Imported `FeishuAdapterLocale` type for proper typing.
+- Validation:
+  - Integration test (en): pass (send `[OneClaw] integration test (en)` via webhook, receive `delivery confirmed` inbound event)
+  - Integration test (zh-CN): pass (same flow with Chinese locale)
+  - `pnpm typecheck` (pass)
+  - `pnpm test` (pass; 56 core + 18 cli = 74 tests)
+  - `pnpm lint` (pass; 0 errors, 3 warnings)
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1

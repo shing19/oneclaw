@@ -6,6 +6,7 @@ import { describe, it } from "vitest";
 
 import {
   FeishuAdapter,
+  type FeishuAdapterLocale,
   type FeishuChannelConfig,
 } from "../feishu-adapter.js";
 import type { InboundMessage } from "../../channel-interface.js";
@@ -182,79 +183,87 @@ async function postInboundConfirmation(
   assert.equal(payload.code, 0);
 }
 
-describe("feishu adapter integration", () => {
-  it("sends test message and receives confirmation event", async () => {
-    const eventPort = await allocateTcpPort();
-    const webhookPort = await allocateTcpPort();
-    const webhookPayloads: Record<string, unknown>[] = [];
-    const callbackErrors: string[] = [];
+async function runSendReceiveRoundtrip(locale: FeishuAdapterLocale): Promise<void> {
+  const eventPort = await allocateTcpPort();
+  const webhookPort = await allocateTcpPort();
+  const webhookPayloads: Record<string, unknown>[] = [];
+  const callbackErrors: string[] = [];
 
-    const webhookServer = createServer((request, response) => {
-      void handleWebhookRequest({
-        request,
-        response,
+  const webhookServer = createServer((request, response) => {
+    void handleWebhookRequest({
+      request,
+      response,
+      eventPort,
+      webhookPayloads,
+      callbackErrors,
+    });
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    webhookServer.once("error", reject);
+    webhookServer.listen(webhookPort, "127.0.0.1", () => {
+      webhookServer.off("error", reject);
+      resolve();
+    });
+  });
+
+  const adapter = new FeishuAdapter({
+    locale,
+    resolveSecret: async (secretRef: string): Promise<string | null> => {
+      if (secretRef === "oneclaw/channel/feishu/app-secret") {
+        return "integration-secret";
+      }
+      return null;
+    },
+  });
+
+  let received: InboundMessage | null = null;
+  const listener = adapter.onMessage((message) => {
+    received = message;
+  });
+
+  try {
+    await adapter.connect(
+      createBaseConfig(
+        `http://127.0.0.1:${String(webhookPort)}/webhook`,
         eventPort,
-        webhookPayloads,
-        callbackErrors,
-      });
+      ),
+    );
+
+    const sendResult = await adapter.sendMessage({
+      text: `[OneClaw] integration test (${locale})`,
+      format: "plain",
     });
 
-    await new Promise<void>((resolve, reject) => {
-      webhookServer.once("error", reject);
-      webhookServer.listen(webhookPort, "127.0.0.1", () => {
-        webhookServer.off("error", reject);
-        resolve();
-      });
-    });
+    assert.equal(sendResult.success, true);
+    assert.equal(sendResult.messageId, "webhook-message-id");
+    assert.equal(webhookPayloads.length, 1);
+    assert.equal(
+      readNestedString(webhookPayloads[0] ?? {}, ["content", "text"]),
+      `[OneClaw] integration test (${locale})`,
+    );
 
-    const adapter = new FeishuAdapter({
-      locale: "en",
-      resolveSecret: async (secretRef: string): Promise<string | null> => {
-        if (secretRef === "oneclaw/channel/feishu/app-secret") {
-          return "integration-secret";
-        }
-        return null;
-      },
-    });
+    await waitForCondition(() => received !== null, 2_000);
+    assert.ok(received !== null);
+    const inboundMessage = received as InboundMessage;
+    assert.equal(inboundMessage.text, "delivery confirmed");
+    assert.equal(inboundMessage.channel, "feishu");
+    assert.equal(adapter.getStatus(), "connected");
+    assert.deepEqual(callbackErrors, []);
+  } finally {
+    listener.dispose();
+    await adapter.disconnect();
+    await closeServer(webhookServer);
+  }
+}
 
-    let received: InboundMessage | null = null;
-    const listener = adapter.onMessage((message) => {
-      received = message;
-    });
+describe("feishu adapter integration", () => {
+  it("sends test message and receives confirmation event (en)", async () => {
+    await runSendReceiveRoundtrip("en");
+  });
 
-    try {
-      await adapter.connect(
-        createBaseConfig(
-          `http://127.0.0.1:${String(webhookPort)}/webhook`,
-          eventPort,
-        ),
-      );
-
-      const sendResult = await adapter.sendMessage({
-        text: "[OneClaw] integration test",
-        format: "plain",
-      });
-
-      assert.equal(sendResult.success, true);
-      assert.equal(sendResult.messageId, "webhook-message-id");
-      assert.equal(webhookPayloads.length, 1);
-      assert.equal(
-        readNestedString(webhookPayloads[0] ?? {}, ["content", "text"]),
-        "[OneClaw] integration test",
-      );
-
-      await waitForCondition(() => received !== null, 2_000);
-      assert.ok(received !== null);
-      const inboundMessage = received as InboundMessage;
-      assert.equal(inboundMessage.text, "delivery confirmed");
-      assert.equal(inboundMessage.channel, "feishu");
-      assert.equal(adapter.getStatus(), "connected");
-      assert.deepEqual(callbackErrors, []);
-    } finally {
-      listener.dispose();
-      await adapter.disconnect();
-      await closeServer(webhookServer);
-    }
+  it("sends test message and receives confirmation event (zh-CN)", async () => {
+    await runSendReceiveRoundtrip("zh-CN");
   });
 });
 
