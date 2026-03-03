@@ -20,7 +20,7 @@
 
 ## Milestone P1-A: Runtime and Packaging Correctness
 
-- [ ] `P1-A1` Fix internal daemon command registration compatibility in `packages/cli/src/commands/start.ts`.
+- [x] `P1-A1` Fix internal daemon command registration compatibility in `packages/cli/src/commands/start.ts`.
 - [ ] `P1-A2` Ensure config schema asset is available at runtime for built CLI (`dist/schema.json`).
 - [ ] `P1-A3` Verify `node dist/index.js --version` and `node dist/index.js --help` both pass after build.
 - [ ] `P1-A4` Ensure published package includes all runtime-required assets (not only `index.js`).

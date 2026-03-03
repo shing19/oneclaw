@@ -107,9 +107,8 @@ export function registerStartCommand(program: Command): void {
     });
 
   program
-    .command(INTERNAL_DAEMON_COMMAND)
+    .command(INTERNAL_DAEMON_COMMAND, { hidden: true })
     .description("Internal daemon runner / 内部守护进程命令")
-    .hideHelp()
     .option(
       "--openclaw-bin <path>",
       "Override OpenClaw executable path / 指定 OpenClaw 可执行文件路径",
