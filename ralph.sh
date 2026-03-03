@@ -332,7 +332,7 @@ run_codex() {
         return 1
     fi
 
-    script -q /dev/null bash -c "codex exec --full-auto - < '$PROMPT_TMPFILE'" 2>&1 | tee_log
+    script -q /dev/null bash -c "codex exec -s danger-full-access - < '$PROMPT_TMPFILE'" 2>&1 | tee_log
     return "${PIPESTATUS[0]}"
 }
 
@@ -396,7 +396,7 @@ agent_command_with_prompt() {
 
     case "$agent" in
         codex)
-            echo "codex exec --full-auto - < $quoted_prompt"
+            echo "codex exec -s danger-full-access - < $quoted_prompt"
             ;;
         claude)
             echo "unset CLAUDECODE; claude -p --dangerously-skip-permissions < $quoted_prompt"
