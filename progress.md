@@ -1736,3 +1736,30 @@
   - Log path: `.ralph-status/iteration-56-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 57 - M1.6 Task 3
+
+- Task ID and description: `M1.6-3` Configure npm package (`package.json` bin field, `prepublishOnly` build).
+- Key decisions made:
+  - Searched existing package metadata first and confirmed root `package.json` had no `bin`, `build`, or `prepublishOnly` configuration.
+  - Kept the root `oneclaw` package as the npm publish target and configured executable metadata with `bin.oneclaw -> dist/index.js`.
+  - Implemented a concrete prepublish build path using Bun bundling (`bun build packages/cli/src/index.ts --target=node --format=esm --outfile dist/index.js`) so publish-time artifacts are generated deterministically.
+  - Added publish file allowlist (`files: ["dist", "README.md"]`) and package `main` entry to align npm tarball contents with CLI runtime output.
+- Files changed:
+  - `package.json`
+  - `plan.md`
+  - `progress.md`
+- Validation:
+  - `pnpm build` passed.
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `chore: configure npm package bin and prepublish build`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.6-3`
+  - Command: `git add package.json plan.md progress.md && git commit -m "chore: configure npm package bin and prepublish build"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-57-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

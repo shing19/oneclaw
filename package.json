@@ -1,13 +1,23 @@
 {
   "name": "oneclaw",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "OneClaw monorepo workspace",
   "packageManager": "pnpm@10.26.1",
+  "main": "dist/index.js",
+  "bin": {
+    "oneclaw": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "engines": {
     "node": ">=20.0.0"
   },
   "scripts": {
+    "build": "bun build packages/cli/src/index.ts --target=node --format=esm --outfile dist/index.js",
+    "prepublishOnly": "pnpm build",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "lint": "pnpm -r --if-present lint"
