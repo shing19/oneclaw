@@ -130,7 +130,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/core/src/channels/feishu/feishu-auth.ts` — app_id/app_secret token management
 - [x] Implement `packages/cli/src/commands/channel.ts` — setup wizard + test message
 - [x] Write unit tests for feishu-adapter (mock HTTP)
-- [ ] Write integration test: send test message → receive confirmation
+- [x] Write integration test: send test message → receive confirmation
 
 ## M1.6 — 分发
 

@@ -1646,3 +1646,32 @@
   - Log path: `.ralph-status/iteration-53-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 54 - M1.5 Task 6
+
+- Task ID and description: `M1.5-6` Write integration test: send test message → receive confirmation.
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing Feishu integration test covering send + inbound confirmation in one flow.
+  - Added a dedicated integration test at `packages/core/src/channels/feishu/__tests__/feishu-adapter.integration.test.ts` using real local HTTP servers (no fetch mocks) for webhook send and event-subscription receive paths.
+  - Implemented an end-to-end assertion chain: adapter sends test message to webhook simulator, simulator posts a confirmation callback to adapter event endpoint, adapter emits inbound message to listeners.
+  - Kept runtime verification strict by asserting outbound payload text, webhook acceptance (`message_id`), inbound confirmation text, and final adapter `connected` status.
+- Files changed:
+  - `packages/core/src/channels/feishu/__tests__/feishu-adapter.integration.test.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-54-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `test: add feishu send receive integration coverage`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.5-6`
+  - Command: `git add packages/core/src/channels/feishu/__tests__/feishu-adapter.integration.test.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "test: add feishu send receive integration coverage"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-54-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
