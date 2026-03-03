@@ -1822,3 +1822,32 @@
   - Log path: `.ralph-status/iteration-59-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 60 - M1.6 Task 6
+
+- Task ID and description: `M1.6-6` Create `Dockerfile` for server deployment scenario.
+- Key decisions made:
+  - Searched the repository before implementation and confirmed there was no existing `Dockerfile`.
+  - Implemented a multi-stage container build: `oven/bun` builder stage (`pnpm install --frozen-lockfile` + `pnpm build`) and minimal `node:20-alpine` runtime stage.
+  - Configured container runtime for server deployment persistence by setting `ONECLAW_CONFIG_PATH=/config/config.json` and declaring `/config` as a volume.
+  - Hardened runtime image by running as non-root `oneclaw` user and using a direct CLI entrypoint (`node /opt/oneclaw/index.js`).
+- Files changed:
+  - `Dockerfile`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-60-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add dockerfile for server deployment`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.6-6`
+  - Command: `git add Dockerfile plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: add dockerfile for server deployment"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-60-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

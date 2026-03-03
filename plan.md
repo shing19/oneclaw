@@ -141,7 +141,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Configure npm package (`package.json` bin field, `prepublishOnly` build)
 - [x] Create `.github/workflows/ci.yml` — PR checks (lint + typecheck + test)
 - [x] Create `.github/workflows/release.yml` — tag-triggered release (build + npm publish + GitHub Release)
-- [ ] Create `Dockerfile` for server deployment scenario
+- [x] Create `Dockerfile` for server deployment scenario
 - [ ] Write smoke test: clean install from npm on macOS and Ubuntu
 
 ---
