@@ -9,14 +9,16 @@ import {
   type KernelStatus,
   type OneclawConfigPaths,
 } from "../../../core/src/index.js";
+import {
+  formatStatusError,
+  formatStatusSummary,
+  type AgentHealthStatus,
+  type CliLocale,
+  type StatusFormatterOptions,
+  type StatusSummary,
+} from "../formatters/status.js";
 
-type CliLocale = "zh-CN" | "en";
-
-interface CliGlobalOptions {
-  json: boolean;
-  quiet: boolean;
-  locale: CliLocale;
-}
+type CliGlobalOptions = StatusFormatterOptions;
 
 interface RuntimeFilePaths {
   pidFilePath: string;
@@ -35,27 +37,6 @@ interface RuntimeState {
   lastError?: string;
 }
 
-type AgentHealthStatus = "ok" | "degraded" | "unreachable";
-
-interface StatusSummary {
-  running: boolean;
-  state: KernelStatus["state"];
-  health: AgentHealthStatus;
-  mode: "foreground" | "daemon" | "unknown";
-  pid: number | null;
-  pidAlive: boolean;
-  currentModel: string;
-  configPath: string;
-  pidFilePath: string;
-  stateFilePath: string;
-  logFilePath: string;
-  startedAt: string | null;
-  updatedAt: string | null;
-  uptimeMs: number | null;
-  lastError?: string;
-  message: string;
-}
-
 const DAEMON_PID_FILE_NAME = "agent-daemon.pid";
 const DAEMON_STATE_FILE_NAME = "agent-daemon-state.json";
 const DAEMON_LOG_FILE_NAME = "agent-daemon.log";
@@ -70,9 +51,9 @@ export function registerStatusCommand(program: Command): void {
 
       try {
         const summary = await resolveStatusSummary(locale);
-        emitSummary(globalOptions, summary);
+        output.write(formatStatusSummary(summary, globalOptions));
       } catch (error: unknown) {
-        emitError(globalOptions, toErrorMessage(error, locale));
+        output.write(formatStatusError(toErrorMessage(error, locale), globalOptions));
         process.exitCode = 1;
       }
     });
@@ -340,61 +321,6 @@ function isProcessAlive(pid: number): boolean {
     }
     return false;
   }
-}
-
-function emitSummary(options: CliGlobalOptions, summary: StatusSummary): void {
-  if (options.json) {
-    output.write(`${JSON.stringify(summary, null, 2)}\n`);
-    return;
-  }
-
-  if (options.quiet) {
-    output.write(`${summary.state}\n`);
-    return;
-  }
-
-  output.write(`${summary.message}\n`);
-  output.write(`${text(options.locale, "State", "状态")}: ${summary.state}\n`);
-  output.write(`${text(options.locale, "Health", "健康")}: ${summary.health}\n`);
-  output.write(`${text(options.locale, "Model", "模型")}: ${summary.currentModel}\n`);
-  output.write(`${text(options.locale, "Mode", "模式")}: ${summary.mode}\n`);
-  output.write(
-    `${text(options.locale, "PID", "进程 PID")}: ${summary.pid === null ? "-" : String(summary.pid)}\n`,
-  );
-  output.write(
-    `${text(options.locale, "Process alive", "进程存活")}: ${summary.pidAlive ? "yes" : "no"}\n`,
-  );
-  output.write(
-    `${text(options.locale, "Started at", "启动时间")}: ${summary.startedAt ?? "-"}\n`,
-  );
-  output.write(
-    `${text(options.locale, "Updated at", "更新时间")}: ${summary.updatedAt ?? "-"}\n`,
-  );
-  output.write(
-    `${text(options.locale, "Uptime(ms)", "运行时长(毫秒)")}: ${summary.uptimeMs === null ? "-" : String(summary.uptimeMs)}\n`,
-  );
-  output.write(
-    `${text(options.locale, "Config", "配置文件")}: ${summary.configPath}\n`,
-  );
-  output.write(
-    `${text(options.locale, "State file", "状态文件")}: ${summary.stateFilePath}\n`,
-  );
-  output.write(
-    `${text(options.locale, "Log file", "日志文件")}: ${summary.logFilePath}\n`,
-  );
-
-  if (summary.lastError !== undefined && summary.lastError.length > 0) {
-    output.write(`${text(options.locale, "Last error", "最近错误")}: ${summary.lastError}\n`);
-  }
-}
-
-function emitError(options: CliGlobalOptions, message: string): void {
-  if (options.json) {
-    output.write(`${JSON.stringify({ ok: false, error: message }, null, 2)}\n`);
-    return;
-  }
-
-  output.write(`${message}\n`);
 }
 
 function resolveGlobalOptions(command: Command): CliGlobalOptions {

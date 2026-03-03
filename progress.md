@@ -1384,3 +1384,39 @@
   - Log path: `.ralph-status/iteration-45-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 46 - M1.4 Task 10
+
+- Task ID and description: `M1.4-10` Implement `packages/cli/src/formatters/` — table, JSON, status formatters.
+- Key decisions made:
+  - Searched the CLI codebase before implementation and confirmed there was no existing `packages/cli/src/formatters/` directory or formatter module set.
+  - Added dedicated formatter modules under `packages/cli/src/formatters/`:
+    - `json.ts` for consistent machine-readable output/error serialization;
+    - `table.ts` for reusable ASCII table rendering with alignment and width checks;
+    - `status.ts` for status-specific output modes (`human`/`--json`/`--quiet`) built on shared JSON/table formatters.
+  - Refactored `packages/cli/src/commands/status.ts` to use shared formatter APIs instead of inline rendering so formatter logic is centralized and reusable by later command/test work.
+  - Removed a duplicate `AgentHealthStatus` declaration in `status.ts` after refactor to keep formatter type imports conflict-free.
+  - Kept bilingual (`zh-CN`/`en`) labels in status formatter output to stay aligned with project i18n requirements.
+- Files changed:
+  - `packages/cli/src/formatters/json.ts`
+  - `packages/cli/src/formatters/table.ts`
+  - `packages/cli/src/formatters/status.ts`
+  - `packages/cli/src/commands/status.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-46-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli output formatters`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-10`
+  - Command: `git add packages/cli/src/formatters/json.ts packages/cli/src/formatters/table.ts packages/cli/src/formatters/status.ts packages/cli/src/commands/status.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement cli output formatters"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-46-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
