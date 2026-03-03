@@ -1453,3 +1453,36 @@
   - Log path: `.ralph-status/iteration-47-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 48 - M1.4 Task 12
+
+- Task ID and description: `M1.4-12` Write integration test: `oneclaw init` → `oneclaw start` → `oneclaw status` → `oneclaw stop`.
+- Key decisions made:
+  - Searched CLI tests before implementation and confirmed no existing lifecycle integration spec for the full `init/start/status/stop` flow.
+  - Added a dedicated integration test at `packages/cli/src/__tests__/commands/cli-lifecycle.integration.test.ts` that runs real CLI parsing (`runCli`) command-by-command.
+  - Implemented deterministic test seams to avoid external side effects while preserving command behavior:
+    - mock `node:readline/promises#createInterface` to drive `init` wizard answers non-interactively;
+    - mock `createSecretStore` from core to avoid platform keychain/secret-service dependencies.
+  - Simulated daemon runtime with a temporary JS runner process so `start --daemon` writes real runtime PID/state files, then validated `status --json` and `stop --json` against that live process.
+  - Extended CLI Vitest shim with `vi` typing used by module mocks.
+- Files changed:
+  - `packages/cli/src/__tests__/commands/cli-lifecycle.integration.test.ts`
+  - `packages/cli/src/__tests__/vitest-shim.d.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-48-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `test: add cli init-start-status-stop integration test`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-12`
+  - Command: `git add packages/cli/src/__tests__/commands/cli-lifecycle.integration.test.ts packages/cli/src/__tests__/vitest-shim.d.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "test: add cli init-start-status-stop integration test"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-48-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

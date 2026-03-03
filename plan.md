@@ -119,7 +119,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/cli/src/commands/doctor.ts` — comprehensive health check + fix suggestions
 - [x] Implement `packages/cli/src/formatters/` — table, JSON, status formatters
 - [x] Write unit tests for command parsing and formatters
-- [ ] Write integration test: `oneclaw init` → `oneclaw start` → `oneclaw status` → `oneclaw stop`
+- [x] Write integration test: `oneclaw init` → `oneclaw start` → `oneclaw status` → `oneclaw stop`
 
 ## M1.5 — 飞书通信渠道
 
