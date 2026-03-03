@@ -1580,3 +1580,39 @@
   - Log path: `.ralph-status/iteration-51-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 52 - M1.5 Task 4
+
+- Task ID and description: `M1.5-4` Implement `packages/cli/src/commands/channel.ts` — setup wizard + test message.
+- Key decisions made:
+  - Searched the CLI command tree before implementation and confirmed there was no existing `packages/cli/src/commands/channel.ts`.
+  - Implemented a dedicated `channel` command group with required surfaces:
+    - `oneclaw channel setup [channel]` interactive setup wizard (Feishu in Phase 1),
+    - `oneclaw channel test [channel]` send test message using saved channel config.
+  - Implemented Feishu setup flow with config + secret-store persistence:
+    - saves `channels.feishu` (`appId`, `appSecretRef`, `webhookUrl`, optional `webhookTokenRef`, `enabled`) through `ConfigManager`,
+    - stores secret values in `SecretStore` using contract-safe refs (`oneclaw/channel/feishu/app-secret`, `oneclaw/channel/feishu/webhook-token`).
+  - Added end-to-end test-message path using `createFeishuAdapter` + secret resolution callback, with bilingual (`zh-CN`/`en`) output and global `--json` / `--quiet` handling.
+  - Wired command registration in `packages/cli/src/index.ts` and extended command-parsing unit coverage to include new `channel` command/subcommands/options.
+- Files changed:
+  - `packages/cli/src/commands/channel.ts`
+  - `packages/cli/src/index.ts`
+  - `packages/cli/src/__tests__/commands/command-parsing.test.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-52-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli channel setup and test command`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.5-4`
+  - Command: `git add packages/cli/src/commands/channel.ts packages/cli/src/index.ts packages/cli/src/__tests__/commands/command-parsing.test.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement cli channel setup and test command"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-52-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

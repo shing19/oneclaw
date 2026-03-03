@@ -19,6 +19,7 @@ describe("cli command parsing", () => {
     assert.ok(names.includes("config"));
     assert.ok(names.includes("model"));
     assert.ok(names.includes("cost"));
+    assert.ok(names.includes("channel"));
     assert.ok(names.includes("doctor"));
     assert.ok(names.includes("__run-agent-daemon"));
   });
@@ -83,6 +84,16 @@ describe("cli command parsing", () => {
 
     const doctor = mustFindCommand(program, "doctor");
     assert.deepEqual(getOptionLongFlags(doctor), ["--skip-network", "--timeout-ms"]);
+
+    const channel = mustFindCommand(program, "channel");
+    assert.deepEqual(
+      channel.commands.map((command) => command.name()),
+      ["setup", "test"],
+    );
+    const channelSetup = mustFindCommand(channel, "setup");
+    assert.deepEqual(getOptionLongFlags(channelSetup), ["--skip-test"]);
+    const channelTest = mustFindCommand(channel, "test");
+    assert.deepEqual(getOptionLongFlags(channelTest), ["--message"]);
   });
 });
 
