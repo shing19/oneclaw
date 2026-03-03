@@ -120,8 +120,8 @@
 - Validation:
   - `pnpm test` (pass; 55 core tests across 15 files, 18 cli tests across 4 files — all via Vitest v4.0.18)
   - `pnpm typecheck` (pass)
-- Commit: pending
-- Push: pending
+- Commit: `e3ad3a1` (`chore(phase1): install vitest and wire test tooling for p1-b3`)
+- Push: `main` -> `origin/main` (pass)
 
 ## Failed Attempts
 
