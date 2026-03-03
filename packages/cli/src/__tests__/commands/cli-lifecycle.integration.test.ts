@@ -68,7 +68,7 @@ vi.mock("../../../../core/src/index.js", async () => {
 });
 
 describe("cli integration lifecycle", () => {
-  it("runs init -> start -> status -> stop", async () => {
+  async function runLifecycle(locale: "en" | "zh-CN"): Promise<void> {
     mockPromptAnswers.length = 0;
     mockSecretValues.clear();
 
@@ -107,7 +107,7 @@ describe("cli integration lifecycle", () => {
       mockPromptAnswers.push("1", "1", "test-api-key", "test-secret-password");
       const initResult = await runCliCommand([
         "--locale",
-        "en",
+        locale,
         "init",
         "--skip-connection-test",
       ]);
@@ -128,7 +128,7 @@ describe("cli integration lifecycle", () => {
       process.argv[1] = daemonRunnerPath;
       const startResult = await runCliCommand([
         "--locale",
-        "en",
+        locale,
         "--json",
         "start",
         "--daemon",
@@ -140,7 +140,7 @@ describe("cli integration lifecycle", () => {
       assert.equal(startSummary.model, "deepseek/deepseek-chat");
       daemonPid = startSummary.pid;
 
-      const statusResult = await runCliCommand(["--locale", "en", "--json", "status"]);
+      const statusResult = await runCliCommand(["--locale", locale, "--json", "status"]);
       assert.equal(statusResult.exitCode, 0);
 
       const statusSummary = parseJsonFromOutput(statusResult.output) as StatusSummary;
@@ -153,7 +153,7 @@ describe("cli integration lifecycle", () => {
           statusSummary.state === "stopping",
       );
 
-      const stopResult = await runCliCommand(["--locale", "en", "--json", "stop"]);
+      const stopResult = await runCliCommand(["--locale", locale, "--json", "stop"]);
       assert.equal(stopResult.exitCode, 0);
 
       const stopSummary = parseJsonFromOutput(stopResult.output) as StopSummary;
@@ -178,6 +178,14 @@ describe("cli integration lifecycle", () => {
 
       await rm(tempRoot, { recursive: true, force: true });
     }
+  }
+
+  it("runs init -> start -> status -> stop (en)", async () => {
+    await runLifecycle("en");
+  });
+
+  it("runs init -> start -> status -> stop (zh-CN)", async () => {
+    await runLifecycle("zh-CN");
   });
 });
 

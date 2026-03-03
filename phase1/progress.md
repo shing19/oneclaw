@@ -237,6 +237,25 @@
   - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
   - `pnpm lint` (pass; 0 errors, 3 warnings)
 
+## 2026-03-04 - Loop: P1-D1
+
+- Scope: Re-run integration flow evidence: `init -> start -> status -> stop`.
+- Search:
+  - Confirmed integration test exists at `packages/cli/src/__tests__/commands/cli-lifecycle.integration.test.ts` but was excluded from normal test runs by `vitest.config.ts` `exclude` pattern.
+  - Integration test covers full lifecycle: `init` (provider selection, model, API key, secret storage) -> `start --daemon` (spawn daemon, verify PID + model) -> `status` (verify running state, PID, model, mode) -> `stop` (SIGTERM, verify process dead).
+  - Previous exclusion reason ("ConfigManager export issue") no longer applies after P1-B1/B2 fixes.
+- Implementation:
+  - Added `packages/cli/vitest.integration.config.ts` for running integration tests separately.
+  - Added `test:integration` script to `packages/cli/package.json`.
+  - Extended lifecycle integration test with `zh-CN` locale variant to cover G3 bilingual requirement.
+  - Refactored test to share `runLifecycle(locale)` helper between `en` and `zh-CN` test cases.
+- Validation:
+  - Integration test (en): pass (init writes config with `deepseek/deepseek-chat`, start spawns daemon, status confirms running, stop kills process)
+  - Integration test (zh-CN): pass (same flow with Chinese locale)
+  - `pnpm typecheck` (pass)
+  - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
+  - `pnpm lint` (pass; 0 errors, 3 warnings)
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1
