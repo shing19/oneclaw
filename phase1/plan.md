@@ -45,7 +45,7 @@
 - [x] `P1-D1` Re-run integration flow evidence: `init -> start -> status -> stop`.
 - [x] `P1-D2` Re-run Feishu integration evidence: send + receive confirmation.
 - [x] `P1-D3` Verify doctor command surfaces common failure guidance in both `zh-CN` and `en`.
-- [ ] `P1-D4` Record final evidence and links in `phase1/human-review.md`.
+- [x] `P1-D4` Record final evidence and links in `phase1/human-review.md`.
 
 ## Done Definition for Phase 1
 
