@@ -1851,3 +1851,30 @@
   - Log path: `.ralph-status/iteration-60-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 61 - M1.6 Task 7
+
+- Task ID and description: `M1.6-7` Write smoke test: clean install from npm on macOS and Ubuntu.
+- Key decisions made:
+  - Searched the repository first and confirmed no existing smoke-install workflow/test for npm global installation on both macOS and Ubuntu.
+  - Added a dedicated GitHub Actions workflow at `.github/workflows/smoke-install.yml` with a matrix over `ubuntu-latest` and `macos-latest`.
+  - Implemented clean-install validation using an isolated npm global prefix to ensure the tested `oneclaw` binary comes from the npm-installed package, not runner/global state.
+  - Added release-aware version resolution (`release` tag `v*` -> npm version) and availability retry logic to handle npm propagation delay before install.
+  - Verified CLI usability in smoke checks via `oneclaw --version` and `oneclaw --help`.
+- Files changed:
+  - `.github/workflows/smoke-install.yml`
+  - `plan.md`
+  - `progress.md`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `ci: add npm install smoke test workflow for macos and ubuntu`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.6-7`
+  - Command: `git add .github/workflows/smoke-install.yml plan.md progress.md && git commit -m "ci: add npm install smoke test workflow for macos and ubuntu"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-61-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

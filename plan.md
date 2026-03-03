@@ -142,7 +142,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Create `.github/workflows/ci.yml` — PR checks (lint + typecheck + test)
 - [x] Create `.github/workflows/release.yml` — tag-triggered release (build + npm publish + GitHub Release)
 - [x] Create `Dockerfile` for server deployment scenario
-- [ ] Write smoke test: clean install from npm on macOS and Ubuntu
+- [x] Write smoke test: clean install from npm on macOS and Ubuntu
 
 ---
 

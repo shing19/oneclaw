@@ -1,0 +1,116 @@
+name: Smoke Install
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      package_version:
+        description: "Package version to test (e.g. 0.1.0 or latest)"
+        required: false
+        default: latest
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke-install-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  npm-install-smoke:
+    name: npm install smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Resolve package version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "release" ]]; then
+            version="${{ github.event.release.tag_name }}"
+            version="${version#v}"
+          else
+            version="${{ github.event.inputs.package_version }}"
+          fi
+
+          if [[ -z "${version}" ]]; then
+            version="latest"
+          fi
+
+          echo "PACKAGE_VERSION=${version}" >> "$GITHUB_ENV"
+          echo "Resolved package version: ${version}"
+
+      - name: Wait for npm package availability
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${PACKAGE_VERSION}" == "latest" ]]; then
+            echo "Skipping npm availability wait for latest."
+            exit 0
+          fi
+
+          package_spec="oneclaw@${PACKAGE_VERSION}"
+          for attempt in {1..20}; do
+            if npm view "${package_spec}" version >/dev/null 2>&1; then
+              echo "${package_spec} is available on npm."
+              exit 0
+            fi
+
+            echo "Attempt ${attempt}/20: ${package_spec} not available yet, waiting 15s..."
+            sleep 15
+          done
+
+          echo "Timed out waiting for ${package_spec} on npm."
+          exit 1
+
+      - name: Install from npm in isolated global prefix
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          npm_prefix="$(mktemp -d)"
+          package_spec="oneclaw@${PACKAGE_VERSION}"
+
+          echo "Using npm prefix: ${npm_prefix}"
+          npm install --global --prefix "${npm_prefix}" "${package_spec}"
+          echo "${npm_prefix}/bin" >> "$GITHUB_PATH"
+          echo "NPM_PREFIX=${npm_prefix}" >> "$GITHUB_ENV"
+
+      - name: Verify oneclaw CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          command_path="$(command -v oneclaw)"
+          if [[ -z "${command_path}" ]]; then
+            echo "oneclaw binary was not installed."
+            exit 1
+          fi
+
+          case "${command_path}" in
+            "${NPM_PREFIX}"/*) ;;
+            *)
+              echo "oneclaw resolved outside isolated npm prefix: ${command_path}"
+              exit 1
+              ;;
+          esac
+
+          oneclaw --version
+          oneclaw --help >/dev/null
