@@ -1420,3 +1420,36 @@
   - Log path: `.ralph-status/iteration-46-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 47 - M1.4 Task 11
+
+- Task ID and description: `M1.4-11` Write unit tests for command parsing and formatters.
+- Key decisions made:
+  - Searched the CLI codebase before implementation and confirmed no existing tests under `packages/cli/src/__tests__/` for command parsing or formatter behavior.
+  - Added command parsing unit coverage in `packages/cli/src/__tests__/commands/command-parsing.test.ts` focused on parser surface only (global options, top-level command registration, subcommand registration, and option contracts) without invoking side-effecting command actions.
+  - Added formatter unit coverage under `packages/cli/src/__tests__/formatters/` for `json`, `table`, and `status` formatters, including error/fallback and localization-sensitive rendering paths.
+  - Added a local Vitest type shim at `packages/cli/src/__tests__/vitest-shim.d.ts` so strict TypeScript checks continue to work in this environment.
+- Files changed:
+  - `packages/cli/src/__tests__/vitest-shim.d.ts`
+  - `packages/cli/src/__tests__/commands/command-parsing.test.ts`
+  - `packages/cli/src/__tests__/formatters/json.test.ts`
+  - `packages/cli/src/__tests__/formatters/table.test.ts`
+  - `packages/cli/src/__tests__/formatters/status.test.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-47-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `test: add cli command parsing and formatter unit tests`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-11`
+  - Command: `git add packages/cli/src/__tests__/vitest-shim.d.ts packages/cli/src/__tests__/commands/command-parsing.test.ts packages/cli/src/__tests__/formatters/json.test.ts packages/cli/src/__tests__/formatters/table.test.ts packages/cli/src/__tests__/formatters/status.test.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "test: add cli command parsing and formatter unit tests"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-47-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
