@@ -53,6 +53,8 @@
 - Validation:
   - `pnpm pack --pack-destination /tmp/oneclaw-p1a4 && tar -tzf /tmp/oneclaw-p1a4/oneclaw-0.1.0.tgz` (pass; includes `dist/index.js` and `dist/schema.json`)
   - `pnpm typecheck && pnpm test` (pass)
+- Commit: `5bf676a` (`chore(phase1): verify packaged runtime assets for p1-a4`)
+- Push: `main` -> `origin/main` (pass)
 
 ## Failed Attempts
 
