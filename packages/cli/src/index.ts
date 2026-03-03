@@ -9,6 +9,7 @@ import { registerStartCommand } from "./commands/start.js";
 import { registerStatusCommand } from "./commands/status.js";
 import { registerStopCommand } from "./commands/stop.js";
 import { registerConfigCommand } from "./commands/config.js";
+import { registerModelCommand } from "./commands/model.js";
 
 export type CliLocale = "zh-CN" | "en";
 
@@ -51,6 +52,7 @@ export function createCliProgram(): Command {
   registerStopCommand(program);
   registerStatusCommand(program);
   registerConfigCommand(program);
+  registerModelCommand(program);
 
   return program;
 }

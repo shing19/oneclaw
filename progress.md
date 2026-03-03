@@ -1286,3 +1286,35 @@
   - Log path: `.ralph-status/iteration-42-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 43 - M1.4 Task 7
+
+- Task ID and description: `M1.4-7` Implement `packages/cli/src/commands/model.ts` — list/test/priority subcommands.
+- Key decisions made:
+  - Searched the CLI codebase before implementation and confirmed `packages/cli/src/commands/model.ts` did not exist.
+  - Implemented a dedicated `model` command group with required subcommands: `list`, `test [provider]`, and `priority [chain]`.
+  - Implemented `model list` to read config via `ConfigManager`, enrich provider display names from preset registry, and display provider/model/fallback/default-model state.
+  - Implemented `model test` to validate connectivity against provider endpoints (`/models` or `/api/tags` for Ollama), resolving API keys from `SecretStore` with bilingual diagnostics and pass/fail summaries.
+  - Implemented `model priority` in both read and write modes, with strict chain parsing (`comma-separated ids`), provider existence checks, duplicate rejection, and config persistence through `ConfigManager.save()`.
+  - Wired command registration in `packages/cli/src/index.ts` via `registerModelCommand(program)` and kept global `--json`/`--quiet` and `zh-CN`/`en` behavior consistent with existing commands.
+- Files changed:
+  - `packages/cli/src/commands/model.ts`
+  - `packages/cli/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-43-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli model command suite`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-7`
+  - Command: `git add packages/cli/src/commands/model.ts packages/cli/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement cli model command suite"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-43-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
