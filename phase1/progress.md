@@ -123,6 +123,21 @@
 - Commit: `e3ad3a1` (`chore(phase1): install vitest and wire test tooling for p1-b3`)
 - Push: `main` -> `origin/main` (pass)
 
+## 2026-03-04 - Loop: P1-B4
+
+- Scope: Make root scripts fail if package scripts are missing (remove `--if-present` for required checks).
+- Search:
+  - Confirmed both workspace packages (`@oneclaw/core`, `@oneclaw/cli`) already have `typecheck`, `test`, and `lint` scripts (added in P1-B1 and P1-B2).
+  - Confirmed root `package.json` scripts used `pnpm -r --if-present typecheck|test|lint`, which silently skips packages missing scripts — a false green risk.
+- Implementation:
+  - Removed `--if-present` from root `typecheck`, `test`, and `lint` scripts in `package.json`.
+  - Root scripts now use `pnpm -r typecheck`, `pnpm -r test`, `pnpm -r lint` — pnpm will fail if any workspace package is missing the required script.
+- Validation:
+  - `pnpm typecheck` (pass; runs in both core and cli)
+  - `pnpm test` (pass; 55 core tests + 18 cli tests, all via Vitest v4.0.18)
+- Commit: pending
+- Push: pending
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1
@@ -267,4 +282,18 @@ error: unexpected argument '-a' found
 [2026-03-04 01:18:30] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
 [2026-03-04 01:18:30] [Agent: claude] Failed on iteration 1.
 ^C[2026-03-04 01:19:18] [Agent: claude] Failed on iteration 2.
+```
+
+### 2026-03-04 01:24:20 | Agent: claude | Iteration: 1
+- Task: Unknown Task
+- Exit code: 1
+- Attempts: 1
+- Log: `/Users/shing/Projects/oneclaw/ralph-log.txt`
+- Error excerpt:
+```text
+[2026-03-04 01:18:30] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
+[2026-03-04 01:18:30] [Agent: claude] Failed on iteration 1.
+^C[2026-03-04 01:19:18] [Agent: claude] Failed on iteration 2.
+[2026-03-04 01:24:20] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
+[2026-03-04 01:24:20] [Agent: claude] Failed on iteration 1.
 ```

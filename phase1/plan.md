@@ -30,7 +30,7 @@
 - [x] `P1-B1` Add explicit `typecheck`, `test`, `lint` scripts in `packages/core/package.json`.
 - [x] `P1-B2` Add explicit `typecheck`, `test`, `lint` scripts in `packages/cli/package.json`.
 - [x] `P1-B3` Install and wire missing test tooling (Vitest/TS runner) so tests actually execute.
-- [ ] `P1-B4` Make root scripts fail if package scripts are missing (remove `--if-present` for required checks).
+- [x] `P1-B4` Make root scripts fail if package scripts are missing (remove `--if-present` for required checks).
 - [ ] `P1-B5` Verify locally: `pnpm typecheck && pnpm test && pnpm lint` runs real checks and fails on real errors.
 
 ## Milestone P1-C: CI/Release/Smoke Hardening

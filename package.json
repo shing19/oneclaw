@@ -18,9 +18,9 @@
   "scripts": {
     "build": "bun build packages/cli/src/index.ts --target=node --format=esm --outfile dist/index.js && node scripts/copy-runtime-assets.mjs",
     "prepublishOnly": "pnpm build",
-    "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm -r --if-present test",
-    "lint": "pnpm -r --if-present lint"
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
