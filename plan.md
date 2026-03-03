@@ -115,7 +115,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/cli/src/commands/status.ts` — display Agent status, health, current model
 - [x] Implement `packages/cli/src/commands/config.ts` — show/set/validate/backup/rollback subcommands
 - [x] Implement `packages/cli/src/commands/model.ts` — list/test/priority subcommands
-- [ ] Implement `packages/cli/src/commands/cost.ts` — today's summary, history, export
+- [x] Implement `packages/cli/src/commands/cost.ts` — today's summary, history, export
 - [ ] Implement `packages/cli/src/commands/doctor.ts` — comprehensive health check + fix suggestions
 - [ ] Implement `packages/cli/src/formatters/` — table, JSON, status formatters
 - [ ] Write unit tests for command parsing and formatters

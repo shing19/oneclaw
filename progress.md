@@ -1318,3 +1318,38 @@
   - Log path: `.ralph-status/iteration-43-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 44 - M1.4 Task 8
+
+- Task ID and description: `M1.4-8` Implement `packages/cli/src/commands/cost.ts` — today's summary, history, export.
+- Key decisions made:
+  - Searched the CLI codebase before implementation and confirmed there was no existing `packages/cli/src/commands/cost.ts`.
+  - Implemented a dedicated `cost` command group with required surfaces: default `cost` (today summary), `cost history --range <Nd>`, and `cost export --format <csv|json> [--output <path>]`.
+  - Reused core modules instead of duplicating logic: `parseOpenClawLogLine` for runtime log ingestion and `createQuotaTracker` for daily/history/export aggregation.
+  - Added robust runtime parsing behavior for log-backed cost events:
+    - reads daemon runtime log from config `dataDir`;
+    - extracts timestamps from JSON payload fields or bracket-prefixed lines when present;
+    - maps parsed `CostEvent` values into `UsageEvent` records with token normalization.
+  - Added bilingual (`zh-CN`/`en`) output and global `--json` / `--quiet` compatibility for summary/history/export output modes.
+  - Wired command registration in `packages/cli/src/index.ts` via `registerCostCommand(program)`.
+- Files changed:
+  - `packages/cli/src/commands/cost.ts`
+  - `packages/cli/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-44-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli cost command suite`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-8`
+  - Command: `git add packages/cli/src/commands/cost.ts packages/cli/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement cli cost command suite"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-44-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
