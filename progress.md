@@ -1763,3 +1763,32 @@
   - Log path: `.ralph-status/iteration-57-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 58 - M1.6 Task 4
+
+- Task ID and description: `M1.6-4` Create `.github/workflows/ci.yml` — PR checks (lint + typecheck + test).
+- Key decisions made:
+  - Searched the repository before implementation and confirmed `.github/workflows/ci.yml` did not exist.
+  - Implemented a dedicated GitHub Actions CI workflow triggered on `pull_request` (plus `workflow_dispatch`) with three required checks as separate jobs: `lint`, `typecheck`, and `test`.
+  - Standardized all jobs on Node 20 + pnpm `10.26.1`, with `pnpm` cache enabled and deterministic dependency install via `pnpm install --frozen-lockfile`.
+  - Added workflow `concurrency` control to cancel superseded in-progress runs for the same ref.
+- Files changed:
+  - `.github/workflows/ci.yml`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-58-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `ci: add pr workflow checks`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.6-4`
+  - Command: `git add .github/workflows/ci.yml plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "ci: add pr workflow checks"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-58-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
