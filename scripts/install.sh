@@ -6,6 +6,9 @@ ONECLAW_BINARY_NAME="${ONECLAW_BINARY_NAME:-oneclaw}"
 ONECLAW_REPOSITORY="${ONECLAW_REPOSITORY:-oneclaw/oneclaw}"
 ONECLAW_VERSION="${ONECLAW_VERSION:-latest}"
 ONECLAW_DOWNLOAD_URL="${ONECLAW_DOWNLOAD_URL:-}"
+ONECLAW_DOWNLOAD_SOURCE="${ONECLAW_DOWNLOAD_SOURCE:-auto}"
+ONECLAW_MIRROR_BASE_URL="${ONECLAW_MIRROR_BASE_URL:-https://oneclaw.cn/releases}"
+ONECLAW_CONNECT_TIMEOUT_SECONDS="${ONECLAW_CONNECT_TIMEOUT_SECONDS:-5}"
 ONECLAW_ASSET_NAME="${ONECLAW_ASSET_NAME:-}"
 ONECLAW_INSTALL_DIR="${ONECLAW_INSTALL_DIR:-}"
 
@@ -71,24 +74,120 @@ resolve_asset_name() {
   printf 'oneclaw-%s-%s.tar.gz' "$os" "$arch"
 }
 
-resolve_download_url() {
-  local asset_name="$1"
-
-  if [[ -n "$ONECLAW_DOWNLOAD_URL" ]]; then
-    printf '%s' "$ONECLAW_DOWNLOAD_URL"
+normalize_version_tag() {
+  local version="$1"
+  if [[ "$version" != v* ]]; then
+    printf 'v%s' "$version"
     return 0
   fi
+  printf '%s' "$version"
+}
+
+resolve_github_download_url() {
+  local asset_name="$1"
 
   if [[ "$ONECLAW_VERSION" == "latest" ]]; then
     printf 'https://github.com/%s/releases/latest/download/%s' "$ONECLAW_REPOSITORY" "$asset_name"
     return 0
   fi
 
-  local normalized_version="$ONECLAW_VERSION"
-  if [[ "$normalized_version" != v* ]]; then
-    normalized_version="v${normalized_version}"
-  fi
+  local normalized_version
+  normalized_version="$(normalize_version_tag "$ONECLAW_VERSION")"
   printf 'https://github.com/%s/releases/download/%s/%s' "$ONECLAW_REPOSITORY" "$normalized_version" "$asset_name"
+}
+
+resolve_mirror_download_url() {
+  local asset_name="$1"
+  local mirror_base_url="${ONECLAW_MIRROR_BASE_URL%/}"
+
+  if [[ "$ONECLAW_VERSION" == "latest" ]]; then
+    printf '%s/latest/%s' "$mirror_base_url" "$asset_name"
+    return 0
+  fi
+
+  local normalized_version
+  normalized_version="$(normalize_version_tag "$ONECLAW_VERSION")"
+  printf '%s/%s/%s' "$mirror_base_url" "$normalized_version" "$asset_name"
+}
+
+can_reach_url() {
+  local target_url="$1"
+  local timeout_seconds="$2"
+  local max_time_seconds
+  max_time_seconds=$((timeout_seconds + 2))
+
+  if command -v curl >/dev/null 2>&1; then
+    curl \
+      --head \
+      --silent \
+      --show-error \
+      --location \
+      --connect-timeout "$timeout_seconds" \
+      --max-time "$max_time_seconds" \
+      --output /dev/null \
+      "$target_url" >/dev/null 2>&1
+    return 0
+  fi
+
+  if command -v wget >/dev/null 2>&1; then
+    wget \
+      --spider \
+      --quiet \
+      --timeout="$timeout_seconds" \
+      "$target_url" >/dev/null 2>&1
+    return 0
+  fi
+
+  return 1
+}
+
+resolve_download_source() {
+  if [[ -n "$ONECLAW_DOWNLOAD_URL" ]]; then
+    printf 'custom'
+    return 0
+  fi
+
+  case "$ONECLAW_DOWNLOAD_SOURCE" in
+    auto | AUTO | Auto | "")
+      if can_reach_url "https://github.com" "$ONECLAW_CONNECT_TIMEOUT_SECONDS"; then
+        log_info "GitHub connectivity check passed (${ONECLAW_CONNECT_TIMEOUT_SECONDS}s timeout)."
+        printf 'github'
+      else
+        log_info "GitHub connectivity check failed (${ONECLAW_CONNECT_TIMEOUT_SECONDS}s timeout); falling back to China mirror."
+        printf 'mirror'
+      fi
+      return 0
+      ;;
+    github | mirror)
+      printf '%s' "$ONECLAW_DOWNLOAD_SOURCE"
+      return 0
+      ;;
+    *)
+      log_error "Invalid ONECLAW_DOWNLOAD_SOURCE: ${ONECLAW_DOWNLOAD_SOURCE}. Use: auto, github, mirror."
+      exit 1
+      ;;
+  esac
+}
+
+resolve_download_url() {
+  local asset_name="$1"
+  local download_source="$2"
+
+  case "$download_source" in
+    custom)
+      printf '%s' "$ONECLAW_DOWNLOAD_URL"
+      ;;
+    github)
+      resolve_github_download_url "$asset_name"
+      ;;
+    mirror)
+      resolve_mirror_download_url "$asset_name"
+      ;;
+    *)
+      log_error "Unsupported download source: ${download_source}"
+      exit 1
+      ;;
+  esac
 }
 
 resolve_install_dir() {
@@ -131,16 +230,29 @@ main() {
   local os
   local arch
   local asset_name
+  local download_source
   local download_url
   local install_dir
 
   os="$(detect_os)"
   arch="$(detect_arch)"
   asset_name="$(resolve_asset_name "$os" "$arch")"
-  download_url="$(resolve_download_url "$asset_name")"
+  download_source="$(resolve_download_source)"
+  download_url="$(resolve_download_url "$asset_name" "$download_source")"
   install_dir="$(resolve_install_dir)"
 
   log_info "Detected platform: ${os}/${arch}"
+  case "$download_source" in
+    custom)
+      log_info "Download source: custom URL"
+      ;;
+    github)
+      log_info "Download source: GitHub Releases"
+      ;;
+    mirror)
+      log_info "Download source: China mirror (${ONECLAW_MIRROR_BASE_URL%/})"
+      ;;
+  esac
   log_info "Download URL: ${download_url}"
   log_info "Install directory: ${install_dir}"
 

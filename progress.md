@@ -1705,3 +1705,34 @@
   - Log path: `.ralph-status/iteration-55-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 56 - M1.6 Task 2
+
+- Task ID and description: `M1.6-2` Add China mirror auto-detection in install script (test connectivity, fallback to mirror).
+- Key decisions made:
+  - Searched `scripts/install.sh` and distribution docs before implementation to confirm there was no existing mirror auto-detection logic.
+  - Added explicit download source resolution with `ONECLAW_DOWNLOAD_SOURCE` (`auto`/`github`/`mirror`) and kept `ONECLAW_DOWNLOAD_URL` as highest-priority manual override.
+  - Implemented GitHub connectivity probing (`https://github.com`) with configurable timeout (`ONECLAW_CONNECT_TIMEOUT_SECONDS`, default `5`) using `curl` or `wget`.
+  - Added mirror URL support via `ONECLAW_MIRROR_BASE_URL` (default `https://oneclaw.cn/releases`) and version-aware mirror path construction (`latest` and pinned `v*` tags).
+  - Added installer source logging so runtime output states whether GitHub Releases, China mirror, or custom URL is used, including explicit fallback notice when GitHub connectivity check fails.
+- Files changed:
+  - `scripts/install.sh`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-56-git-failure.log`
+- Validation:
+  - `bash -n scripts/install.sh` passed.
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add installer china mirror auto-detection`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.6-2`
+  - Command: `git add scripts/install.sh plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: add installer china mirror auto-detection"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-56-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
