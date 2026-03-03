@@ -56,6 +56,47 @@ jobs:
           cd artifacts
           sha256sum ./*.tgz > checksums.txt
 
+      - name: Validate tarball content
+        run: |
+          set -euo pipefail
+          tarball="$(ls artifacts/*.tgz | head -1)"
+          echo "Validating tarball: ${tarball}"
+          contents="$(tar -tzf "${tarball}")"
+
+          required_files=(
+            "package/package.json"
+            "package/dist/index.js"
+            "package/dist/schema.json"
+          )
+
+          missing=0
+          for f in "${required_files[@]}"; do
+            if echo "${contents}" | grep -qx "${f}"; then
+              echo "  OK: ${f}"
+            else
+              echo "  MISSING: ${f}"
+              missing=1
+            fi
+          done
+
+          if [[ "${missing}" -ne 0 ]]; then
+            echo "Tarball is missing required files. Aborting release."
+            echo "Full tarball contents:"
+            echo "${contents}"
+            exit 1
+          fi
+
+          echo "Tarball validation passed."
+
+      - name: Smoke test packed tarball
+        run: |
+          set -euo pipefail
+          tarball="$(ls artifacts/*.tgz | head -1)"
+          smoke_dir="$(mktemp -d)"
+          tar -xzf "${tarball}" -C "${smoke_dir}"
+          node "${smoke_dir}/package/dist/index.js" --version
+          echo "Smoke test passed."
+
       - name: Publish to npm
         run: pnpm publish --no-git-checks --access public
 

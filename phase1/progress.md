@@ -180,6 +180,25 @@
   - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
   - `pnpm lint` (pass; 0 errors, 3 warnings)
 
+## 2026-03-04 - Loop: P1-C2
+
+- Scope: Ensure release workflow validates packaged tarball content before publish.
+- Search:
+  - Reviewed `.github/workflows/release.yml` — pack step creates tarball but publishes immediately without validating contents.
+  - Confirmed required runtime files: `dist/index.js` (main + bin), `dist/schema.json` (config schema).
+  - No existing validation between pack and publish steps.
+- Implementation:
+  - Added "Validate tarball content" step to release workflow between pack and publish:
+    - Extracts tarball file listing and checks for `package/package.json`, `package/dist/index.js`, `package/dist/schema.json`.
+    - Prints full tarball contents on failure for debugging.
+    - Fails the release if any required file is missing.
+  - Added "Smoke test packed tarball" step:
+    - Extracts tarball to temp dir and runs `node dist/index.js --version` to verify the packaged artifact works.
+- Validation:
+  - `pnpm typecheck` (pass)
+  - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
+  - `pnpm lint` (pass; 0 errors, 3 warnings)
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1
