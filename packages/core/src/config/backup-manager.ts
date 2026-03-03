@@ -1,3 +1,4 @@
+import type { Dirent } from "node:fs";
 import { copyFile, mkdir, readdir, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -84,9 +85,12 @@ export class BackupManager {
   }
 
   async listBackups(): Promise<ConfigBackup[]> {
-    let entries: Awaited<ReturnType<typeof readdir>>;
+    let entries: Dirent<string>[];
     try {
-      entries = await readdir(this.paths.backupsDir, { withFileTypes: true });
+      entries = await readdir(this.paths.backupsDir, {
+        withFileTypes: true,
+        encoding: "utf8",
+      });
     } catch (error: unknown) {
       if (hasErrorCode(error, "ENOENT")) {
         return [];
@@ -233,6 +237,9 @@ function parseBackupTimestamp(fileName: string): Date | null {
   }
 
   const token = match[1];
+  if (token === undefined) {
+    return null;
+  }
   const isoLikeValue = `${token.slice(0, 4)}-${token.slice(4, 6)}-${token.slice(6, 8)}T${token.slice(9, 11)}:${token.slice(11, 13)}:${token.slice(13, 15)}.${token.slice(15, 18)}Z`;
   const parsed = new Date(isoLikeValue);
 

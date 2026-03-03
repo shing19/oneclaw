@@ -38,7 +38,7 @@ type ZodLikeSafeParseResult<T> =
   | { success: true; data: T }
   | { success: false; error: { issues: ZodLikeIssue[] } };
 
-export interface ZodLikeSchema<T> {
+export interface ModelConfigZodLikeSchema<T> {
   safeParse(
     input: unknown,
     options?: ModelConfigValidationOptions,
@@ -97,11 +97,11 @@ const CACHE_RETENTION_VALUES: readonly NonNullable<
   ModelSettings["cacheRetention"]
 >[] = ["none", "short", "long"];
 
-export const modelSettingsZodSchema: ZodLikeSchema<ModelSettings> = {
+export const modelSettingsZodSchema: ModelConfigZodLikeSchema<ModelSettings> = {
   safeParse: safeParseModelSettings,
 };
 
-export const modelConfigZodSchema: ZodLikeSchema<ModelConfig> = {
+export const modelConfigZodSchema: ModelConfigZodLikeSchema<ModelConfig> = {
   safeParse: safeParseModelConfig,
 };
 

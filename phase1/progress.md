@@ -56,6 +56,34 @@
 - Commit: `5bf676a` (`chore(phase1): verify packaged runtime assets for p1-a4`)
 - Push: `main` -> `origin/main` (pass)
 
+## 2026-03-04 - Loop: P1-B1
+
+- Scope: Add explicit `typecheck`, `test`, `lint` scripts in `packages/core/package.json`.
+- Search:
+  - Confirmed `packages/core/package.json` had no scripts.
+  - Verified `packages/core/src/**/__tests__` contains real tests and `bun test` executes them under current repo setup.
+  - Confirmed `pnpm --filter @oneclaw/core exec vitest` was unavailable, so script wiring used available runtime/test tooling while keeping checks real.
+- Implementation:
+  - Added scripts in `packages/core/package.json`:
+    - `typecheck`: `tsc --noEmit -p tsconfig.json`
+    - `test`: `bun test`
+    - `lint`: `eslint "src/**/*.ts"`
+  - Added workspace dev dependency `@types/node` to satisfy TypeScript Node built-in typings.
+  - Fixed surfaced TypeScript compatibility issues so new core `typecheck` is executable:
+    - `packages/core/src/adapter/agent-kernel.ts` (`override` cause, protected base locale)
+    - `packages/core/src/adapter/openclaw-adapter.ts` (spawn stdio typing, translate config type widening, inherited locale usage)
+    - `packages/core/src/config/backup-manager.ts` (typed `readdir` entries + regex token guard)
+    - `packages/core/src/models/model-config.ts` (renamed exported `ZodLikeSchema` to avoid barrel export collisions)
+    - `packages/core/src/channels/feishu/feishu-auth.ts` (renamed exported `FeishuSecretResolver` to avoid barrel export collisions)
+    - `packages/core/src/adapter/__tests__/openclaw-adapter.integration.test.ts` (strict-null typing fixes)
+    - `packages/core/src/channels/feishu/__tests__/feishu-adapter.integration.test.ts` (strict-null typing fixes)
+  - Fixed one real test failure surfaced by enabling core tests:
+    - `packages/core/src/config/config-manager.ts` now normalizes returned configs by stripping `undefined` fields for deterministic save/load round-trips.
+- Validation:
+  - `pnpm typecheck && pnpm test` (pass)
+- Commit: pending
+- Push: pending
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1
@@ -158,4 +186,18 @@ error: unexpected argument '-a' found
 [2026-03-04 00:53:40] [Agent: codex] Failed on iteration 2.
 error: unexpected argument '-a' found
 [2026-03-04 00:53:46] [Agent: codex] Failed on iteration 3.
+```
+
+### 2026-03-04 00:56:30 | Agent: codex | Iteration: 1
+- Task: Unknown Task
+- Exit code: 1
+- Attempts: 1
+- Log: `/Users/shing/Projects/oneclaw/ralph-log.txt`
+- Error excerpt:
+```text
+ ## Failed Attempts
+[2026-03-04 00:56:30] [Agent: codex] Policy check failed (rc=88): Documentation completion state was updated but not committed.
+[2026-03-04 00:56:30] [Rescue][codex] Nothing staged after git add, rescue failed.
+[2026-03-04 00:56:30] [Agent: codex] Rescue failed.
+[2026-03-04 00:56:30] [Agent: codex] Failed on iteration 1.
 ```

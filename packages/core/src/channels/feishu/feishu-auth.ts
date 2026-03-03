@@ -22,7 +22,7 @@ export interface FeishuAuthToken {
   expiresAt: Date;
 }
 
-export type FeishuSecretResolver = (
+export type FeishuAuthSecretResolver = (
   secretRef: string,
 ) => string | null | Promise<string | null>;
 
@@ -30,7 +30,7 @@ export interface FeishuAuthManagerOptions {
   appId: string;
   appSecret?: string;
   appSecretRef?: string;
-  resolveSecret?: FeishuSecretResolver;
+  resolveSecret?: FeishuAuthSecretResolver;
   locale?: FeishuAuthLocale;
   fetchImpl?: typeof fetch;
   now?: () => Date;
@@ -84,7 +84,7 @@ export class FeishuAuthManager {
   private readonly appId: string;
   private readonly appSecretRef?: string;
   private appSecret?: string;
-  private readonly resolveSecret?: FeishuSecretResolver;
+  private readonly resolveSecret?: FeishuAuthSecretResolver;
   private readonly locale: FeishuAuthLocale;
   private readonly fetchImpl: typeof fetch;
   private readonly now: () => Date;

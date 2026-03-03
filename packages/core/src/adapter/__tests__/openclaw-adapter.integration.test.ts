@@ -54,7 +54,7 @@ describe("openclaw adapter integration", () => {
 
         const child = spawn(command, args, {
           ...options,
-          stdio: ["ignore", "pipe", "pipe"],
+          stdio: ["pipe", "pipe", "pipe"],
         });
         spawnedChild = child;
         return child;
@@ -68,11 +68,13 @@ describe("openclaw adapter integration", () => {
     try {
       await adapter.start(createAgentConfig());
 
-      assert.ok(lastSpawnCall);
-      assert.equal(lastSpawnCall.command, process.execPath);
-      assert.equal(lastSpawnCall.env.DEEPSEEK_API_KEY, "deepseek-test-key");
+      assert.ok(lastSpawnCall !== null);
+      const spawnCall = lastSpawnCall as SpawnCallSnapshot;
 
-      const configPath = extractConfigPath(lastSpawnCall.args);
+      assert.equal(spawnCall.command, process.execPath);
+      assert.equal(spawnCall.env.DEEPSEEK_API_KEY, "deepseek-test-key");
+
+      const configPath = extractConfigPath(spawnCall.args);
       const translatedConfigRaw = await readFile(configPath, "utf8");
       assert.match(translatedConfigRaw, /"model":\s*"deepseek\/deepseek-chat"/);
 
@@ -156,7 +158,9 @@ function extractConfigPath(args: readonly string[]): string {
   assert.notEqual(configFlagIndex, -1, "expected --config argument");
 
   const configPath = args[configFlagIndex + 1];
-  assert.ok(configPath, "expected config path argument");
+  if (configPath === undefined || configPath.length === 0) {
+    throw new Error("Expected config path argument.");
+  }
   return configPath;
 }
 

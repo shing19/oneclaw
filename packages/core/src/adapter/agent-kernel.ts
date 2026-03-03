@@ -32,7 +32,7 @@ const ERROR_RECOVERABILITY: Readonly<Record<AdapterErrorCode, boolean>> = {
 export class AgentKernelError extends Error implements AdapterError {
   readonly code: AdapterErrorCode;
   readonly recoverable: boolean;
-  readonly cause?: Error;
+  override readonly cause?: Error;
 
   constructor(
     code: AdapterErrorCode,
@@ -48,7 +48,7 @@ export class AgentKernelError extends Error implements AdapterError {
 }
 
 export abstract class AgentKernelBase implements AgentKernel {
-  private readonly locale: AgentKernelLocale;
+  protected readonly locale: AgentKernelLocale;
   private readonly now: () => number;
   private readonly eventStream: AgentKernelEventStream;
 

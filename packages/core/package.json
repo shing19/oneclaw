@@ -4,5 +4,10 @@
   "private": true,
   "description": "Core runtime and domain modules for OneClaw",
   "type": "module",
-  "main": "src/index.ts"
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "bun test",
+    "lint": "eslint \"src/**/*.ts\""
+  }
 }

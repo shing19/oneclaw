@@ -244,8 +244,10 @@ describe("feishu adapter integration", () => {
       );
 
       await waitForCondition(() => received !== null, 2_000);
-      assert.equal(received?.text, "delivery confirmed");
-      assert.equal(received?.channel, "feishu");
+      assert.ok(received !== null);
+      const inboundMessage = received as InboundMessage;
+      assert.equal(inboundMessage.text, "delivery confirmed");
+      assert.equal(inboundMessage.channel, "feishu");
       assert.equal(adapter.getStatus(), "connected");
       assert.deepEqual(callbackErrors, []);
     } finally {

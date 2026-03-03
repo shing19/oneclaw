@@ -14,6 +14,7 @@ import type {
   HealthReport,
 } from "../types/agent-adapter.js";
 import {
+  type OpenClawConfigFile,
   resolveProviderApiKeyEnvVarName,
   translateAgentConfigToOpenClawConfig,
 } from "./config-translator.js";
@@ -24,7 +25,6 @@ import {
 import {
   AgentKernelBase,
   type AgentKernelBaseOptions,
-  type AgentKernelLocale,
   toAdapterError,
 } from "./agent-kernel.js";
 
@@ -43,7 +43,10 @@ export interface OpenClawAdapterOptions extends AgentKernelBaseOptions {
   ) => Promise<string | undefined> | string | undefined;
   translateConfig?: (
     config: AgentConfig,
-  ) => Promise<Record<string, unknown>> | Record<string, unknown>;
+  ) =>
+    | Promise<OpenClawConfigFile | Record<string, unknown>>
+    | OpenClawConfigFile
+    | Record<string, unknown>;
   spawnProcess?: (
     command: string,
     args: readonly string[],
@@ -59,7 +62,6 @@ const DEFAULT_HEARTBEAT_INTERVAL_MS = 10_000;
 const DEFAULT_MAX_CRASH_RESTARTS = 1;
 
 export class OpenClawAdapter extends AgentKernelBase {
-  private readonly locale: AgentKernelLocale;
   private readonly command: string;
   private readonly args: readonly string[];
   private readonly cwd: string | undefined;
@@ -76,7 +78,7 @@ export class OpenClawAdapter extends AgentKernelBase {
     | undefined;
   private readonly translateConfig: (
     config: AgentConfig,
-  ) => Promise<Record<string, unknown>>;
+  ) => Promise<OpenClawConfigFile | Record<string, unknown>>;
   private readonly spawnProcess: (
     command: string,
     args: readonly string[],
@@ -96,7 +98,6 @@ export class OpenClawAdapter extends AgentKernelBase {
   constructor(options: OpenClawAdapterOptions = {}) {
     super(options);
 
-    this.locale = options.locale ?? "zh-CN";
     this.command = options.command ?? DEFAULT_COMMAND;
     this.args = options.args ?? [];
     this.cwd = options.cwd;
@@ -124,7 +125,7 @@ export class OpenClawAdapter extends AgentKernelBase {
     this.resolveApiKey = options.resolveApiKey;
     this.translateConfig = async (
       config: AgentConfig,
-    ): Promise<Record<string, unknown>> =>
+    ): Promise<OpenClawConfigFile | Record<string, unknown>> =>
       options.translateConfig?.(config) ??
       translateAgentConfigToOpenClawConfig(config);
     this.spawnProcess =
@@ -132,7 +133,7 @@ export class OpenClawAdapter extends AgentKernelBase {
       ((command, args, spawnOptions) =>
         spawn(command, args, {
           ...spawnOptions,
-          stdio: ["ignore", "pipe", "pipe"],
+          stdio: ["pipe", "pipe", "pipe"],
         }));
 
     this.process = null;
@@ -230,7 +231,7 @@ export class OpenClawAdapter extends AgentKernelBase {
 
   private async translateConfigOrThrow(
     config: AgentConfig,
-  ): Promise<Record<string, unknown>> {
+  ): Promise<OpenClawConfigFile | Record<string, unknown>> {
     try {
       return await this.translateConfig(config);
     } catch (error: unknown) {
@@ -268,7 +269,7 @@ export class OpenClawAdapter extends AgentKernelBase {
     const spawnOptions: SpawnOptionsWithoutStdio = {
       cwd: this.cwd,
       env,
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: ["pipe", "pipe", "pipe"],
     };
 
     const child = this.spawnProcess(this.command, args, spawnOptions);

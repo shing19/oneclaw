@@ -118,11 +118,11 @@ export class ConfigManager {
       throw new ConfigManagerError("CONFIG_PARSE_FAILED", this.locale, error);
     }
 
-    return assertValidConfig(parsed, { locale: this.locale });
+    return normalizeConfig(assertValidConfig(parsed, { locale: this.locale }));
   }
 
   async save(input: unknown): Promise<OneclawConfig> {
-    const config = assertValidConfig(input, { locale: this.locale });
+    const config = normalizeConfig(assertValidConfig(input, { locale: this.locale }));
     const serialized = `${JSON.stringify(config, null, 2)}\n`;
 
     await this.ensureConfigDir();
@@ -238,6 +238,33 @@ export class ConfigManager {
       throw new ConfigManagerError("CONFIG_WRITE_FAILED", this.locale, error);
     }
   }
+}
+
+function normalizeConfig(config: OneclawConfig): OneclawConfig {
+  return stripUndefinedFields(config);
+}
+
+function stripUndefinedFields<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripUndefinedFields(item)) as T;
+  }
+
+  if (value !== null && typeof value === "object") {
+    const cleanedEntries: [string, unknown][] = [];
+
+    for (const [key, entryValue] of Object.entries(
+      value as Record<string, unknown>,
+    )) {
+      if (entryValue === undefined) {
+        continue;
+      }
+      cleanedEntries.push([key, stripUndefinedFields(entryValue)]);
+    }
+
+    return Object.fromEntries(cleanedEntries) as T;
+  }
+
+  return value;
 }
 
 function normalizeDebounceMs(value: number): number {
