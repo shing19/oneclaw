@@ -101,8 +101,8 @@
   - `pnpm --filter @oneclaw/cli test` (pass, 18 tests across 4 files)
   - `pnpm --filter @oneclaw/cli lint` (runs but reports 49 pre-existing errors — wiring confirmed real)
   - `pnpm typecheck && pnpm test` (pass, both core and cli)
-- Commit: pending
-- Push: pending
+- Commit: `13aa6d1` (`chore(phase1): add cli quality scripts and typecheck fixes for p1-b2`)
+- Push: `main` -> `origin/main` (pass)
 
 ## Failed Attempts
 
