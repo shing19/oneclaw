@@ -150,6 +150,37 @@
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
 
+## Iteration 41 - M1.4 Task 5
+
+- Task ID and description: `M1.4-5` Implement `packages/cli/src/commands/status.ts` — display Agent status, health, current model.
+- Key decisions made:
+  - Searched the CLI codebase before implementation and confirmed there was no existing `packages/cli/src/commands/status.ts`.
+  - Implemented `oneclaw status` with runtime-file inspection (`agent-daemon.pid`, `agent-daemon-state.json`) plus live PID checks to avoid trusting stale state blindly.
+  - Added status summary output for required fields: kernel state, computed health (`ok`/`degraded`/`unreachable`), and current model (runtime model with config fallback).
+  - Added bilingual (`zh-CN`/`en`) output and global `--json` / `--quiet` handling aligned with existing CLI commands.
+  - Wired command registration in `packages/cli/src/index.ts` via `registerStatusCommand(program)`.
+- Files changed:
+  - `packages/cli/src/commands/status.ts`
+  - `packages/cli/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-41-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli status command`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-5`
+  - Command: `git add packages/cli/src/commands/status.ts packages/cli/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement cli status command"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-41-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
 ## Iteration 6 - M1.0 Task 5
 
 - Task ID and description: `M1.0-5` Configure Vitest (root config + per-package configs).
