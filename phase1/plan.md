@@ -35,7 +35,7 @@
 
 ## Milestone P1-C: CI/Release/Smoke Hardening
 
-- [ ] `P1-C1` Add CI `build` job and runtime smoke check on built artifact.
+- [x] `P1-C1` Add CI `build` job and runtime smoke check on built artifact.
 - [ ] `P1-C2` Ensure release workflow validates packaged tarball content before publish.
 - [ ] `P1-C3` Add a local reproducible smoke command/script for `npm pack` -> isolated install -> `oneclaw --version`.
 - [ ] `P1-C4` Confirm install script behavior for source selection and failure reporting.

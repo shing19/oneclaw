@@ -161,6 +161,25 @@
   - `pnpm test` (pass; 55 core tests + 18 cli tests = 73 total, all via Vitest v4.0.18)
   - `pnpm lint` (pass; 0 errors, 3 warnings — all `no-redundant-type-constituents`)
 
+## 2026-03-04 - Loop: P1-C1
+
+- Scope: Add CI `build` job and runtime smoke check on built artifact.
+- Search:
+  - Existing CI workflow (`.github/workflows/ci.yml`) had `lint`, `typecheck`, and `test` jobs but no `build` job and no runtime smoke check.
+  - Release workflow had a build step with Bun but no standalone CI build gate.
+  - Smoke-install workflow only runs post-publish (not on PRs/pushes).
+- Implementation:
+  - Added `build` job to `.github/workflows/ci.yml` with:
+    - pnpm + Node.js 20 + Bun setup (matching release workflow).
+    - `pnpm build` step.
+    - Artifact verification: checks `dist/index.js` and `dist/schema.json` exist.
+    - Runtime smoke checks: `node dist/index.js --version` and `node dist/index.js --help`.
+  - Added `push` trigger for `main` branch so build failures are caught on merge, not just PRs.
+- Validation:
+  - `pnpm typecheck` (pass)
+  - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
+  - `pnpm lint` (pass; 0 errors, 3 warnings)
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1
