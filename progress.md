@@ -1675,3 +1675,33 @@
   - Log path: `.ralph-status/iteration-54-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 55 - M1.6 Task 1
+
+- Task ID and description: `M1.6-1` Create `scripts/install.sh` — one-click install script (detect OS/arch, download binary, install to PATH).
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing install script under `scripts/`.
+  - Implemented `scripts/install.sh` as a Unix installer for Phase 1 with platform/architecture detection (`darwin`/`linux`, `x64`/`arm64`).
+  - Added release download resolution for both `latest` and pinned versions (`ONECLAW_VERSION`), with environment overrides for repository, asset name, direct URL, install directory, and binary name.
+  - Implemented robust install flow: dependency checks, archive download via `curl`/`wget`, extraction, binary discovery, install to writable PATH target (`/usr/local/bin` or `~/.local/bin`), and PATH guidance.
+  - Kept this loop scoped to `M1.6-1` only; China mirror auto-detection remains for `M1.6-2`.
+- Files changed:
+  - `scripts/install.sh`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-55-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add phase-1 installer script`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.6-1`
+  - Command: `git add scripts/install.sh plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: add phase-1 installer script"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-55-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

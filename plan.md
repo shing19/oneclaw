@@ -136,7 +136,7 @@ If blocked, document in `progress.md` and move to the next task.
 
 > Module: `docs/modules/distribution.md`
 
-- [ ] Create `scripts/install.sh` — one-click install script (detect OS/arch, download binary, install to PATH)
+- [x] Create `scripts/install.sh` — one-click install script (detect OS/arch, download binary, install to PATH)
 - [ ] Add China mirror auto-detection in install script (test connectivity, fallback to mirror)
 - [ ] Configure npm package (`package.json` bin field, `prepublishOnly` build)
 - [ ] Create `.github/workflows/ci.yml` — PR checks (lint + typecheck + test)
