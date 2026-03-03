@@ -1548,3 +1548,35 @@
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
 
+
+## Iteration 51 - M1.5 Task 3
+
+- Task ID and description: `M1.5-3` Implement `packages/core/src/channels/feishu/feishu-auth.ts` — app_id/app_secret token management.
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing `packages/core/src/channels/feishu/feishu-auth.ts` module.
+  - Implemented `FeishuAuthManager` with app-level tenant token lifecycle management for Feishu Open API (`tenant_access_token/internal`), including in-memory caching and expiry-aware refresh.
+  - Added configurable app secret resolution flow: direct `appSecret` support plus `appSecretRef` lookup through async secret resolver hooks for SecretStore integration.
+  - Added in-flight refresh deduplication to prevent concurrent token-fetch stampedes and exposed explicit lifecycle APIs (`getAccessToken`, `getToken`, `refreshAccessToken`, `invalidateAccessToken`, `setAppSecret`).
+  - Added bilingual (`zh-CN`/`en`) typed auth errors covering invalid config, secret resolution failures, HTTP request failures, auth rejection, and malformed auth responses.
+  - Exported the auth module from `packages/core/src/index.ts` for downstream Feishu channel command/setup integration.
+- Files changed:
+  - `packages/core/src/channels/feishu/feishu-auth.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-51-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement feishu app auth token manager`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.5-3`
+  - Command: `git add packages/core/src/channels/feishu/feishu-auth.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement feishu app auth token manager"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-51-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
