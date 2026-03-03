@@ -1792,3 +1792,33 @@
   - Log path: `.ralph-status/iteration-58-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 59 - M1.6 Task 5
+
+- Task ID and description: `M1.6-5` Create `.github/workflows/release.yml` — tag-triggered release (build + npm publish + GitHub Release).
+- Key decisions made:
+  - Searched the repository and confirmed no existing `.github/workflows/release.yml` before implementation.
+  - Added a tag-triggered release workflow (`push` tags `v*` + `workflow_dispatch`) with required scope: build, npm publish, and GitHub Release.
+  - Standardized release runtime on Node 20 + pnpm `10.26.1`, and added Bun setup to satisfy the existing `pnpm build` pipeline (`bun build ...`).
+  - Added release packaging steps (`pnpm pack` + `sha256sum`) and attached generated artifacts to the GitHub Release.
+  - Configured npm publishing through `NODE_AUTH_TOKEN` (`secrets.NPM_TOKEN`) and GitHub release publishing with `contents: write` permission.
+- Files changed:
+  - `.github/workflows/release.yml`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-59-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `ci: add tag-triggered release workflow`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.6-5`
+  - Command: `git add .github/workflows/release.yml plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "ci: add tag-triggered release workflow"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-59-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
