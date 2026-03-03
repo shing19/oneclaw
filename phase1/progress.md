@@ -215,6 +215,28 @@
   - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
   - `pnpm lint` (pass; 0 errors, 3 warnings)
 
+## 2026-03-04 - Loop: P1-C4
+
+- Scope: Confirm install script behavior for source selection and failure reporting.
+- Search:
+  - Reviewed `scripts/install.sh` — identified critical bug in `can_reach_url()`: `return 0` after curl/wget discards actual exit code, so auto source selection always picks GitHub even when unreachable.
+  - Reviewed `docs/modules/distribution.md` for install script requirements.
+  - No existing test coverage for install script logic.
+- Implementation:
+  - Fixed `can_reach_url()`: replaced `return 0` with `return $?` after curl and wget calls so auto detection correctly falls back to China mirror when GitHub is unreachable.
+  - Improved `download_file()`: captures exit code and reports actionable error message with URL and suggestion to try `ONECLAW_DOWNLOAD_SOURCE=mirror`.
+  - Improved missing-binary error: now dumps archive contents to help debug bad tarballs.
+  - Added `scripts/test-install-script.sh` with 15 tests covering:
+    - Source selection: explicit github, explicit mirror, custom URL override, invalid source rejection.
+    - Connectivity: `can_reach_url` returns non-zero for unreachable URLs (confirms bug fix).
+    - URL construction: GitHub latest/versioned, mirror latest/versioned, v-prefix normalization.
+    - Failure reporting: download failure message with URL and mirror suggestion, unsupported OS/arch errors, missing command errors.
+- Validation:
+  - `bash scripts/test-install-script.sh` (pass; 15/15 tests)
+  - `pnpm typecheck` (pass)
+  - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
+  - `pnpm lint` (pass; 0 errors, 3 warnings)
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1

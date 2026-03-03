@@ -126,7 +126,7 @@ can_reach_url() {
       --max-time "$max_time_seconds" \
       --output /dev/null \
       "$target_url" >/dev/null 2>&1
-    return 0
+    return $?
   fi
 
   if command -v wget >/dev/null 2>&1; then
@@ -135,7 +135,7 @@ can_reach_url() {
       --quiet \
       --timeout="$timeout_seconds" \
       "$target_url" >/dev/null 2>&1
-    return 0
+    return $?
   fi
 
   return 1
@@ -207,14 +207,25 @@ resolve_install_dir() {
 download_file() {
   local url="$1"
   local output_path="$2"
+  local rc=0
 
   if command -v curl >/dev/null 2>&1; then
-    curl -fsSL "$url" -o "$output_path"
+    curl -fsSL "$url" -o "$output_path" || rc=$?
+    if [[ "$rc" -ne 0 ]]; then
+      log_error "Download failed (curl exit code ${rc}): ${url}"
+      log_error "Check the URL, your network connection, or try ONECLAW_DOWNLOAD_SOURCE=mirror"
+      return "$rc"
+    fi
     return 0
   fi
 
   if command -v wget >/dev/null 2>&1; then
-    wget -qO "$output_path" "$url"
+    wget -qO "$output_path" "$url" || rc=$?
+    if [[ "$rc" -ne 0 ]]; then
+      log_error "Download failed (wget exit code ${rc}): ${url}"
+      log_error "Check the URL, your network connection, or try ONECLAW_DOWNLOAD_SOURCE=mirror"
+      return "$rc"
+    fi
     return 0
   fi
 
@@ -285,6 +296,8 @@ main() {
 
   if [[ -z "$binary_source_path" ]]; then
     log_error "Could not find binary '${ONECLAW_BINARY_NAME}' in downloaded archive"
+    log_error "Archive contents:"
+    find "$extract_dir" -type f 2>/dev/null | sed "s|${extract_dir}/|  |" >&2
     exit 1
   fi
 

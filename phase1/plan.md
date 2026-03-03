@@ -38,7 +38,7 @@
 - [x] `P1-C1` Add CI `build` job and runtime smoke check on built artifact.
 - [x] `P1-C2` Ensure release workflow validates packaged tarball content before publish.
 - [x] `P1-C3` Add a local reproducible smoke command/script for `npm pack` -> isolated install -> `oneclaw --version`.
-- [ ] `P1-C4` Confirm install script behavior for source selection and failure reporting.
+- [x] `P1-C4` Confirm install script behavior for source selection and failure reporting.
 
 ## Milestone P1-D: Phase 1 Exit Evidence
 
