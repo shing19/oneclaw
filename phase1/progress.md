@@ -274,6 +274,26 @@
   - `pnpm test` (pass; 56 core + 18 cli = 74 tests)
   - `pnpm lint` (pass; 0 errors, 3 warnings)
 
+## 2026-03-04 - Loop: P1-D3
+
+- Scope: Verify doctor command surfaces common failure guidance in both `zh-CN` and `en`.
+- Search:
+  - Reviewed `packages/cli/src/commands/doctor.ts` (1,405 lines) — full bilingual support via `text(locale, english, chinese)` helper across all 6 health checks.
+  - Confirmed existing test coverage in `command-parsing.test.ts` only verified command registration and options, not failure guidance output.
+  - No existing doctor integration test.
+- Implementation:
+  - Created `packages/cli/src/__tests__/commands/doctor-guidance.integration.test.ts` with 8 test cases covering 3 failure scenarios in both locales:
+    - **Missing config**: Verifies config check fails with "does not exist" (en) / "不存在" (zh-CN) and suggests `oneclaw init`.
+    - **Invalid JSON config**: Verifies config check fails with "invalid JSON" (en) / "JSON 格式不合法" (zh-CN) and suggests `config validate`.
+    - **Stale PID**: Verifies runtime check fails with "not alive" / "PID exists" (en) / "已不存在" (zh-CN) and suggests `stop --force`.
+    - **All 6 check categories**: Verifies filesystem, config, openclaw-binary, runtime, secret-store, provider-connectivity are all present and every non-pass check has a suggestion (both locales).
+  - Verified all titles are in the correct language per locale (English starts with `[A-Z]`, Chinese contains expected characters).
+- Validation:
+  - Doctor integration tests: pass (8/8 tests, 177ms)
+  - `pnpm typecheck` (pass)
+  - `pnpm test` (pass; 56 core + 18 cli = 74 tests)
+  - `pnpm lint` (pass; 0 errors, 3 warnings)
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1
