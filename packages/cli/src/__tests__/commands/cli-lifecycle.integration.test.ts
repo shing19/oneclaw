@@ -39,9 +39,7 @@ const mockPromptAnswers: string[] = [];
 const mockSecretValues = new Map<string, string>();
 
 vi.mock("node:readline/promises", async () => {
-  const actual = await vi.importActual<typeof import("node:readline/promises")>(
-    "node:readline/promises",
-  );
+  const actual = await import("node:readline/promises");
 
   return {
     ...actual,
@@ -60,10 +58,8 @@ vi.mock("node:readline/promises", async () => {
   };
 });
 
-vi.mock("../../../core/src/index.js", async () => {
-  const actual = await vi.importActual<typeof import("../../../core/src/index.js")>(
-    "../../../core/src/index.js",
-  );
+vi.mock("../../../../core/src/index.js", async () => {
+  const actual = await import("../../../../core/src/index.js");
 
   return {
     ...actual,
@@ -81,7 +77,7 @@ describe("cli integration lifecycle", () => {
     const daemonRunnerPath = join(tempRoot, "mock-daemon-runner.mjs");
 
     const originalConfigPath = process.env.ONECLAW_CONFIG_PATH;
-    const originalArgv1 = process.argv[1];
+    const originalArgv1 = process.argv[1] ?? "oneclaw";
     const originalStdinDescriptor = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
     const originalStdoutDescriptor = Object.getOwnPropertyDescriptor(process.stdout, "isTTY");
     let daemonPid: number | null = null;
@@ -213,7 +209,6 @@ async function runCliCommand(args: readonly string[]): Promise<CliCommandResult>
 
   process.exitCode = 0;
   try {
-    vi.resetModules();
     const { runCli } = await import("../../index.js");
     await runCli(["node", "oneclaw", ...args]);
   } finally {

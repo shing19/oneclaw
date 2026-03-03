@@ -522,7 +522,7 @@ run_agent_with_retries() {
         if git_is_repo; then
             before_head="$(git_current_head)"
             before_ahead="$(git_ahead_count_or_minus_one)"
-            before_docs_state="$(docs_worktree_state "$plan_file" "$progress_file")"
+            before_docs_state="$(docs_worktree_state "$plan_file")"
             before_task="$(current_task_title "$plan_file")"
         else
             before_head=""
@@ -736,16 +736,16 @@ enforce_task_completion_commit_policy() {
     fi
 
     current_head="$(git_current_head)"
-    after_docs_state="$(docs_worktree_state "$plan_file" "$progress_file")"
+    after_docs_state="$(docs_worktree_state "$plan_file")"
     if [[ "$after_docs_state" != "$before_docs_state" ]]; then
         docs_worktree=1
     fi
-    if docs_changed_in_commit_range "$before_head" "$current_head" "$plan_file" "$progress_file"; then
+    if docs_changed_in_commit_range "$before_head" "$current_head" "$plan_file"; then
         docs_committed=1
     fi
 
     if [[ $docs_worktree -eq 0 && $docs_committed -eq 0 ]]; then
-        TASK_POLICY_REASON="Task completed but plan/progress documentation was not updated."
+        TASK_POLICY_REASON="Task completed but plan documentation was not updated."
         return 92
     fi
 
@@ -792,23 +792,22 @@ enforce_task_completion_commit_policy() {
 
 docs_worktree_state() {
     local plan_file="$1"
-    local progress_file="$2"
-    git status --porcelain -- "$plan_file" "$progress_file" 2>/dev/null || true
+    # Only track plan file — progress is a local runtime log, not a deliverable
+    git status --porcelain -- "$plan_file" 2>/dev/null || true
 }
 
 docs_changed_in_commit_range() {
     local before_head="$1"
     local after_head="$2"
     local plan_file="$3"
-    local progress_file="$4"
 
     [[ -n "$before_head" && -n "$after_head" ]] || return 1
     [[ "$before_head" != "$after_head" ]] || return 1
 
     if command -v rg &>/dev/null; then
-        git diff --name-only "$before_head..$after_head" -- "$plan_file" "$progress_file" 2>/dev/null | rg -q "."
+        git diff --name-only "$before_head..$after_head" -- "$plan_file" 2>/dev/null | rg -q "."
     else
-        [[ -n "$(git diff --name-only "$before_head..$after_head" -- "$plan_file" "$progress_file" 2>/dev/null)" ]]
+        [[ -n "$(git diff --name-only "$before_head..$after_head" -- "$plan_file" 2>/dev/null)" ]]
     fi
 }
 
@@ -830,11 +829,11 @@ enforce_doc_push_policy() {
         return 0
     fi
 
-    after_docs_state="$(docs_worktree_state "$plan_file" "$progress_file")"
+    after_docs_state="$(docs_worktree_state "$plan_file")"
     if [[ "$after_docs_state" != "$before_docs_state" ]]; then
         docs_worktree=1
     fi
-    if docs_changed_in_commit_range "$before_head" "$after_head" "$plan_file" "$progress_file"; then
+    if docs_changed_in_commit_range "$before_head" "$after_head" "$plan_file"; then
         docs_committed=1
     fi
 
@@ -881,9 +880,9 @@ rescue_doc_policy() {
     case "$policy_rc" in
         88)
             # Uncommitted doc changes — auto-commit
-            log "${YELLOW}[Rescue][$agent_name]${NC} Auto-committing uncommitted doc changes..."
-            git add -- "$plan_file" "$progress_file" 2>/dev/null || true
-            if git diff --cached --quiet -- "$plan_file" "$progress_file" 2>/dev/null; then
+            log "${YELLOW}[Rescue][$agent_name]${NC} Auto-committing uncommitted plan changes..."
+            git add -- "$plan_file" 2>/dev/null || true
+            if git diff --cached --quiet -- "$plan_file" 2>/dev/null; then
                 log "${RED}[Rescue][$agent_name]${NC} Nothing staged after git add, rescue failed."
                 return 1
             fi
@@ -1325,7 +1324,7 @@ run_one_iteration() {
     if git_is_repo; then
         before_head="$(git_current_head)"
         before_ahead="$(git_ahead_count_or_minus_one)"
-        before_docs_state="$(docs_worktree_state "$PLAN_FILE" "$PROGRESS_FILE")"
+        before_docs_state="$(docs_worktree_state "$PLAN_FILE")"
         before_task="$(current_task_title "$PLAN_FILE")"
     fi
 

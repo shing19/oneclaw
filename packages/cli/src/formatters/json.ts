@@ -16,7 +16,7 @@ export function formatJsonError(message: string, options: JsonFormatterOptions =
 }
 
 function serializeJson(value: unknown, indent: number | null | undefined): string {
-  const normalizedIndent = indent === undefined ? 2 : indent;
+  const normalizedIndent = indent === undefined || indent === null ? 2 : indent;
   try {
     const serialized = JSON.stringify(value, null, normalizedIndent);
     return serialized ?? "null";

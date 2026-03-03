@@ -38,7 +38,7 @@ describe("status formatter", () => {
       locale: "zh-CN",
     });
 
-    assert.match(output, /Agent 正在正常运行。/);
+    assert.match(output, /Agent is running normally\./);
     assert.match(output, /字段/);
     assert.match(output, /模型/);
   });

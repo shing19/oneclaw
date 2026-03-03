@@ -492,7 +492,7 @@ async function checkRuntime(
         "Start the agent with `oneclaw start` when ready.",
         "准备好后可执行 `oneclaw start` 启动 Agent。",
       ),
-      details: runtimePaths,
+      details: { ...runtimePaths },
     };
   }
 
@@ -1402,4 +1402,3 @@ function hasErrorCode(error: unknown, code: string): boolean {
     (error as { code: string }).code === code
   );
 }
-

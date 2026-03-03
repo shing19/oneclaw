@@ -432,6 +432,15 @@ function applyPathValue(
   for (let index = 0; index < segments.length - 1; index += 1) {
     const segment = segments[index];
     const nextSegment = segments[index + 1];
+    if (segment === undefined || nextSegment === undefined) {
+      throw new Error(
+        text(
+          locale,
+          `Invalid config key path: "${keyPath}".`,
+          `配置键路径无效："${keyPath}"。`,
+        ),
+      );
+    }
 
     if (typeof segment === "number") {
       if (!Array.isArray(cursor)) {

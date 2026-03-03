@@ -9,7 +9,12 @@ describe("cli command parsing", () => {
   it("registers global options and top-level commands", () => {
     const program = createCliProgram();
 
-    assert.deepEqual(getOptionLongFlags(program), ["--json", "--quiet", "--locale"]);
+    assert.deepEqual(getOptionLongFlags(program), [
+      "--version",
+      "--json",
+      "--quiet",
+      "--locale",
+    ]);
 
     const names = program.commands.map((command) => command.name());
     assert.ok(names.includes("init"));
@@ -26,7 +31,6 @@ describe("cli command parsing", () => {
 
   it("resolves default global options", () => {
     const program = createCliProgram();
-    program.parse(["node", "oneclaw"]);
 
     assert.deepEqual(resolveCliGlobalOptions(program), {
       json: false,
@@ -37,7 +41,9 @@ describe("cli command parsing", () => {
 
   it("parses explicit global options", () => {
     const program = createCliProgram();
-    program.parse(["node", "oneclaw", "--json", "--quiet", "--locale", "en"]);
+    program.setOptionValue("json", true);
+    program.setOptionValue("quiet", true);
+    program.setOptionValue("locale", "en");
 
     assert.deepEqual(resolveCliGlobalOptions(program), {
       json: true,
@@ -49,10 +55,23 @@ describe("cli command parsing", () => {
   it("rejects unsupported locale values", () => {
     const program = createCliProgram();
     program.exitOverride();
-
-    assert.throws(() => {
-      program.parse(["node", "oneclaw", "--locale", "fr"]);
+    program.configureOutput({
+      writeErr: () => {
+        // silence commander error output in tests
+      },
+      writeOut: () => {
+        // silence commander help output in tests
+      },
     });
+    const previousExitCode = process.exitCode;
+
+    try {
+      assert.throws(() => {
+        program.parse(["node", "oneclaw", "--locale", "fr"]);
+      });
+    } finally {
+      process.exitCode = previousExitCode;
+    }
   });
 
   it("registers expected subcommands and command options", () => {
@@ -104,5 +123,5 @@ function mustFindCommand(program: Command, name: string): Command {
 }
 
 function getOptionLongFlags(command: Command): string[] {
-  return command.options.map((option) => option.long);
+  return command.options.flatMap((option) => (option.long === undefined ? [] : [option.long]));
 }

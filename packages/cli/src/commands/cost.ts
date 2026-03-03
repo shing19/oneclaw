@@ -461,7 +461,18 @@ function parseHistoryRangeDays(
     );
   }
 
-  const parsed = Number.parseInt(matched[1], 10);
+  const daysToken = matched[1];
+  if (daysToken === undefined) {
+    throw new Error(
+      text(
+        locale,
+        `Invalid range "${normalized}". Use format like 7d.`,
+        `无效范围 "${normalized}"。请使用类似 7d 的格式。`,
+      ),
+    );
+  }
+
+  const parsed = Number.parseInt(daysToken, 10);
   if (
     !Number.isInteger(parsed) ||
     parsed <= 0 ||

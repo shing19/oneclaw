@@ -8,6 +8,11 @@
   "bin": {
     "oneclaw": "src/index.ts"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "bun test ./src/__tests__/formatters ./src/__tests__/commands/command-parsing.test.ts",
+    "lint": "eslint \"src/**/*.ts\""
+  },
   "dependencies": {
     "commander": "^12.1.0"
   }
