@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { realpathSync } from "node:fs";
 import { basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
@@ -85,7 +86,11 @@ function isDirectExecution(argv: readonly string[] = process.argv): boolean {
   }
 
   const currentFilePath = fileURLToPath(import.meta.url);
-  return resolve(entryPath) === resolve(currentFilePath);
+  try {
+    return realpathSync(resolve(entryPath)) === realpathSync(resolve(currentFilePath));
+  } catch {
+    return resolve(entryPath) === resolve(currentFilePath);
+  }
 }
 
 if (isDirectExecution()) {

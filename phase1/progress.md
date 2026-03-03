@@ -199,6 +199,22 @@
   - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
   - `pnpm lint` (pass; 0 errors, 3 warnings)
 
+## 2026-03-04 - Loop: P1-C3
+
+- Scope: Add a local reproducible smoke command/script for `npm pack` -> isolated install -> `oneclaw --version`.
+- Search:
+  - Confirmed no existing local smoke script; only CI-level smoke checks (`ci.yml` build job, `release.yml` tarball validation, `smoke-install.yml` post-publish).
+  - Identified `scripts/` directory already contains `install.sh` and `copy-runtime-assets.mjs`.
+- Implementation:
+  - Created `scripts/smoke-pack.sh`: build -> pack -> validate tarball contents -> isolated `npm install --global` -> verify binary -> `oneclaw --version` + `--help`.
+  - Added `"smoke": "bash scripts/smoke-pack.sh"` convenience script to root `package.json`.
+  - Fixed real bug discovered by smoke test: `isDirectExecution()` in `packages/cli/src/index.ts` compared raw paths without resolving symlinks, so the CLI never ran when invoked via npm global bin symlink. Added `realpathSync` to resolve symlinks before comparison.
+- Validation:
+  - `pnpm smoke` (pass; full pack -> isolated install -> `oneclaw --version` -> `0.1.0`)
+  - `pnpm typecheck` (pass)
+  - `pnpm test` (pass; 55 core + 18 cli = 73 tests)
+  - `pnpm lint` (pass; 0 errors, 3 warnings)
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1
