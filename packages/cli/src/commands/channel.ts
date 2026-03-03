@@ -87,16 +87,7 @@ export function registerChannelCommand(program: Command): void {
         const locale = globalOptions.locale;
 
         try {
-          const channel = resolveChannelName(channelName, locale);
-          if (channel !== "feishu") {
-            throw new Error(
-              text(
-                locale,
-                `Unsupported channel: ${channel}`,
-                `不支持的渠道：${channel}`,
-              ),
-            );
-          }
+          resolveChannelName(channelName, locale);
 
           if (!isInteractiveTerminal()) {
             throw new Error(
@@ -137,8 +128,8 @@ export function registerChannelCommand(program: Command): void {
         const locale = globalOptions.locale;
 
         try {
-          const channel = resolveChannelName(channelName, locale);
-          const summary = await testChannel(channel, locale, options.message);
+          resolveChannelName(channelName, locale);
+          const summary = await testChannel(locale, options.message);
           emitTestSummary(globalOptions, summary);
           if (!summary.success) {
             process.exitCode = 1;
@@ -321,20 +312,9 @@ async function collectFeishuSetupInputs(
 }
 
 async function testChannel(
-  channel: SupportedChannel,
   locale: CliLocale,
   message: string | undefined,
 ): Promise<ChannelTestSummary> {
-  if (channel !== "feishu") {
-    throw new Error(
-      text(
-        locale,
-        `Unsupported channel: ${channel}`,
-        `不支持的渠道：${channel}`,
-      ),
-    );
-  }
-
   const configManager = new ConfigManager({ locale });
   const config = await configManager.load();
   const feishu = config.channels.feishu;
@@ -647,7 +627,7 @@ function normalizeOptionalString(value: unknown): string | undefined {
 }
 
 function isInteractiveTerminal(): boolean {
-  return Boolean(input.isTTY && output.isTTY);
+  return input.isTTY && output.isTTY;
 }
 
 async function promptSecretPassword(locale: ValidationLocale): Promise<string> {
@@ -668,7 +648,7 @@ async function promptSecretPassword(locale: ValidationLocale): Promise<string> {
   });
 
   try {
-    while (true) {
+    for (;;) {
       const answer = (
         await rl.question(
           `${text(
@@ -714,7 +694,7 @@ class ChannelWizardPrompter {
   }
 
   async askRequired(label: string, defaultValue?: string): Promise<string> {
-    while (true) {
+    for (;;) {
       const suffix =
         defaultValue !== undefined && defaultValue.length > 0
           ? ` (${defaultValue})`
@@ -742,7 +722,7 @@ class ChannelWizardPrompter {
     const yesSet = new Set(["y", "yes"]);
     const noSet = new Set(["n", "no"]);
 
-    while (true) {
+    for (;;) {
       const answer = (await this.rl.question(`${label} `)).trim().toLowerCase();
       if (answer.length === 0) {
         return defaultValue;

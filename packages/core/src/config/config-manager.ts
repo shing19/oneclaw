@@ -246,7 +246,7 @@ function normalizeConfig(config: OneclawConfig): OneclawConfig {
 
 function stripUndefinedFields<T>(value: T): T {
   if (Array.isArray(value)) {
-    return value.map((item) => stripUndefinedFields(item)) as T;
+    return (value as unknown[]).map((item: unknown) => stripUndefinedFields(item)) as T;
   }
 
   if (value !== null && typeof value === "object") {

@@ -217,7 +217,7 @@ async function validateConfigFile(
   let parsed: unknown;
   try {
     parsed = JSON.parse(rawContent) as unknown;
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     return {
       valid: false,
       configPath,
@@ -462,7 +462,7 @@ function applyPathValue(
         );
       }
 
-      let nextValue = cursor[segment];
+      let nextValue: unknown = cursor[segment];
       if (nextValue === undefined || nextValue === null) {
         const container = typeof nextSegment === "number" ? [] : {};
         cursor[segment] = container;

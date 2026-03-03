@@ -32,7 +32,7 @@ export interface ConfigMigrationResult {
   appliedMigrations: string[];
 }
 
-export interface MigrateConfigOptions extends ConfigMigratorOptions {}
+export type MigrateConfigOptions = ConfigMigratorOptions;
 
 export class ConfigMigratorError extends Error {
   readonly code: ConfigMigratorErrorCode;
@@ -226,7 +226,7 @@ function buildMigrationRegistry(
     map.set(fromVersion, {
       fromVersion,
       toVersion,
-      migrate: migration.migrate,
+      migrate: (config) => migration.migrate(config),
     });
   }
 

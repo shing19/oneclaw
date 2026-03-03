@@ -274,7 +274,7 @@ function buildProviderMap(
   }
 
   if (Array.isArray(providers)) {
-    for (const provider of providers) {
+    for (const provider of providers as readonly ModelProvider[]) {
       const providerId = normalizeProviderId(provider.id);
       if (providerId === null) {
         continue;
@@ -284,7 +284,8 @@ function buildProviderMap(
     return providerMap;
   }
 
-  for (const provider of Object.values(providers)) {
+  const record = providers as Record<string, ModelProvider>;
+  for (const provider of Object.values(record)) {
     const providerId = normalizeProviderId(provider.id);
     if (providerId === null) {
       continue;
@@ -327,10 +328,7 @@ function toUnavailableHealth(checkedAt: Date, error: unknown): ProviderHealth {
 }
 
 function normalizeHealthStatus(status: ProviderHealth["status"]): ProviderHealth["status"] {
-  if (status === "ok" || status === "degraded" || status === "unreachable") {
-    return status;
-  }
-  return "degraded";
+  return status;
 }
 
 function normalizeLatencyMs(latencyMs: number): number {

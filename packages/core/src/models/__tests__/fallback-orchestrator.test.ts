@@ -233,6 +233,7 @@ function streamFromChunks(chunks: readonly ChatChunk[]): AsyncIterable<ChatChunk
 
 function streamThatThrows(error: unknown): AsyncIterable<ChatChunk> {
   return (async function* (): AsyncIterable<ChatChunk> {
+    yield* []; // ensure valid generator before throwing
     throw error;
   })();
 }

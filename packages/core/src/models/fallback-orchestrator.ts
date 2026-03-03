@@ -55,7 +55,7 @@ export class FallbackOrchestratorError extends Error {
     code: FallbackOrchestratorErrorCode,
     locale: FallbackOrchestratorLocale,
     attempts: readonly FallbackAttempt[] = [],
-    cause: unknown = undefined,
+    cause?: unknown,
   ) {
     super(messageForErrorCode(code, locale));
     this.name = "FallbackOrchestratorError";
@@ -121,7 +121,10 @@ export class DefaultFallbackOrchestrator implements FallbackOrchestrator {
     }
 
     for (let index = 0; index < executionOrder.length; index += 1) {
-      const providerId = executionOrder[index]!;
+      const providerId = executionOrder[index];
+      if (providerId === undefined) {
+        continue;
+      }
       const provider = this.resolveProvider(providerId);
       if (provider === undefined) {
         attempts.push({
@@ -136,8 +139,9 @@ export class DefaultFallbackOrchestrator implements FallbackOrchestrator {
       const providerRequest = this.toProviderRequest(provider, request);
       let timeoutRetryCount = 0;
       let hasYieldedChunks = false;
+      const maxAttempts = this.timeoutRetryLimit + 1;
 
-      while (true) {
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         try {
           for await (const chunk of provider.chat(providerRequest)) {
             hasYieldedChunks = true;
@@ -580,7 +584,7 @@ function buildProviderMap(
   }
 
   if (Array.isArray(providers)) {
-    for (const provider of providers) {
+    for (const provider of providers as readonly ModelProvider[]) {
       const providerId = normalizeProviderId(provider.id);
       if (providerId !== null) {
         providerMap.set(providerId, provider);
@@ -589,7 +593,8 @@ function buildProviderMap(
     return providerMap;
   }
 
-  for (const provider of Object.values(providers)) {
+  const record = providers as Record<string, ModelProvider>;
+  for (const provider of Object.values(record)) {
     const providerId = normalizeProviderId(provider.id);
     if (providerId !== null) {
       providerMap.set(providerId, provider);
@@ -640,7 +645,10 @@ function resolveModelForProvider(provider: ModelProvider, rawModelRef: string): 
   }
 
   if (providerModels.length > 0) {
-    return providerModels[0]!;
+    const firstModel = providerModels[0];
+    if (firstModel !== undefined) {
+      return firstModel;
+    }
   }
 
   if (modelSelection.modelId !== null) {

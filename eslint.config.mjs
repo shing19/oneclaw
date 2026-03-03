@@ -51,6 +51,37 @@ export default tseslint.config(
           ignoreArrowShorthand: true,
         },
       ],
+      "@typescript-eslint/restrict-template-expressions": [
+        "error",
+        {
+          allowNumber: true,
+          allowBoolean: true,
+        },
+      ],
+      "@typescript-eslint/dot-notation": "off",
+      "@typescript-eslint/prefer-regexp-exec": "off",
+      "@typescript-eslint/no-redundant-type-constituents": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
+  {
+    files: ["**/*.test.ts", "**/*.integration.test.ts"],
+    rules: {
+      "@typescript-eslint/require-await": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/unbound-method": "off",
     },
   },
   eslintConfigPrettier,

@@ -118,7 +118,7 @@ describe("cli command parsing", () => {
 
 function mustFindCommand(program: Command, name: string): Command {
   const found = program.commands.find((command) => command.name() === name);
-  assert.ok(found, `Expected command \"${name}\" to be registered.`);
+  assert.ok(found, `Expected command "${name}" to be registered.`);
   return found;
 }
 

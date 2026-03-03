@@ -550,7 +550,7 @@ class EncryptedFileSecretDriver implements SecretStoreDriver {
       if (!(key in current)) {
         return;
       }
-      delete current[key];
+      Reflect.deleteProperty(current, key);
       await this.writeSecrets(current);
     });
   }
@@ -808,24 +808,24 @@ interface CreateDriverOptions {
   options: SecretStoreOptions;
 }
 
-async function createDriver(options: CreateDriverOptions): Promise<SecretStoreDriver> {
+function createDriver(options: CreateDriverOptions): Promise<SecretStoreDriver> {
   if (options.backendKind === "macos-keychain") {
-    return new MacOsKeychainSecretDriver({
+    return Promise.resolve(new MacOsKeychainSecretDriver({
       locale: options.locale,
       runner: options.runner,
       serviceName: options.serviceName,
-    });
+    }));
   }
 
   if (options.backendKind === "linux-secret-service") {
-    return new LinuxSecretServiceDriver({
+    return Promise.resolve(new LinuxSecretServiceDriver({
       locale: options.locale,
       runner: options.runner,
       serviceName: options.serviceName,
-    });
+    }));
   }
 
-  return new EncryptedFileSecretDriver({
+  return Promise.resolve(new EncryptedFileSecretDriver({
     locale: options.locale,
     filePath: options.paths.secretsFilePath,
     password: options.options.password,
@@ -836,7 +836,7 @@ async function createDriver(options: CreateDriverOptions): Promise<SecretStoreDr
     platform: options.platform,
     env: options.env,
     runner: options.runner,
-  });
+  }));
 }
 
 async function probeCommand(
@@ -887,18 +887,14 @@ async function runCommand(
     let stdout = "";
     let stderr = "";
 
-    if (child.stdout !== null) {
-      child.stdout.setEncoding("utf8");
-      child.stdout.on("data", (chunk: string): void => {
-        stdout += chunk;
-      });
-    }
-    if (child.stderr !== null) {
-      child.stderr.setEncoding("utf8");
-      child.stderr.on("data", (chunk: string): void => {
-        stderr += chunk;
-      });
-    }
+    child.stdout.setEncoding("utf8");
+    child.stdout.on("data", (chunk: string): void => {
+      stdout += chunk;
+    });
+    child.stderr.setEncoding("utf8");
+    child.stderr.on("data", (chunk: string): void => {
+      stderr += chunk;
+    });
     child.on("error", (error: Error): void => {
       reject(error);
     });
@@ -910,12 +906,10 @@ async function runCommand(
       });
     });
 
-    if (isNonEmptyString(options.stdin) && child.stdin !== null) {
+    if (isNonEmptyString(options.stdin)) {
       child.stdin.write(options.stdin);
     }
-    if (child.stdin !== null) {
-      child.stdin.end();
-    }
+    child.stdin.end();
   });
 }
 

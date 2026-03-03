@@ -371,7 +371,7 @@ function normalizeProviderPoliciesInput(
   }
 
   if (Array.isArray(input)) {
-    return [...input];
+    return [...(input as readonly ProviderQuotaPolicy[])];
   }
 
   return Object.entries(input).map(

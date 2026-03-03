@@ -198,8 +198,8 @@ function checkStrictKeys(
         ctx,
         [...path, key],
         "unrecognized_key",
-        `Unexpected field \"${key}\".`,
-        `存在未定义字段 \"${key}\"。`,
+        `Unexpected field "${key}".`,
+        `存在未定义字段 "${key}"。`,
         "Remove the field or add it to the schema.",
         "删除该字段或在 Schema 中声明它。",
       );
@@ -278,7 +278,7 @@ function expectString(
   if (options?.uri === true) {
     try {
       // URL constructor is sufficient for RFC-3986 compliant absolute URIs.
-      // eslint-disable-next-line no-new
+       
       new URL(value);
     } catch {
       addIssue(
@@ -457,8 +457,8 @@ function expectEnumValue<T extends string>(
       ctx,
       path,
       "invalid_enum_value",
-      `Invalid value \"${value}\".`,
-      `非法枚举值 \"${value}\"。`,
+      `Invalid value "${value}".`,
+      `非法枚举值 "${value}"。`,
       `Use one of: ${values.join(", ")}.`,
       `请使用以下值之一：${values.join("、")}。`,
     );
@@ -479,8 +479,8 @@ function expectRequiredField(
       ctx,
       [...path, key],
       "required",
-      `Missing required field \"${key}\".`,
-      `缺少必填字段 \"${key}\"。`,
+      `Missing required field "${key}".`,
+      `缺少必填字段 "${key}"。`,
       "Add the missing field.",
       "请补充缺失字段。",
     );
@@ -735,8 +735,8 @@ function parseModelConfig(
           ctx,
           [...path, "perModelSettings", key],
           "invalid_key",
-          `Invalid model key \"${key}\".`,
-          `模型键 \"${key}\" 格式不合法。`,
+          `Invalid model key "${key}".`,
+          `模型键 "${key}" 格式不合法。`,
           "Use provider/model format.",
           "请使用 provider/model 格式。",
         );
@@ -1549,8 +1549,8 @@ function validateAgainstJsonSchemaNode(
         locale,
         path,
         "invalid_ref",
-        `Unable to resolve schema reference \"${schema.$ref}\".`,
-        `无法解析 Schema 引用 \"${schema.$ref}\"。`,
+        `Unable to resolve schema reference "${schema.$ref}".`,
+        `无法解析 Schema 引用 "${schema.$ref}"。`,
         "Fix the schema reference path.",
         "请修复 Schema 引用路径。",
       );
@@ -1590,8 +1590,8 @@ function validateAgainstJsonSchemaNode(
         locale,
         path,
         "type_mismatch",
-        `Expected type \"${schema.type}\".`,
-        `类型应为 \"${schema.type}\"。`,
+        `Expected type "${schema.type}".`,
+        `类型应为 "${schema.type}"。`,
         "Fix the value type to match schema.",
         "请按 Schema 要求修正值类型。",
       );
@@ -1628,7 +1628,7 @@ function validateAgainstJsonSchemaNode(
 
     if (schema.format === "uri") {
       try {
-        // eslint-disable-next-line no-new
+         
         new URL(value);
       } catch {
         addJsonSchemaIssue(
@@ -1716,8 +1716,8 @@ function validateAgainstJsonSchemaNode(
             locale,
             [...path, key],
             "required",
-            `Missing required field \"${key}\".`,
-            `缺少必填字段 \"${key}\"。`,
+            `Missing required field "${key}".`,
+            `缺少必填字段 "${key}"。`,
             "Add the missing field.",
             "请补充缺失字段。",
           );
@@ -1766,8 +1766,8 @@ function validateAgainstJsonSchemaNode(
           locale,
           [...path, key],
           "additional_properties",
-          `Field \"${key}\" is not allowed.`,
-          `字段 \"${key}\" 不被允许。`,
+          `Field "${key}" is not allowed.`,
+          `字段 "${key}" 不被允许。`,
           "Remove this field or update schema.",
           "请删除该字段或更新 Schema。",
         );

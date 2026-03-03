@@ -56,7 +56,7 @@ describe("model management integration", () => {
               rotated: result.rotated,
               currentKey: result.currentKey,
             });
-            throw { status: 429, message: "rate limit" };
+            throw new Error(JSON.stringify({ status: 429, message: "rate limit" }));
           }
 
           yield {

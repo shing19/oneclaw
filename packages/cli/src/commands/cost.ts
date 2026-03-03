@@ -382,7 +382,7 @@ async function loadUsageEvents(logFilePath: string): Promise<readonly UsageEvent
   for (const line of lines) {
     const timestamp = resolveTimestampFromLogLine(line) ?? fallbackTimestamp;
     const parsed = parseOpenClawLogLine(line, "stdout", { timestamp });
-    if (parsed === null || parsed.costEvent === null) {
+    if (parsed?.costEvent == null) {
       continue;
     }
 

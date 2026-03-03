@@ -810,7 +810,7 @@ function hasErrorCode(error: unknown, code: string): boolean {
 }
 
 function isInteractiveTerminal(): boolean {
-  return Boolean(input.isTTY && output.isTTY);
+  return input.isTTY && output.isTTY;
 }
 
 async function promptSecretPassword(locale: ValidationLocale): Promise<string> {
@@ -831,7 +831,7 @@ async function promptSecretPassword(locale: ValidationLocale): Promise<string> {
   });
 
   try {
-    while (true) {
+    for (;;) {
       const answer = (
         await rl.question(
           `${text(

@@ -85,7 +85,7 @@ export class BackupManager {
   }
 
   async listBackups(): Promise<ConfigBackup[]> {
-    let entries: Dirent<string>[];
+    let entries: Dirent[];
     try {
       entries = await readdir(this.paths.backupsDir, {
         withFileTypes: true,

@@ -205,14 +205,14 @@ export class OpenClawAdapter extends AgentKernelBase {
     await this.cleanupRuntimeDirectory();
   }
 
-  protected override async onHealthCheck(): Promise<HealthReport> {
+  protected override onHealthCheck(): Promise<HealthReport> {
     const now = new Date();
     const status = this.getStatus();
     const config = this.getLastConfig();
     const providers = config?.modelConfig.providers ?? [];
     const running = status.state === "running" && this.process !== null;
 
-    return {
+    return Promise.resolve({
       endpoints: providers.map((provider) => ({
         provider: provider.id,
         url: provider.baseUrl,
@@ -226,7 +226,7 @@ export class OpenClawAdapter extends AgentKernelBase {
       },
       activeConnections: running ? 1 : 0,
       timestamp: now,
-    };
+    });
   }
 
   private async translateConfigOrThrow(

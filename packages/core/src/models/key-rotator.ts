@@ -89,7 +89,11 @@ export class KeyRotator {
   }
 
   getCurrentKey(): string {
-    return this.keys[this.currentIndex]!;
+    const key = this.keys[this.currentIndex];
+    if (key === undefined) {
+      throw new Error(`Key index out of bounds: ${this.currentIndex}`);
+    }
+    return key;
   }
 
   listKeys(): readonly string[] {
@@ -193,8 +197,8 @@ export class KeyRotator {
 
     for (let offset = 1; offset <= keyCount; offset += 1) {
       const candidateIndex = (startIndex + offset) % keyCount;
-      const key = this.keys[candidateIndex]!;
-      if (!this.isRateLimitedAt(key, atMs)) {
+      const key = this.keys[candidateIndex];
+      if (key !== undefined && !this.isRateLimitedAt(key, atMs)) {
         return candidateIndex;
       }
     }

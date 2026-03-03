@@ -135,7 +135,7 @@ describe("cli integration lifecycle", () => {
       ]);
       assert.equal(startResult.exitCode, 0);
 
-      const startSummary = parseJsonFromOutput<StartSummary>(startResult.output);
+      const startSummary = parseJsonFromOutput(startResult.output) as StartSummary;
       assert.ok(startSummary.pid > 0);
       assert.equal(startSummary.model, "deepseek/deepseek-chat");
       daemonPid = startSummary.pid;
@@ -143,7 +143,7 @@ describe("cli integration lifecycle", () => {
       const statusResult = await runCliCommand(["--locale", "en", "--json", "status"]);
       assert.equal(statusResult.exitCode, 0);
 
-      const statusSummary = parseJsonFromOutput<StatusSummary>(statusResult.output);
+      const statusSummary = parseJsonFromOutput(statusResult.output) as StatusSummary;
       assert.equal(statusSummary.pid, daemonPid);
       assert.equal(statusSummary.mode, "daemon");
       assert.equal(statusSummary.currentModel, "deepseek/deepseek-chat");
@@ -156,7 +156,7 @@ describe("cli integration lifecycle", () => {
       const stopResult = await runCliCommand(["--locale", "en", "--json", "stop"]);
       assert.equal(stopResult.exitCode, 0);
 
-      const stopSummary = parseJsonFromOutput<StopSummary>(stopResult.output);
+      const stopSummary = parseJsonFromOutput(stopResult.output) as StopSummary;
       assert.equal(stopSummary.pid, daemonPid);
       assert.equal(stopSummary.stopped, true);
 
@@ -223,13 +223,13 @@ async function runCliCommand(args: readonly string[]): Promise<CliCommandResult>
   };
 }
 
-function parseJsonFromOutput<T>(output: string): T {
+function parseJsonFromOutput(output: string): unknown {
   const start = output.indexOf("{");
   const end = output.lastIndexOf("}");
   assert.ok(start >= 0 && end >= start, `Expected JSON output, received: ${output}`);
 
   const raw = output.slice(start, end + 1);
-  return JSON.parse(raw) as T;
+  return JSON.parse(raw) as unknown;
 }
 
 function restoreTtyDescriptor(

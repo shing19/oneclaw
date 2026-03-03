@@ -131,8 +131,7 @@ export function registerInitCommand(program: Command): void {
           }
         } else if (
           selection.shouldTestConnection &&
-          connectionResult !== null &&
-          connectionResult.success
+          connectionResult?.success
         ) {
           emitInfo(globalOptions, connectionResult.message);
         }
@@ -515,7 +514,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isInteractiveTerminal(): boolean {
-  return Boolean(input.isTTY && output.isTTY);
+  return input.isTTY && output.isTTY;
 }
 
 function toErrorMessage(error: unknown, locale: CliLocale): string {
@@ -548,7 +547,7 @@ class WizardPrompter {
   }
 
   async askRequired(label: string): Promise<string> {
-    while (true) {
+    for (;;) {
       const answer = (await this.rl.question(`${label} `)).trim();
       if (answer.length > 0) {
         return answer;
@@ -568,7 +567,7 @@ class WizardPrompter {
     const yesSet = new Set(["y", "yes"]);
     const noSet = new Set(["n", "no"]);
 
-    while (true) {
+    for (;;) {
       const answer = (
         await this.rl.question(`${label} `)
       ).trim().toLowerCase();
@@ -614,7 +613,7 @@ class WizardPrompter {
       output.write(`  ${String(index + 1)}. ${option.label}\n`);
     });
 
-    while (true) {
+    for (;;) {
       const answer = (await this.rl.question("> ")).trim();
       const parsed = Number.parseInt(answer, 10);
       const selectedIndex = parsed - 1;

@@ -16,16 +16,16 @@ export function formatJsonError(message: string, options: JsonFormatterOptions =
 }
 
 function serializeJson(value: unknown, indent: number | null | undefined): string {
-  const normalizedIndent = indent === undefined || indent === null ? 2 : indent;
+  const normalizedIndent = indent ?? 2;
   try {
     const serialized = JSON.stringify(value, null, normalizedIndent);
-    return serialized ?? "null";
+    return serialized;
   } catch {
     const fallback = {
       ok: false,
       error: "Failed to serialize JSON output.",
     };
     const serialized = JSON.stringify(fallback, null, normalizedIndent);
-    return serialized ?? "{\"ok\":false,\"error\":\"Failed to serialize JSON output.\"}";
+    return serialized;
   }
 }

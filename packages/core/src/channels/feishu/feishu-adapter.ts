@@ -520,11 +520,9 @@ export class FeishuAdapter implements ChannelAdapter {
     let verificationToken = normalizeNonEmptyString(
       readOptionalString(nested, "verificationToken"),
     );
-    if (verificationToken === undefined) {
-      verificationToken = normalizeNonEmptyString(
-        readOptionalString(config, "verificationToken"),
-      );
-    }
+    verificationToken ??= normalizeNonEmptyString(
+      readOptionalString(config, "verificationToken"),
+    );
 
     const verificationTokenRef =
       normalizeNonEmptyString(readOptionalString(nested, "verificationTokenRef")) ??
@@ -823,7 +821,7 @@ function baseMessagePayload(message: OutboundMessage): Record<string, unknown> {
 }
 
 function extractCardPayload(message: OutboundMessage): Record<string, unknown> {
-  const metadataCard = asRecord(message.metadata)?.card;
+  const metadataCard = asRecord(message.metadata).card;
   if (isRecord(metadataCard)) {
     return metadataCard;
   }

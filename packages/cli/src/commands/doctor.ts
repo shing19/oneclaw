@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { constants as fsConstants } from "node:fs";
-import { access, mkdir, readFile, stat } from "node:fs/promises";
+import { access, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { stdout as output } from "node:process";
 

@@ -891,7 +891,7 @@ function expectString(
   if (options?.uri === true) {
     try {
       // URL constructor is sufficient for RFC-3986 compatible absolute URIs.
-      // eslint-disable-next-line no-new
+       
       new URL(value);
     } catch {
       addIssue(
