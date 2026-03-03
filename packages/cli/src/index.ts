@@ -6,6 +6,7 @@ import { Command, Option } from "commander";
 
 import { registerInitCommand } from "./commands/init.js";
 import { registerStartCommand } from "./commands/start.js";
+import { registerStopCommand } from "./commands/stop.js";
 
 export type CliLocale = "zh-CN" | "en";
 
@@ -45,6 +46,7 @@ export function createCliProgram(): Command {
 
   registerInitCommand(program);
   registerStartCommand(program);
+  registerStopCommand(program);
 
   return program;
 }

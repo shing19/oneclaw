@@ -1192,3 +1192,34 @@
   - Log path: `.ralph-status/iteration-39-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 40 - M1.4 Task 4
+
+- Task ID and description: `M1.4-4` Implement `packages/cli/src/commands/stop.ts` — stop running Agent.
+- Key decisions made:
+  - Searched the CLI codebase before implementation and confirmed there was no existing `packages/cli/src/commands/stop.ts` command module.
+  - Implemented `oneclaw stop` with runtime PID/state detection using the same runtime files produced by `start` (`agent-daemon.pid`, `agent-daemon-state.json`).
+  - Added graceful shutdown behavior with `SIGTERM` wait and optional forced termination via `--force` (`SIGKILL`) when the process does not exit in time.
+  - Added stale-runtime handling so missing/dead PID scenarios are treated as idempotent stop operations and runtime state is normalized to `stopped`.
+  - Added bilingual (`zh-CN`/`en`) output with global `--json` / `--quiet` compatibility and wired registration in CLI entry.
+- Files changed:
+  - `packages/cli/src/commands/stop.ts`
+  - `packages/cli/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-40-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli stop command`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-4`
+  - Command: `git add packages/cli/src/commands/stop.ts packages/cli/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement cli stop command"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-40-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
