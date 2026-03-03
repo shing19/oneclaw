@@ -126,7 +126,7 @@ If blocked, document in `progress.md` and move to the next task.
 > Module: `docs/modules/communication.md`
 
 - [x] Implement `packages/core/src/channels/channel-interface.ts` — ChannelAdapter interface
-- [ ] Implement `packages/core/src/channels/feishu/feishu-adapter.ts` — Feishu bot (send/receive messages via webhook + event subscription)
+- [x] Implement `packages/core/src/channels/feishu/feishu-adapter.ts` — Feishu bot (send/receive messages via webhook + event subscription)
 - [ ] Implement `packages/core/src/channels/feishu/feishu-auth.ts` — app_id/app_secret token management
 - [ ] Implement `packages/cli/src/commands/channel.ts` — setup wizard + test message
 - [ ] Write unit tests for feishu-adapter (mock HTTP)

@@ -1516,3 +1516,35 @@
   - Log path: `.ralph-status/iteration-49-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 50 - M1.5 Task 2
+
+- Task ID and description: `M1.5-2` Implement `packages/core/src/channels/feishu/feishu-adapter.ts` — Feishu bot (send/receive messages via webhook + event subscription).
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing `packages/core/src/channels/feishu/feishu-adapter.ts` implementation.
+  - Implemented `FeishuAdapter` to fulfill the `ChannelAdapter` contract with `connect`, `disconnect`, `sendMessage`, `onMessage`, `testConnection`, and `getStatus`.
+  - Added webhook send support with message format mapping (`plain`/`markdown`/`card`) and optional webhook-signing token support.
+  - Added event subscription receive support via an internal HTTP server (`eventSubscription.host/port/path`) with URL verification challenge handling and inbound message parsing for Feishu callback payloads.
+  - Added configurable request verification (`verificationToken` fallback and optional custom verifier callback), secret-ref resolution hooks, localized (`zh-CN`/`en`) error reporting, and adapter factory export wiring in core index.
+- Files changed:
+  - `packages/core/src/channels/feishu/feishu-adapter.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-50-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement feishu channel adapter`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.5-2`
+  - Command: `git add packages/core/src/channels/feishu/feishu-adapter.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement feishu channel adapter"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-50-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+

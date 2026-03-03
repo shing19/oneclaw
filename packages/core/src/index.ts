@@ -17,3 +17,4 @@ export * from "./adapter/config-translator.js";
 export * from "./adapter/log-parser.js";
 export * from "./adapter/openclaw-adapter.js";
 export * from "./channels/channel-interface.js";
+export * from "./channels/feishu/feishu-adapter.js";
