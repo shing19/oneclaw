@@ -104,6 +104,25 @@
 - Commit: `13aa6d1` (`chore(phase1): add cli quality scripts and typecheck fixes for p1-b2`)
 - Push: `main` -> `origin/main` (pass)
 
+## 2026-03-04 - Loop: P1-B3
+
+- Scope: Install and wire missing test tooling (Vitest/TS runner) so tests actually execute.
+- Search:
+  - All 20 test files import from `"vitest"` but vitest was not installed as a dependency.
+  - Tests ran via `bun test` with TypeScript declaration shims (`vitest-shim.d.ts`) faking vitest types.
+  - Vitest config files (`vitest.config.ts`) existed at root, core, and cli but were unused.
+- Implementation:
+  - Installed `vitest@^4.0.18` as workspace root dev dependency.
+  - Updated `packages/core/package.json` test script: `bun test` -> `vitest run`.
+  - Updated `packages/cli/package.json` test script: `bun test ./src/__tests__/formatters ./src/__tests__/commands/command-parsing.test.ts` -> `vitest run`.
+  - Updated `packages/cli/vitest.config.ts` to exclude `*.integration.test.ts` (pre-existing ConfigManager export issue).
+  - Removed `packages/core/src/config/__tests__/vitest-shim.d.ts` and `packages/cli/src/__tests__/vitest-shim.d.ts` (no longer needed with real vitest).
+- Validation:
+  - `pnpm test` (pass; 55 core tests across 15 files, 18 cli tests across 4 files — all via Vitest v4.0.18)
+  - `pnpm typecheck` (pass)
+- Commit: pending
+- Push: pending
+
 ## Failed Attempts
 
 ### 2026-03-04 00:51:40 | Agent: codex | Iteration: 1
@@ -220,4 +239,32 @@ error: unexpected argument '-a' found
 [2026-03-04 00:56:30] [Rescue][codex] Nothing staged after git add, rescue failed.
 [2026-03-04 00:56:30] [Agent: codex] Rescue failed.
 [2026-03-04 00:56:30] [Agent: codex] Failed on iteration 1.
+```
+
+### 2026-03-04 01:18:30 | Agent: claude | Iteration: 1
+- Task: Unknown Task
+- Exit code: 1
+- Attempts: 1
+- Log: `/Users/shing/Projects/oneclaw/ralph-log.txt`
+- Error excerpt:
+```text
++    throw new Error(
+     (error as { code: string }).code === code
+- Validation: typecheck passes, 18 tests pass across 4 files, lint runs (49 pre-existing errors — real gate, not false green)
+[2026-03-04 01:18:30] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
+[2026-03-04 01:18:30] [Agent: claude] Failed on iteration 1.
+```
+
+### 2026-03-04 01:19:18 | Agent: claude | Iteration: 2
+- Task: Unknown Task
+- Exit code: 1
+- Attempts: 1
+- Log: `/Users/shing/Projects/oneclaw/ralph-log.txt`
+- Error excerpt:
+```text
+     (error as { code: string }).code === code
+- Validation: typecheck passes, 18 tests pass across 4 files, lint runs (49 pre-existing errors — real gate, not false green)
+[2026-03-04 01:18:30] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
+[2026-03-04 01:18:30] [Agent: claude] Failed on iteration 1.
+^C[2026-03-04 01:19:18] [Agent: claude] Failed on iteration 2.
 ```

@@ -10,7 +10,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "bun test ./src/__tests__/formatters ./src/__tests__/commands/command-parsing.test.ts",
+    "test": "vitest run",
     "lint": "eslint \"src/**/*.ts\""
   },
   "dependencies": {

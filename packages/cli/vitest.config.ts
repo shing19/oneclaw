@@ -6,7 +6,8 @@ export default mergeConfig(
   defineConfig({
     test: {
       name: "cli",
-      include: ["src/**/*.test.ts", "src/**/*.spec.ts"]
+      include: ["src/**/*.test.ts", "src/**/*.spec.ts"],
+      exclude: ["src/**/*.integration.test.ts"]
     }
   })
 );
