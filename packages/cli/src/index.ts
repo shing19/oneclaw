@@ -11,6 +11,7 @@ import { registerStopCommand } from "./commands/stop.js";
 import { registerConfigCommand } from "./commands/config.js";
 import { registerModelCommand } from "./commands/model.js";
 import { registerCostCommand } from "./commands/cost.js";
+import { registerDoctorCommand } from "./commands/doctor.js";
 
 export type CliLocale = "zh-CN" | "en";
 
@@ -55,6 +56,7 @@ export function createCliProgram(): Command {
   registerConfigCommand(program);
   registerModelCommand(program);
   registerCostCommand(program);
+  registerDoctorCommand(program);
 
   return program;
 }

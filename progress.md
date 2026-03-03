@@ -1353,3 +1353,34 @@
   - Log path: `.ralph-status/iteration-44-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 45 - M1.4 Task 9
+
+- Task ID and description: `M1.4-9` Implement `packages/cli/src/commands/doctor.ts` — comprehensive health check + fix suggestions.
+- Key decisions made:
+  - Searched the CLI codebase before implementation and confirmed there was no existing `packages/cli/src/commands/doctor.ts`.
+  - Implemented a dedicated `doctor` command with bilingual (`zh-CN`/`en`) output and global `--json` / `--quiet` compatibility, then registered it in the CLI entrypoint.
+  - Added a multi-check diagnostics pipeline that covers: filesystem accessibility, config schema validity, OpenClaw binary availability, runtime PID/state consistency, SecretStore readiness (including required credential refs), and provider connectivity probing.
+  - Added per-check fix suggestions and structured details so both human-readable and machine-readable (`--json`) doctor reports can drive remediation.
+  - Added optional execution controls for diagnostics ergonomics: `--skip-network` (skip provider probes) and `--timeout-ms` (probe timeout bounds validation).
+- Files changed:
+  - `packages/cli/src/commands/doctor.ts`
+  - `packages/cli/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-45-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli doctor command suite`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-9`
+  - Command: `git add packages/cli/src/commands/doctor.ts packages/cli/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement cli doctor command suite"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-45-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

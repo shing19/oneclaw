@@ -116,7 +116,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/cli/src/commands/config.ts` — show/set/validate/backup/rollback subcommands
 - [x] Implement `packages/cli/src/commands/model.ts` — list/test/priority subcommands
 - [x] Implement `packages/cli/src/commands/cost.ts` — today's summary, history, export
-- [ ] Implement `packages/cli/src/commands/doctor.ts` — comprehensive health check + fix suggestions
+- [x] Implement `packages/cli/src/commands/doctor.ts` — comprehensive health check + fix suggestions
 - [ ] Implement `packages/cli/src/formatters/` — table, JSON, status formatters
 - [ ] Write unit tests for command parsing and formatters
 - [ ] Write integration test: `oneclaw init` → `oneclaw start` → `oneclaw status` → `oneclaw stop`
