@@ -1254,3 +1254,35 @@
   - Log path: `.ralph-status/iteration-40-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 42 - M1.4 Task 6
+
+- Task ID and description: `M1.4-6` Implement `packages/cli/src/commands/config.ts` — show/set/validate/backup/rollback subcommands.
+- Key decisions made:
+  - Searched the CLI codebase before implementation and confirmed `packages/cli/src/commands/config.ts` did not exist.
+  - Implemented a dedicated `config` command group with all required subcommands: `show`, `set <key> <value>`, `validate`, `backup`, and `rollback [version]`.
+  - Reused core config modules (`ConfigManager`, `BackupManager`, `validateConfig`) so command behavior follows existing config/backup/validation contracts instead of duplicating logic.
+  - Added dot/bracket path assignment for `config set` (for example `models.providers[0].enabled`) with typed value parsing and post-write schema validation via `ConfigManager.save()`.
+  - Implemented `rollback` target resolution with three selectors: latest (default), explicit backup filename/timestamp, and 1-based history index.
+  - Added bilingual (`zh-CN`/`en`) user output and global `--json` / `--quiet` compatibility for every config subcommand.
+- Files changed:
+  - `packages/cli/src/commands/config.ts`
+  - `packages/cli/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-42-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: implement cli config command suite`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.4-6`
+  - Command: `git add packages/cli/src/commands/config.ts packages/cli/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: implement cli config command suite"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-42-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.

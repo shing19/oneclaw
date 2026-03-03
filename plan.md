@@ -113,7 +113,7 @@ If blocked, document in `progress.md` and move to the next task.
 - [x] Implement `packages/cli/src/commands/start.ts` — start Agent (foreground or daemon mode)
 - [x] Implement `packages/cli/src/commands/stop.ts` — stop running Agent
 - [x] Implement `packages/cli/src/commands/status.ts` — display Agent status, health, current model
-- [ ] Implement `packages/cli/src/commands/config.ts` — show/set/validate/backup/rollback subcommands
+- [x] Implement `packages/cli/src/commands/config.ts` — show/set/validate/backup/rollback subcommands
 - [ ] Implement `packages/cli/src/commands/model.ts` — list/test/priority subcommands
 - [ ] Implement `packages/cli/src/commands/cost.ts` — today's summary, history, export
 - [ ] Implement `packages/cli/src/commands/doctor.ts` — comprehensive health check + fix suggestions
