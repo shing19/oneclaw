@@ -1486,3 +1486,33 @@
   - Log path: `.ralph-status/iteration-48-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+## Iteration 49 - M1.5 Task 1
+
+- Task ID and description: `M1.5-1` Implement `packages/core/src/channels/channel-interface.ts` — ChannelAdapter interface.
+- Key decisions made:
+  - Searched the codebase before implementation and confirmed there was no existing `packages/core/src/channels/channel-interface.ts` or reusable channel adapter contract type.
+  - Implemented a dedicated channels contract module at `packages/core/src/channels/channel-interface.ts` with the required adapter surface from `docs/modules/communication.md`: `connect`, `disconnect`, `sendMessage`, `onMessage`, `testConnection`, `getStatus`.
+  - Added strongly typed message primitives (`InboundMessage`, `OutboundMessage`, `Attachment`), connection/testing payloads (`SendResult`, `TestResult`), and channel error types (`ChannelErrorCode`, `ChannelErrorInfo`) to keep upcoming Feishu integration modules contract-first.
+  - Reused shared `Disposable` typing from core model contract types and exported the new channel interfaces via `packages/core/src/index.ts`.
+- Files changed:
+  - `packages/core/src/channels/channel-interface.ts`
+  - `packages/core/src/index.ts`
+  - `plan.md`
+  - `progress.md`
+  - `.ralph-status/iteration-49-git-failure.log`
+- Validation:
+  - `pnpm typecheck && pnpm test && pnpm lint` passed.
+- Commit:
+  - Attempted `feat: add channel adapter interface contract`, but sandbox prevented git index writes.
+- Failure record:
+  - Task: `M1.5-1`
+  - Command: `git add packages/core/src/channels/channel-interface.ts packages/core/src/index.ts plan.md progress.md`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git commit -m "feat: add channel adapter interface contract"`
+  - Error excerpt: `fatal: Unable to create '/Users/shing/Projects/oneclaw/.git/index.lock': Operation not permitted`
+  - Command: `git push`
+  - Error excerpt: `ssh: connect to host github.com port 22: Operation not permitted`
+  - Log path: `.ralph-status/iteration-49-git-failure.log`
+- Blockers or notes for next iteration:
+  - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
