@@ -1,3 +1,2 @@
-// Custom React hooks barrel export
-// Hooks will be added as they are implemented.
-export {};
+export { useTheme } from "./use-theme";
+export type { ThemeContext } from "./use-theme";

@@ -50,6 +50,31 @@
 
 ---
 
+## Iteration 3 — P2-A3: Add design tokens and base layout shell (icon rail + sidebar + content panel)
+
+- **Date**: 2026-03-04
+- **Scope**: Expand design tokens and implement the three-panel layout shell (IconRail + Sidebar + ContentPanel)
+- **Implementation**:
+  - Expanded `src/theme/tokens.ts`: added `spacing`, `typography`, `transitions`, `zIndex`, `borderRadius` token groups; expanded `lightColors`/`darkColors` with icon rail colors, disabled text, border variants, status colors, hover accents
+  - Added `ColorTokens` widened type for cross-theme compatibility
+  - Created `src/hooks/use-theme.ts`: resolves system/light/dark preference, listens to OS `prefers-color-scheme` changes, returns resolved theme + color tokens
+  - Created `src/components/layout/types.ts`: `PageId` union type for navigation
+  - Created `src/components/layout/IconRail.tsx`: 48px vertical icon rail with 4 nav items (Dashboard, 模型, 通信, 设置), SVG icons, active state indicator, aria attributes
+  - Created `src/components/layout/Sidebar.tsx`: 240px sidebar with bilingual page titles (zh-CN/en), border and theme transitions
+  - Created `src/components/layout/ContentPanel.tsx`: flex-grow content area with padding and scroll
+  - Created `src/components/layout/AppLayout.tsx`: composes IconRail + Sidebar + ContentPanel, manages active page state, renders page components
+  - Created `src/global.css`: box-sizing reset, full-height body/root, font smoothing
+  - Updated `src/App.tsx`: replaced greet demo with `AppLayout`
+  - Updated `src/main.tsx`: imports `global.css`
+  - Updated barrel exports: `hooks/index.ts` exports `useTheme`, `components/index.ts` exports `AppLayout`
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 74 tests pass (56 core + 18 cli)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
+
+---
+
 ## Failed Attempts
 
 ### 2026-03-04 10:54:36 | Agent: claude | Iteration: 2
