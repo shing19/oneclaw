@@ -25,7 +25,7 @@ You are implementing OneClaw — a one-click AI Agent platform for mainland Chin
 4. If missing: implement it fully (no placeholders, no shortcuts)
 5. Run validation:
    ```bash
-   pnpm typecheck && pnpm test
+   pnpm typecheck && pnpm test && pnpm lint
    ```
 6. Update the plan file: change `- [ ]` to `- [x]` for the completed task
 7. Update the progress file with iteration details (scope, implementation, validation, commit)

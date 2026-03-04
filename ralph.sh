@@ -662,29 +662,47 @@ commit_subject_from_task() {
     echo "${task:0:72}"
 }
 
+LAST_FEEDBACK_OUTPUT=""
+
 run_feedback_loops() {
-    if [[ -n "$FEEDBACK_CMD" ]]; then
-        log "${BLUE}[Policy][Feedback]${NC} Running FEEDBACK_CMD: $FEEDBACK_CMD"
-        bash -lc "$FEEDBACK_CMD"
-        return $?
-    fi
+    LAST_FEEDBACK_OUTPUT=""
+    local tmp_output
+    tmp_output="$(mktemp "${TMPDIR:-/tmp}/ralph-feedback.XXXXXX")"
 
-    if [[ -f "package.json" ]] && command -v pnpm &>/dev/null; then
-        local cmd
-        for cmd in \
-            "pnpm -r --if-present typecheck" \
-            "pnpm -r --if-present test" \
-            "pnpm -r --if-present lint"; do
-            log "${BLUE}[Policy][Feedback]${NC} Running: $cmd"
-            if ! bash -lc "$cmd"; then
-                return 1
-            fi
-        done
+    _run_feedback_inner() {
+        if [[ -n "$FEEDBACK_CMD" ]]; then
+            log "${BLUE}[Policy][Feedback]${NC} Running FEEDBACK_CMD: $FEEDBACK_CMD"
+            bash -lc "$FEEDBACK_CMD" 2>&1 | tee "$tmp_output"
+            return "${PIPESTATUS[0]}"
+        fi
+
+        if [[ -f "package.json" ]] && command -v pnpm &>/dev/null; then
+            local cmd
+            for cmd in \
+                "pnpm -r --if-present typecheck" \
+                "pnpm -r --if-present test" \
+                "pnpm -r --if-present lint"; do
+                log "${BLUE}[Policy][Feedback]${NC} Running: $cmd"
+                if ! bash -lc "$cmd" 2>&1 | tee -a "$tmp_output"; then
+                    return 1
+                fi
+            done
+            return 0
+        fi
+
+        log "${YELLOW}[Policy][Feedback]${NC} No default feedback loop detected; skipping."
         return 0
-    fi
+    }
 
-    log "${YELLOW}[Policy][Feedback]${NC} No default feedback loop detected; skipping."
-    return 0
+    local rc=0
+    _run_feedback_inner || rc=$?
+    if [[ $rc -ne 0 && -f "$tmp_output" ]]; then
+        # Capture last 30 lines of feedback output for failure record
+        LAST_FEEDBACK_OUTPUT="$(tail -n 30 "$tmp_output" | grep -Ei "error|failed|warning|✖" | tail -n 10 || true)"
+    fi
+    rm -f "$tmp_output"
+    unset -f _run_feedback_inner
+    return $rc
 }
 
 stage_changes_for_task_commit() {
@@ -733,7 +751,11 @@ enforce_task_completion_commit_policy() {
     log "${BLUE}[Policy][$agent_name]${NC} Task completion detected: $completed_task"
 
     if ! run_feedback_loops; then
-        TASK_POLICY_REASON="Task completed but mandatory feedback loops failed."
+        if [[ -n "$LAST_FEEDBACK_OUTPUT" ]]; then
+            TASK_POLICY_REASON="Task completed but mandatory feedback loops failed. Output:\n$LAST_FEEDBACK_OUTPUT"
+        else
+            TASK_POLICY_REASON="Task completed but mandatory feedback loops failed."
+        fi
         return 91
     fi
 
@@ -1018,7 +1040,7 @@ append_failure_record_to_progress() {
             runner_reason="Task execution timed out."
             ;;
         91)
-            runner_reason="Task completed but mandatory feedback loops failed."
+            runner_reason="Task completed but mandatory feedback loops failed. FIX THE ERRORS BELOW before proceeding."
             ;;
         92)
             runner_reason="Task completed but plan/progress documentation was not updated."
@@ -1284,6 +1306,10 @@ _try_agent() {
                 "$PLAN_FILE" "$PROGRESS_FILE" "$agent_name" || task_policy_rc=$?
             if [[ $task_policy_rc -ne 0 ]]; then
                 log "${YELLOW}[Agent: $agent_name]${NC} Task policy failed (rc=$task_policy_rc): $TASK_POLICY_REASON"
+                # rc=91 = feedback failed but task was completed — return 2 (soft failure)
+                if [[ $task_policy_rc -eq 91 ]]; then
+                    return 2
+                fi
                 return 1
             fi
         fi
@@ -1332,21 +1358,33 @@ run_one_iteration() {
 
     # Single-agent mode: skip fallback chain
     if [[ -n "$AGENT" ]]; then
-        if _try_agent "$AGENT" "$iteration" "$before_head" "$before_ahead" "$before_docs_state" "$before_task"; then
+        local agent_rc=0
+        _try_agent "$AGENT" "$iteration" "$before_head" "$before_ahead" "$before_docs_state" "$before_task" || agent_rc=$?
+        if [[ $agent_rc -eq 0 ]]; then
             return 0
         fi
         log "${RED}[Agent: $AGENT]${NC} Failed on iteration $iteration."
+        local excerpt
+        excerpt="$(error_excerpt_from_log "$LOG_FILE")"
+        # For feedback failures (rc=2), include the feedback output in the excerpt
+        if [[ $agent_rc -eq 2 && -n "$LAST_FEEDBACK_OUTPUT" ]]; then
+            excerpt="$LAST_FEEDBACK_OUTPUT"
+        fi
         append_failure_record_to_progress \
-            "$PROGRESS_FILE" "$PLAN_FILE" "$AGENT" "$iteration" "1" "1" "$LOG_FILE" "$(error_excerpt_from_log "$LOG_FILE")"
-        return 1
+            "$PROGRESS_FILE" "$PLAN_FILE" "$AGENT" "$iteration" "$agent_rc" "1" "$LOG_FILE" "$excerpt"
+        # rc=2 (soft failure: task done, feedback failed) — propagate as 2 so main loop doesn't count it as consecutive
+        return $agent_rc
     fi
 
     # Fallback chain: codex → claude → gemini
     local agent
     for agent in codex claude gemini; do
-        if _try_agent "$agent" "$iteration" "$before_head" "$before_ahead" "$before_docs_state" "$before_task"; then
+        local agent_rc=0
+        _try_agent "$agent" "$iteration" "$before_head" "$before_ahead" "$before_docs_state" "$before_task" || agent_rc=$?
+        if [[ $agent_rc -eq 0 ]]; then
             return 0
         fi
+        # For soft failures in fallback chain, still propagate to let next agent try
         log "${YELLOW}[Agent: $agent]${NC} Failed.${NC}"
     done
 
@@ -1470,7 +1508,9 @@ HELP
 
                 local _task_before _task_after _done_task
                 _task_before="$(current_task_title "$PLAN_FILE")"
-                if run_one_iteration "$i"; then
+                local iter_rc=0
+                run_one_iteration "$i" || iter_rc=$?
+                if [[ $iter_rc -eq 0 ]]; then
                     consecutive_failures=0
                     _task_after="$(current_task_title "$PLAN_FILE")"
                     _done_task="$(completed_task_from_transition "$_task_before" "$_task_after")"
@@ -1478,6 +1518,11 @@ HELP
                         last_completed_task="$_done_task"
                     fi
                     notify_telegram "[$PROJECT_NAME] 🔄 Iteration $i/$max_iterations 完成 | 完成任务: $_done_task | 下一任务: $_task_after"
+                elif [[ $iter_rc -eq 2 ]]; then
+                    # Soft failure: task completed but feedback failed — don't count as consecutive
+                    log "${YELLOW}Task completed but feedback check failed. Next iteration will fix it.${NC}"
+                    consecutive_failures=0
+                    notify_telegram "[$PROJECT_NAME] ⚠️ Iteration $i/$max_iterations 任务完成但验证失败 | 下一轮将修复"
                 else
                     consecutive_failures=$((consecutive_failures + 1))
                     if [[ $consecutive_failures -ge 3 ]]; then
