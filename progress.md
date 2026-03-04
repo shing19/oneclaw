@@ -1878,3 +1878,28 @@
   - Log path: `.ralph-status/iteration-61-git-failure.log`
 - Blockers or notes for next iteration:
   - Sandbox restriction still blocks both git index writes and network push; implementation and documentation updates are complete locally.
+
+---
+
+## Iteration 15 — P2-C5: Settings page: language/theme/workspace/security overview
+
+- **Date**: 2026-03-04
+- **Scope**: Implement the full Settings page with General settings, Security overview, Doctor diagnostics, and About/Reset sections
+- **Implementation**:
+  - Created `src/pages/settings/GeneralSettings.tsx`: Language selector (zh-CN/en), theme selector (system/light/dark), workspace directory input; all changes persisted to config via `config.update` IPC; bilingual labels and placeholders
+  - Created `src/pages/settings/SecurityOverview.tsx`: Keystore status badge (active), stored secrets list from `secret.list` IPC, per-secret delete with two-click confirmation via `secret.delete` IPC, refresh button, monospace key display; security note about values never exposed
+  - Created `src/pages/settings/DoctorPanel.tsx`: Run diagnostics button triggering `doctor.run` IPC, colored check items (pass/warn/fail with symbols), bilingual labels from `IpcDoctorCheck`, overall status summary, error display
+  - Created `src/pages/settings/AboutSection.tsx`: App info with version, config validation via `config.validate` IPC with issue list display, config reset with two-click confirmation via `config.reset` IPC, success/error feedback with auto-dismiss
+  - Updated `src/pages/settings/index.tsx`: Main page composing all 4 sub-components, fetches initial config and secret keys on mount via parallel `Promise.all` IPC calls, wires Zustand config store for language/theme/workspace, passes theme colors and language to all children
+- **Design decisions**:
+  - Uses `useTheme()` hook for color tokens (matching other pages)
+  - Config changes persist immediately via `config.update` IPC (no save button needed)
+  - Secret deletion uses two-click pattern (first click shows confirmation, second click executes)
+  - Config reset also uses two-click confirmation to prevent accidents
+  - Doctor panel is on-demand (not auto-run) to avoid startup overhead
+  - Max width 720px for readability
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
