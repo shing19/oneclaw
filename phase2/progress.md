@@ -96,6 +96,23 @@
 
 ---
 
+## Iteration 5 — P2-A5: Add minimal CI check for desktop frontend typecheck/build
+
+- **Date**: 2026-03-04
+- **Scope**: Add a CI workflow job that validates the desktop frontend compiles and builds correctly
+- **Implementation**:
+  - Added `desktop` job to `.github/workflows/ci.yml` with 3 steps: typecheck, vite build, verify output
+  - Job runs `pnpm --filter @oneclaw/desktop typecheck` then `pnpm --filter @oneclaw/desktop build`
+  - Includes smoke check: verifies `apps/desktop/dist/index.html` exists after build
+  - Uses same pnpm/Node.js setup pattern as existing CI jobs (pnpm 10.26.1, Node 20)
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 74 tests pass (56 core + 18 cli)
+  - Desktop build verified locally: vite produces dist/index.html + JS/CSS assets
+- **Status**: COMPLETE
+
+---
+
 ## Failed Attempts
 
 ### 2026-03-04 10:54:36 | Agent: claude | Iteration: 2

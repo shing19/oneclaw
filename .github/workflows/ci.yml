@@ -86,6 +86,36 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+  desktop:
+    name: Desktop Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck desktop frontend
+        run: pnpm --filter @oneclaw/desktop typecheck
+
+      - name: Build desktop frontend
+        run: pnpm --filter @oneclaw/desktop build
+
+      - name: Verify build output
+        run: test -f apps/desktop/dist/index.html || { echo "desktop dist/index.html missing"; exit 1; }
+
   build:
     name: Build & Smoke
     runs-on: ubuntu-latest
