@@ -180,6 +180,48 @@
 
 ---
 
+## Iteration 8 — P2-B3: Implement write/action operations with error mapping (zh-CN and en)
+
+- **Date**: 2026-03-04
+- **Scope**: Implement all 12 write/action sidecar handlers with bilingual error mapping, update context for kernel/channel/health services
+- **Implementation**:
+  - Created `src-tauri/sidecar/handlers/errors.ts`: bilingual error mapping utility with `SidecarHandlerError`, application-level JSON-RPC error codes (`APP_KERNEL_ERROR`, `APP_CONFIG_ERROR`, `APP_SECRET_ERROR`, `APP_CHANNEL_ERROR`, `APP_MODEL_ERROR`), mapper functions per domain
+  - Updated `src-tauri/sidecar/context.ts`: added `getAgentKernel()` (OpenClawAdapter), `getFeishuAdapter()` / `createFeishuAdapter()` (ChannelAdapter with secret-backed resolveSecret), `getProviderHealthManager()` (ProviderHealthManager)
+  - Updated `src-tauri/sidecar/handlers/agent.ts`: 3 new write handlers
+    - `agent.start`: loads config, translates to AgentConfig, calls kernel.start()
+    - `agent.stop`: calls kernel.stop() with error mapping
+    - `agent.restart`: calls kernel.restart() with error mapping
+    - Updated `agent.status`/`agent.health` to read from live kernel instance
+  - Updated `src-tauri/sidecar/handlers/config.ts`: 2 new write handlers
+    - `config.update`: deep merges patch with current config, validates and saves
+    - `config.reset`: saves default OneclawConfig (version 1, zh-CN, system theme)
+    - Includes `deepMerge()` utility (arrays replaced, objects merged recursively)
+  - Updated `src-tauri/sidecar/handlers/secret.ts`: 2 new write handlers
+    - `secret.set`: stores secret via SecretStoreManager with error mapping
+    - `secret.delete`: removes secret via SecretStoreManager with error mapping
+  - Updated `src-tauri/sidecar/handlers/model.ts`: 2 new write handlers
+    - `model.setFallbackChain`: updates config fallbackChain and saves
+    - `model.testProvider`: runs ProviderHealthManager.check() and returns health snapshot
+  - Updated `src-tauri/sidecar/handlers/channel.ts`: 3 new write handlers
+    - `channel.feishu.setup`: stores appSecret/webhookToken as secrets, creates adapter, connects, runs test
+    - `channel.feishu.test`: calls adapter.testConnection() with serialized IpcTestResult
+    - `channel.feishu.sendTest`: calls adapter.sendMessage() with serialized IpcSendResult
+    - Updated `channel.feishu.status` to read from live adapter instance
+  - Updated `src-tauri/sidecar/router.ts`: registered all 12 write methods (total 26 methods), enhanced error handling to use `SidecarHandlerError` for proper JSON-RPC error codes
+- **Design decisions**:
+  - All errors from core modules are caught and re-thrown as `SidecarHandlerError` with domain-specific JSON-RPC error codes
+  - Feishu credentials stored as secrets (`oneclaw/channel/feishu/app-secret`, `oneclaw/channel/feishu/webhook-token`)
+  - Config update uses deep merge (objects merged recursively, arrays replaced)
+  - Agent kernel, Feishu adapter, and ProviderHealthManager are lazy-initialized in context
+  - Bilingual error messages propagated from core modules through sidecar to frontend
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop including sidecar)
+  - `pnpm test`: 74 tests pass (56 core + 18 cli)
+  - `cargo check`: compiles clean
+- **Status**: COMPLETE
+
+---
+
 ## Failed Attempts
 
 ### 2026-03-04 10:54:36 | Agent: claude | Iteration: 2
@@ -207,4 +249,18 @@
 - **JSON-RPC 2.0 base types** — request, response, notification, error with standard + app error codes
 [2026-03-04 11:30:52] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
 [2026-03-04 11:30:52] [Agent: claude] Failed on iteration 6.
+```
+
+### 2026-03-04 11:45:42 | Agent: claude | Iteration: 7
+- Task: Unknown Task
+- Exit code: 1
+- Attempts: 1
+- Log: `/Users/shing/Projects/oneclaw/ralph-log.txt`
+- Error excerpt:
+```text
+[2026-03-04 11:30:52] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
+[2026-03-04 11:30:52] [Agent: claude] Failed on iteration 6.
+Next task per plan: **P2-B3** — Implement write/action operations with error mapping (zh-CN and en).
+[2026-03-04 11:45:42] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
+[2026-03-04 11:45:42] [Agent: claude] Failed on iteration 7.
 ```

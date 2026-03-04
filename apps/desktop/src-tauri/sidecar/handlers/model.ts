@@ -1,13 +1,19 @@
 /**
- * Sidecar handlers for `model.*` read operations.
+ * Sidecar handlers for `model.*` operations.
  *
- * model.list        — list all registered providers with health and quota
- * model.listPresets — list preset (built-in) providers
- * model.getQuota    — get quota status for a specific provider
+ * Read:
+ *   model.list         — list all registered providers with health and quota
+ *   model.listPresets  — list preset (built-in) providers
+ *   model.getQuota     — get quota status for a specific provider
+ *
+ * Write:
+ *   model.setFallbackChain — reorder the fallback chain
+ *   model.testProvider     — test connectivity to a specific provider
  */
 
 import { listDefaultProviderPresets } from "@oneclaw/core";
 import type { SidecarContext } from "../context.js";
+import { mapConfigError, mapModelError, SidecarHandlerError } from "./errors.js";
 
 export interface IpcModelInfo {
   id: string;
@@ -149,4 +155,56 @@ export function handleModelGetQuota(
       exhausted: quota.exhausted,
     },
   };
+}
+
+export async function handleModelSetFallbackChain(
+  ctx: SidecarContext,
+  params: { chain: string[] },
+): Promise<{ ok: true; chain: string[] }> {
+  const configManager = ctx.getConfigManager();
+
+  try {
+    const config = await configManager.load();
+    const updated = {
+      ...config,
+      models: {
+        ...config.models,
+        fallbackChain: params.chain,
+      },
+    };
+    const saved = await configManager.save(updated);
+    return { ok: true, chain: saved.models.fallbackChain };
+  } catch (error: unknown) {
+    throw new SidecarHandlerError(mapConfigError(error, ctx.locale));
+  }
+}
+
+export async function handleModelTestProvider(
+  ctx: SidecarContext,
+  params: { providerId: string },
+): Promise<{
+  providerId: string;
+  health: {
+    status: "ok" | "degraded" | "unreachable";
+    latencyMs: number;
+    checkedAt: string;
+    message?: string;
+  };
+}> {
+  const healthManager = ctx.getProviderHealthManager();
+
+  try {
+    const snapshot = await healthManager.check(params.providerId);
+    return {
+      providerId: params.providerId,
+      health: {
+        status: snapshot.health.status,
+        latencyMs: snapshot.health.latencyMs,
+        checkedAt: snapshot.health.checkedAt.toISOString(),
+        message: snapshot.health.message ?? snapshot.lastError ?? undefined,
+      },
+    };
+  } catch (error: unknown) {
+    throw new SidecarHandlerError(mapModelError(error, ctx.locale));
+  }
 }

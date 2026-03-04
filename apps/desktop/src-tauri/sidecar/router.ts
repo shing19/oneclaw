@@ -2,25 +2,49 @@
  * JSON-RPC method router.
  *
  * Maps method names to handler functions and dispatches incoming requests.
- * Read operations are registered here; write operations will be added in P2-B3.
+ * Includes both read and write operations.
  */
 
 import type { SidecarContext } from "./context.js";
-import { handleAgentStatus, handleAgentHealth } from "./handlers/agent.js";
-import { handleConfigGet, handleConfigValidate } from "./handlers/config.js";
+import {
+  handleAgentStatus,
+  handleAgentHealth,
+  handleAgentStart,
+  handleAgentStop,
+  handleAgentRestart,
+} from "./handlers/agent.js";
+import {
+  handleConfigGet,
+  handleConfigValidate,
+  handleConfigUpdate,
+  handleConfigReset,
+} from "./handlers/config.js";
 import {
   handleModelList,
   handleModelListPresets,
   handleModelGetQuota,
+  handleModelSetFallbackChain,
+  handleModelTestProvider,
 } from "./handlers/model.js";
-import { handleSecretExists, handleSecretList } from "./handlers/secret.js";
-import { handleChannelFeishuStatus } from "./handlers/channel.js";
+import {
+  handleSecretExists,
+  handleSecretList,
+  handleSecretSet,
+  handleSecretDelete,
+} from "./handlers/secret.js";
+import {
+  handleChannelFeishuStatus,
+  handleChannelFeishuSetup,
+  handleChannelFeishuTest,
+  handleChannelFeishuSendTest,
+} from "./handlers/channel.js";
 import {
   handleCostSummary,
   handleCostHistory,
   handleCostExport,
 } from "./handlers/cost.js";
 import { handleDoctorRun } from "./handlers/doctor.js";
+import { SidecarHandlerError } from "./handlers/errors.js";
 
 const JSONRPC_PARSE_ERROR = -32700;
 const JSONRPC_INVALID_REQUEST = -32600;
@@ -60,31 +84,65 @@ type Handler = (
 function buildMethodTable(): Map<string, Handler> {
   const table = new Map<string, Handler>();
 
-  // Agent read operations
+  // Agent operations
   table.set("agent.status", (ctx) => handleAgentStatus(ctx));
   table.set("agent.health", (ctx) => handleAgentHealth(ctx));
+  table.set("agent.start", (ctx) => handleAgentStart(ctx));
+  table.set("agent.stop", (ctx) => handleAgentStop(ctx));
+  table.set("agent.restart", (ctx) => handleAgentRestart(ctx));
 
-  // Config read operations
+  // Config operations
   table.set("config.get", (ctx) => handleConfigGet(ctx));
   table.set("config.validate", (ctx) => handleConfigValidate(ctx));
+  table.set("config.update", (ctx, params) =>
+    handleConfigUpdate(ctx, params as { patch: Record<string, unknown> }),
+  );
+  table.set("config.reset", (ctx) => handleConfigReset(ctx));
 
-  // Model read operations
+  // Model operations
   table.set("model.list", (ctx) => handleModelList(ctx));
   table.set("model.listPresets", () => handleModelListPresets());
   table.set("model.getQuota", (ctx, params) =>
     handleModelGetQuota(ctx, params as { providerId: string }),
   );
+  table.set("model.setFallbackChain", (ctx, params) =>
+    handleModelSetFallbackChain(ctx, params as { chain: string[] }),
+  );
+  table.set("model.testProvider", (ctx, params) =>
+    handleModelTestProvider(ctx, params as { providerId: string }),
+  );
 
-  // Secret read operations
+  // Secret operations
   table.set("secret.exists", (ctx, params) =>
     handleSecretExists(ctx, params as { key: string }),
   );
   table.set("secret.list", (ctx) => handleSecretList(ctx));
+  table.set("secret.set", (ctx, params) =>
+    handleSecretSet(ctx, params as { key: string; value: string }),
+  );
+  table.set("secret.delete", (ctx, params) =>
+    handleSecretDelete(ctx, params as { key: string }),
+  );
 
-  // Channel read operations
+  // Channel operations
   table.set("channel.feishu.status", (ctx) => handleChannelFeishuStatus(ctx));
+  table.set("channel.feishu.setup", (ctx, params) =>
+    handleChannelFeishuSetup(
+      ctx,
+      params as {
+        appId: string;
+        appSecret: string;
+        webhookUrl?: string;
+        webhookToken?: string;
+      },
+    ),
+  );
+  table.set("channel.feishu.test", (ctx) => handleChannelFeishuTest(ctx));
+  table.set("channel.feishu.sendTest", (ctx, params) =>
+    handleChannelFeishuSendTest(ctx, params as { message?: string }),
+  );
 
-  // Cost read operations
+  // Cost operations
   table.set("cost.summary", (ctx) => handleCostSummary(ctx));
   table.set("cost.history", (ctx, params) =>
     handleCostHistory(ctx, params as { start: string; end: string }),
@@ -150,6 +208,20 @@ export class Router {
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Internal error";
+
+      // Use application-level error codes from SidecarHandlerError
+      if (error instanceof SidecarHandlerError) {
+        return {
+          jsonrpc: "2.0",
+          id: request.id,
+          error: {
+            code: error.jsonrpcCode,
+            message,
+            data: { code: error.code, recoverable: error.recoverable },
+          },
+        };
+      }
+
       const code =
         error instanceof Error && "code" in error
           ? String((error as { code: unknown }).code)
