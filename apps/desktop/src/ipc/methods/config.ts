@@ -70,16 +70,16 @@ export interface IpcAgentSection {
       readonly maxChildrenPerAgent: number;
     };
   };
-  readonly skills: ReadonlyArray<{
+  readonly skills: readonly {
     readonly id: string;
     readonly enabled: boolean;
     readonly options?: Record<string, unknown>;
-  }>;
-  readonly mountPoints: ReadonlyArray<{
+  }[];
+  readonly mountPoints: readonly {
     readonly hostPath: string;
     readonly containerPath: string;
     readonly readonly: boolean;
-  }>;
+  }[];
   readonly timeoutSeconds: number;
 }
 
