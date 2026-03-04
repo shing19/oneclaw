@@ -1936,3 +1936,37 @@
   - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 18 — P2-D3: Linux desktop packaging pipeline (.AppImage or .deb) proof build
+
+- **Date**: 2026-03-04
+- **Scope**: Implement Linux `.deb` + `.AppImage` packaging pipeline with system dependencies, sidecar support, and CI workflow job
+- **Implementation**:
+  - Updated `src-tauri/tauri.conf.json`: added `linux` bundle config with `deb` (depends: libwebkit2gtk-4.1-0, libgtk-3-0; section: utils) and `appimage` (bundleMediaFramework: false)
+  - Added `build-linux` job to `.github/workflows/desktop-build.yml`:
+    - Target: `x86_64-unknown-linux-gnu` on `ubuntu-22.04`
+    - Installs Linux system dependencies: libwebkit2gtk-4.1-dev, libgtk-3-dev, libayatana-appindicator3-dev, librsvg2-dev, patchelf
+    - Installs pnpm 10.26.1, Node 20, Bun latest, Rust stable
+    - Rust dependency caching via `actions/cache@v4`
+    - Builds sidecar via `bash scripts/build-sidecar.sh x86_64-unknown-linux-gnu`
+    - Verifies sidecar binary exists (no `.exe` suffix on Linux)
+    - Builds Tauri app with `--bundles deb,appimage` for both formats
+    - Verifies `.deb` output in `bundle/deb/` and `.AppImage` output in `bundle/appimage/`
+    - Uploads both artifacts separately with 7-day retention
+    - `NO_STRIP=true` env var to avoid stripping issues on CI
+- **Design decisions**:
+  - Both `.deb` and `.AppImage` formats built in a single job (same target triple)
+  - `ubuntu-22.04` chosen for WebKit2GTK 4.1 availability (required by Tauri 2)
+  - `patchelf` required for AppImage generation
+  - `libayatana-appindicator3-dev` for system tray support
+  - `librsvg2-dev` for SVG icon rendering
+  - Separate upload artifacts for `.deb` and `.AppImage` (users can download what they need)
+  - Sidecar build script already supports `x86_64-unknown-linux-gnu` → `bun-linux-x64` mapping
+  - Single x64 target for proof build (ARM64 Linux can be added later)
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE

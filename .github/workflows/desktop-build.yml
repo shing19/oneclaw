@@ -181,3 +181,105 @@ jobs:
           path: apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.exe
           if-no-files-found: error
           retention-days: 7
+
+  build-linux:
+    name: Linux (.deb + .AppImage)
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            arch: x64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/desktop/src-tauri/target
+          key: rust-${{ matrix.target }}-${{ hashFiles('apps/desktop/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            rust-${{ matrix.target }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build sidecar binary
+        working-directory: apps/desktop
+        run: bash scripts/build-sidecar.sh ${{ matrix.target }}
+
+      - name: Verify sidecar binary exists
+        run: |
+          BINARY="apps/desktop/src-tauri/binaries/oneclaw-sidecar-${{ matrix.target }}"
+          test -f "$BINARY" || { echo "Sidecar binary not found: $BINARY"; exit 1; }
+          echo "Sidecar binary size:"
+          ls -lh "$BINARY"
+
+      - name: Build Tauri app (.deb + .AppImage)
+        working-directory: apps/desktop
+        run: pnpm tauri build --target ${{ matrix.target }} --bundles deb,appimage
+        env:
+          NO_STRIP: true
+
+      - name: Verify .deb output
+        run: |
+          DEB_DIR="apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/deb"
+          echo "Checking for .deb in: $DEB_DIR"
+          ls -lh "$DEB_DIR"/*.deb || { echo "No .deb found"; exit 1; }
+
+      - name: Verify .AppImage output
+        run: |
+          APPIMAGE_DIR="apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/appimage"
+          echo "Checking for .AppImage in: $APPIMAGE_DIR"
+          ls -lh "$APPIMAGE_DIR"/*.AppImage || { echo "No .AppImage found"; exit 1; }
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneclaw-linux-${{ matrix.arch }}-deb
+          path: apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/deb/*.deb
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload .AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneclaw-linux-${{ matrix.arch }}-appimage
+          path: apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/appimage/*.AppImage
+          if-no-files-found: error
+          retention-days: 7
