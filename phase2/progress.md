@@ -245,6 +245,32 @@
 
 ---
 
+## Iteration 10 — P2-B5: Add integration tests for IPC contract compatibility
+
+- **Date**: 2026-03-04
+- **Scope**: Add comprehensive integration tests verifying all 26 IPC methods, JSON-RPC 2.0 protocol, response shapes, error format, and wire serialization
+- **Implementation**:
+  - Created `apps/desktop/vitest.config.ts`: vitest config for desktop sidecar tests (merges base config, includes `src-tauri/sidecar/**/*.test.ts`)
+  - Created `apps/desktop/src-tauri/sidecar/__tests__/ipc-contract.test.ts`: 31 integration tests across 5 test suites:
+    1. **JSON-RPC 2.0 protocol** (10 tests): parse error response, invalid request rejection (non-object, missing method, missing jsonrpc), notification returns null, method not found, id preservation (numeric/string), id extraction from invalid requests, null/missing params normalization
+    2. **Method registration** (2 tests): all 26 IPC contract methods are registered and dispatchable (not METHOD_NOT_FOUND); invalid method names correctly return METHOD_NOT_FOUND
+    3. **Stateless read methods** (12 tests): model.listPresets shape, agent.status/health shapes, channel.feishu.status/test/sendTest graceful failures without adapter, cost.summary/history/export shapes, model.getQuota/list shapes, config.validate error shape
+    4. **Error response format** (3 tests): config.get/update structured errors with application error data (code + recoverable), error response envelope (jsonrpc + id)
+    5. **Wire format** (4 tests): JSON serialization round-trip for parse error, success, and error responses; ISO 8601 date field verification
+  - Updated `apps/desktop/package.json`: added `"test": "vitest run"` script
+- **Design decisions**:
+  - Tests use Router class directly with real SidecarContext (no mocking) — verifies full integration from dispatch through handlers to core modules
+  - Stateless methods (model.listPresets, agent.status, channel.feishu.status, cost.*) work without filesystem; methods requiring config (config.get, config.update) naturally fail and test error paths
+  - Method registration completeness tested by dispatching all 26 methods and asserting none return METHOD_NOT_FOUND (-32601)
+  - Wire format tests verify JSON serialization drops undefined values (expected behavior) and date fields follow ISO 8601
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
+
+---
+
 ## Failed Attempts
 
 ### 2026-03-04 10:54:36 | Agent: claude | Iteration: 2
