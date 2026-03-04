@@ -28,6 +28,28 @@
 
 ---
 
+## Iteration 2 — P2-A2: Define folder structure for pages/components/stores/theme/tauri commands
+
+- **Date**: 2026-03-04
+- **Scope**: Establish the full folder structure for the desktop frontend and Tauri backend per `docs/modules/gui.md`
+- **Implementation**:
+  - Created `src/pages/` with 5 page directories: `dashboard/`, `model-config/`, `channel-config/`, `settings/`, `setup-wizard/` — each with a real component
+  - Created `src/components/index.ts` — shared UI components barrel export
+  - Created `src/hooks/index.ts` — custom hooks barrel export
+  - Created `src/stores/` with 4 Zustand stores: `agent-store.ts`, `model-store.ts`, `config-store.ts`, `cost-store.ts` + barrel `index.ts`
+  - Created `src/theme/tokens.ts` — design tokens (layout dimensions, light/dark color palettes) + barrel `index.ts`
+  - Restructured `src-tauri/src/commands/mod.rs` — moved `greet` command into commands module, updated `lib.rs`
+  - Added `zustand` dependency to `@oneclaw/desktop`
+  - Added `@/` path alias in `tsconfig.json` (paths) and `vite.config.ts` (resolve.alias)
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 74 tests pass (56 core + 18 cli)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+  - `cargo check`: compiles clean
+- **Status**: COMPLETE
+
+---
+
 ## Failed Attempts
 
 ### 2026-03-04 10:54:36 | Agent: claude | Iteration: 2
