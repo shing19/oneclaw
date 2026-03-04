@@ -1996,3 +1996,30 @@
   - `pnpm test`: 140 tests pass (91 core + 18 cli + 31 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 18 — P2-D5: Add release artifacts upload for desktop builds
+
+- **Date**: 2026-03-04
+- **Scope**: Create a dedicated GitHub Actions workflow that builds all desktop platforms on tag push and uploads installers + checksums to the GitHub Release
+- **Implementation**:
+  - Created `.github/workflows/desktop-release.yml`: tag-triggered (`v*`) desktop release workflow with:
+    - `build-macos` job: matrix build for ARM64 (`aarch64-apple-darwin`) and Intel (`x86_64-apple-darwin`), produces `.dmg` installers
+    - `build-windows` job: builds `x86_64-pc-windows-msvc` target, produces `.exe` NSIS installer
+    - `build-linux` job: builds `x86_64-unknown-linux-gnu` target, produces `.deb` and `.AppImage` packages
+    - `upload-release` job: runs after all build jobs complete, downloads all artifacts, generates `desktop-checksums.txt` (SHA256), uploads all files to GitHub Release via `softprops/action-gh-release@v2`
+  - All build jobs use same toolchain setup as `desktop-build.yml` (pnpm 10.26.1, Node 20, Bun latest, Rust stable)
+  - Rust dependency caching via `actions/cache@v4` for faster rebuilds
+  - Build artifacts use 1-day retention (only needed until upload-release job completes)
+  - Works alongside existing `release.yml` — both trigger on `v*` tags; `softprops/action-gh-release@v2` creates or updates the release
+- **Design decisions**:
+  - Separate workflow from `desktop-build.yml` (CI) to keep release concerns isolated
+  - SHA256 checksums generated for all desktop artifacts in a single `desktop-checksums.txt` file
+  - `concurrency: cancel-in-progress: false` to prevent release builds from being cancelled
+  - `permissions: contents: write` required for GitHub Release upload
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 140 tests pass (91 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
