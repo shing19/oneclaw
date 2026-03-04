@@ -75,6 +75,27 @@
 
 ---
 
+## Iteration 4 — P2-A4: Decide and document runtime integration strategy
+
+- **Date**: 2026-03-04
+- **Scope**: Evaluate Tauri Rust command wrappers vs sidecar process boundary; write architectural decision record
+- **Implementation**:
+  - Evaluated 3 options: (A) Rust-embedded Node.js/WASM, (B) Sidecar + JSON-RPC over stdio, (C) Sidecar + HTTP/WebSocket
+  - Decision: **Option B — Sidecar process + JSON-RPC over stdio**
+    - Core TypeScript modules depend on Node.js APIs (`child_process`, `node:fs`, `node:crypto`) — cannot compile to WASM
+    - Sidecar binary built via `bun build --compile`, zero runtime dependencies
+    - Tauri `tauri-plugin-shell` manages sidecar lifecycle
+    - JSON-RPC 2.0 over stdin/stdout for request/response, notifications for event push
+    - Rust commands bridge frontend `invoke()` calls to sidecar stdin, forward sidecar stdout events via Tauri `app.emit()`
+  - Created `docs/decisions/runtime-integration.md` with full architecture, data flow, lifecycle, file structure, and consequences
+  - Updated `MAP.md` with new "架构决策" section linking the decision document
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 74 tests pass (56 core + 18 cli)
+- **Status**: COMPLETE
+
+---
+
 ## Failed Attempts
 
 ### 2026-03-04 10:54:36 | Agent: claude | Iteration: 2

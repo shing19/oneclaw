@@ -29,7 +29,7 @@ Current codebase is CLI/core focused. Missing major Phase 2 foundations:
 - [x] `P2-A1` Create `apps/desktop` scaffold (Tauri 2 + React + TypeScript).
 - [x] `P2-A2` Define folder structure for pages/components/stores/theme/tauri commands.
 - [x] `P2-A3` Add design tokens and base layout shell (icon rail + sidebar + content panel).
-- [ ] `P2-A4` Decide and document runtime integration strategy (Tauri Rust command wrappers vs sidecar process boundary).
+- [x] `P2-A4` Decide and document runtime integration strategy (Tauri Rust command wrappers vs sidecar process boundary).
 - [ ] `P2-A5` Add minimal CI check for desktop frontend typecheck/build.
 
 ## Milestone P2-B: Runtime Bridge and IPC (Week 2)

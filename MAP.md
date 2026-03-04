@@ -57,6 +57,12 @@
 | 分发安装 | [docs/modules/distribution.md](docs/modules/distribution.md) | 1-3 |
 | GUI | [docs/modules/gui.md](docs/modules/gui.md) | 2 |
 
+### 架构决策
+
+| 决策 | 说明 |
+|------|------|
+| [运行时集成策略](docs/decisions/runtime-integration.md) | GUI 与 TypeScript 核心的 IPC 方案：Sidecar + JSON-RPC over stdio |
+
 ### 调研资料
 
 | 主题 | 文档 |
