@@ -2056,3 +2056,32 @@
   - `pnpm test`: 162 tests pass (91 core + 18 cli + 53 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 18 — P2-E3: Performance sanity: startup time and key page interactions acceptable
+
+- **Date**: 2026-03-04
+- **Scope**: Create performance sanity test suite verifying sidecar startup, IPC dispatch latency, and page interaction patterns
+- **Implementation**:
+  - Created `apps/desktop/src-tauri/sidecar/__tests__/perf-sanity.test.ts`: 15-test performance sanity suite with:
+    1. **Startup** (1 test): SidecarContext + Router construction within 200ms (no I/O)
+    2. **Fast method dispatch** (6 tests): warm in-memory methods (agent.status, agent.health, model.listPresets, cost.summary, channel.feishu.status, model.list) each within 50ms
+    3. **I/O-bound method dispatch** (3 tests): cold config.get, doctor.run, secret.list each within 2000ms (keychain probing + filesystem)
+    4. **Dashboard page simulation** (1 test): parallel 3-call load within 200ms
+    5. **Cost panel page simulation** (1 test): parallel 2-call load within 200ms
+    6. **Sequential burst** (1 test): 10 sequential fast dispatches within 200ms
+    7. **Parallel burst** (1 test): 10 concurrent fast dispatches within 200ms
+    8. **Bundle size** (1 test): Vite build output under 2MB (skipped gracefully if dist/ absent)
+  - Test architecture uses a shared warm context (pre-initialized in global beforeAll) for fast-path tests, ensuring lazy services (SecretStore, ConfigManager) are already cached
+  - Cold-start tests create fresh contexts per test to measure realistic first-call latency
+- **Design decisions**:
+  - Methods categorized as "fast" (in-memory, cached services) vs "I/O-bound" (keychain probe, filesystem access) with different budgets
+  - `doctor.run` handler calls `createSecretStore()` directly (not cached), explaining ~500ms per-call cost — acceptable for diagnostic tool
+  - Warm context shared across fast-path suites to avoid redundant 500ms keychain init per describe block
+  - Bundle size check gracefully skips when dist/ doesn't exist (test-only runs)
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 177 tests pass (91 core + 18 cli + 68 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
