@@ -42,7 +42,7 @@ Current codebase is CLI/core focused. Missing major Phase 2 foundations:
 
 ## Milestone P2-C: GUI Functional Pages (Weeks 3-5)
 
-- [ ] `P2-C1` Dashboard page: runtime status, recent logs, quick actions.
+- [x] `P2-C1` Dashboard page: runtime status, recent logs, quick actions.
 - [ ] `P2-C2` Cost panel: today/week/month summary and trend view.
 - [ ] `P2-C3` Model config page: provider cards, model selection, fallback chain reorder.
 - [ ] `P2-C4` Channel page: Feishu setup flow + test message trigger + status.

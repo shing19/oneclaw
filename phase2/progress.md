@@ -327,3 +327,27 @@ Created `errors.ts` with `SidecarHandlerError` and domain-specific JSON-RPC erro
 [2026-03-04 11:58:56] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
 [2026-03-04 11:58:56] [Agent: claude] Failed on iteration 8.
 ```
+
+---
+
+## Iteration 11 — P2-C1: Dashboard page: runtime status, recent logs, quick actions
+
+- **Date**: 2026-03-04
+- **Scope**: Implement the full Dashboard page with runtime status card, cost summary cards, quick actions, and recent activity log
+- **Implementation**:
+  - Created `src/pages/dashboard/StatusCard.tsx`: Agent status display with colored indicator dot (glow for running), bilingual status labels (zh-CN/en), uptime calculation from `lastStatusChange` timestamp
+  - Created `src/pages/dashboard/CostCards.tsx`: Three cost summary cards (today/week/month) showing amount in ¥, request count, and token count with smart number formatting (K/万 suffixes)
+  - Created `src/pages/dashboard/QuickActions.tsx`: Start/stop/restart buttons with variant styling (primary/danger/default), loading state, disable logic based on current agent status, async IPC calls via `ipcCallSafe`
+  - Created `src/pages/dashboard/RecentLogs.tsx`: Scrollable log list (max 300px) with color-coded log levels, alternating row backgrounds, clear button, empty state message
+  - Updated `src/pages/dashboard/index.tsx`: Composes all sub-components, fetches initial data on mount via `agent.status` and `cost.summary` IPC calls, wires Zustand stores for real-time updates
+- **Design decisions**:
+  - All components receive `colors` and `language` as props for theme/i18n consistency
+  - Status card shows uptime only when agent is running
+  - Quick action buttons properly wrap async handlers with `void` to satisfy lint rules
+  - Cost overview maps IPC `IpcCostOverview` to store's `CostSummary` shape
+  - Initial data fetch uses `Promise.all` for parallel IPC calls with cancellation guard
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
