@@ -1903,3 +1903,36 @@
   - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 15 — P2-C6: Setup Wizard GUI flow (7-step guided onboarding with skip support)
+
+- **Date**: 2026-03-04
+- **Scope**: Implement the full 7-step Setup Wizard with guided onboarding, skip support, and first-launch overlay
+- **Implementation**:
+  - Created `src/pages/setup-wizard/WizardProgress.tsx`: Step progress indicator with numbered circles, completion checkmarks, step labels, connecting bars with completed/pending states
+  - Created `src/pages/setup-wizard/WizardShell.tsx`: Reusable wizard step frame with title/subtitle header, scrollable content area, and footer with back/skip/next buttons; skip hidden on last step
+  - Created `src/pages/setup-wizard/steps/LanguageStep.tsx`: Step 1 — language selector (zh-CN / en) with radio-button-style cards, descriptions per language
+  - Created `src/pages/setup-wizard/steps/UseCaseStep.tsx`: Step 2 — use case picker (coding / team / automation) with icon cards and bilingual labels
+  - Created `src/pages/setup-wizard/steps/ModelPlanStep.tsx`: Step 3 — model plan selection (Coding Plan / API Key / Free Trial) with plain-language explanations, "Recommended" badge on Coding Plan
+  - Created `src/pages/setup-wizard/steps/ProviderStep.tsx`: Step 4 — provider list from `model.listPresets` IPC, filtered by plan selection (suggested vs others), provider cards with signup/pricing links, fetched via AbortController pattern
+  - Created `src/pages/setup-wizard/steps/ConfigStep.tsx`: Step 5 — API key input (password), optional endpoint, validate connection via `model.testProvider` IPC, save credentials via `secret.set` IPC, security hint
+  - Created `src/pages/setup-wizard/steps/ChannelStep.tsx`: Step 6 — Feishu credential form (App ID, App Secret, Webhook URL), save & connect via `channel.feishu.setup` IPC, skip hint
+  - Created `src/pages/setup-wizard/steps/TestStep.tsx`: Step 7 — completion celebration, test message sender via `channel.feishu.sendTest` IPC (disabled when no channel configured), finish button
+  - Updated `src/pages/setup-wizard/index.tsx`: Main wizard orchestrator managing 7-step state, bilingual step labels/titles, language change persisted via `config.update` IPC, skip/back/next navigation, `onComplete` callback
+  - Updated `src/App.tsx`: Wizard renders as full-screen overlay on first launch (localStorage check), dismissed on completion with `oneclaw-wizard-done` flag
+- **Design decisions**:
+  - Full-screen overlay with z-index 1000 (above all content)
+  - First-launch detection via localStorage (simple, no IPC needed)
+  - Every step can be skipped — only steps 2-4 disable Next until a selection is made
+  - Language change on step 1 immediately updates the entire wizard UI
+  - Provider suggestions filtered by model plan (coding-plan → bailian/volcengine/zhipu, api-key → deepseek/bailian/etc, free-trial → hunyuan/spark)
+  - API key validation saves the key first so `model.testProvider` can use it
+  - Channel step is clearly marked as optional with skip hint
+  - Test step shows different UI based on whether channel was configured
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE

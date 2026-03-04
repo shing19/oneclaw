@@ -47,7 +47,7 @@ Current codebase is CLI/core focused. Missing major Phase 2 foundations:
 - [x] `P2-C3` Model config page: provider cards, model selection, fallback chain reorder.
 - [x] `P2-C4` Channel page: Feishu setup flow + test message trigger + status.
 - [x] `P2-C5` Settings page: language/theme/workspace/security overview.
-- [ ] `P2-C6` Setup Wizard GUI flow (7-step guided onboarding with skip support).
+- [x] `P2-C6` Setup Wizard GUI flow (7-step guided onboarding with skip support).
 
 ## Milestone P2-D: Platform and Packaging (Week 6)
 
