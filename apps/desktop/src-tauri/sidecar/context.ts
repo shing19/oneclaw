@@ -21,7 +21,13 @@ import {
   type OpenClawAdapter,
   type ChannelAdapter,
   type ProviderHealthManager,
+  type Disposable,
 } from "@oneclaw/core";
+import {
+  emitLogEvent,
+  emitStatusEvent,
+  emitCostEvent,
+} from "./event-emitter.js";
 
 export type SidecarLocale = "zh-CN" | "en";
 
@@ -40,6 +46,7 @@ export class SidecarContext {
   private agentKernelInstance: OpenClawAdapter | null = null;
   private feishuAdapterInstance: ChannelAdapter | null = null;
   private providerHealthManagerInstance: ProviderHealthManager | null = null;
+  private readonly eventSubscriptions: Disposable[] = [];
 
   constructor(options: SidecarContextOptions = {}) {
     this.locale = options.locale ?? "zh-CN";
@@ -88,12 +95,16 @@ export class SidecarContext {
   /**
    * Get or create the agent kernel (OpenClawAdapter).
    * The kernel manages its own lifecycle (start/stop/restart).
+   * Automatically subscribes to kernel events and forwards them as
+   * JSON-RPC notifications to stdout (→ Rust bridge → Tauri events).
    */
   getAgentKernel(): OpenClawAdapter {
     if (this.agentKernelInstance === null) {
-      this.agentKernelInstance = createOpenClawAdapter({
+      const kernel = createOpenClawAdapter({
         locale: this.locale,
       });
+      this.subscribeKernelEvents(kernel);
+      this.agentKernelInstance = kernel;
     }
     return this.agentKernelInstance;
   }
@@ -137,5 +148,61 @@ export class SidecarContext {
 
   async loadConfig(): Promise<OneclawConfig> {
     return this.getConfigManager().load();
+  }
+
+  /**
+   * Dispose all event subscriptions. Called on sidecar shutdown.
+   */
+  dispose(): void {
+    for (const sub of this.eventSubscriptions) {
+      sub.dispose();
+    }
+    this.eventSubscriptions.length = 0;
+  }
+
+  /**
+   * Subscribe to kernel log/status/cost events and forward as
+   * JSON-RPC notifications via stdout.
+   */
+  private subscribeKernelEvents(kernel: OpenClawAdapter): void {
+    const logSub = kernel.onLog((entry) => {
+      emitLogEvent({
+        level: entry.level,
+        message: entry.message,
+        timestamp: entry.timestamp.toISOString(),
+        traceId: entry.traceId,
+        metadata: entry.metadata,
+      });
+    });
+
+    const statusSub = kernel.onStatusChange((status) => {
+      emitStatusEvent({
+        state: status.state,
+        uptime: status.uptime,
+        activeAgents: status.activeAgents,
+        lastError:
+          status.lastError === undefined
+            ? undefined
+            : {
+                code: status.lastError.code,
+                message: status.lastError.message,
+                timestamp: status.lastError.timestamp.toISOString(),
+              },
+      });
+    });
+
+    const costSub = kernel.onCostEvent((event) => {
+      emitCostEvent({
+        provider: event.provider,
+        model: event.model,
+        inputTokens: event.inputTokens,
+        outputTokens: event.outputTokens,
+        estimatedCostYuan: event.estimatedCostYuan,
+        timestamp: event.timestamp.toISOString(),
+        traceId: event.traceId,
+      });
+    });
+
+    this.eventSubscriptions.push(logSub, statusSub, costSub);
   }
 }

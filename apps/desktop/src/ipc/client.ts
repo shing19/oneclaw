@@ -10,7 +10,10 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+import type { UnlistenFn } from "@tauri-apps/api/event";
 import type { IpcMethodName, IpcParams, IpcResult } from "./method-map.js";
+import type { TauriEventMap } from "./events.js";
 
 /**
  * Call a JSON-RPC method on the sidecar via Tauri invoke.
@@ -66,4 +69,28 @@ export async function ipcCallSafe<M extends IpcMethodName>(
       error: new IpcError(message, "IPC_ERROR", true),
     };
   }
+}
+
+type TauriEventName = keyof TauriEventMap;
+
+/**
+ * Subscribe to a Tauri event emitted by the sidecar bridge.
+ *
+ * Returns a promise resolving to an unlisten function.
+ * Call the unlisten function to remove the listener.
+ *
+ * @example
+ *   const unlisten = await listenToEvent("agent-status", (payload) => {
+ *     console.log("Agent state:", payload.state);
+ *   });
+ *   // Later:
+ *   unlisten();
+ */
+export async function listenToEvent<E extends TauriEventName>(
+  event: E,
+  callback: (payload: TauriEventMap[E]) => void,
+): Promise<UnlistenFn> {
+  return listen<TauriEventMap[E]>(event, (e) => {
+    callback(e.payload);
+  });
 }

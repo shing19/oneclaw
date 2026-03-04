@@ -222,6 +222,29 @@
 
 ---
 
+## Iteration 9 — P2-B4: Add event channel for runtime status/log/cost updates
+
+- **Date**: 2026-03-04
+- **Scope**: Implement real-time event streaming from sidecar → Rust bridge → frontend stores for agent status, log, and cost events
+- **Implementation**:
+  - Created `src-tauri/sidecar/event-emitter.ts`: JSON-RPC 2.0 notification emitter for stdout with typed helpers (`emitLogEvent`, `emitStatusEvent`, `emitCostEvent`)
+  - Updated `src-tauri/sidecar/context.ts`: imports `Disposable` from core; added `eventSubscriptions` array; wired `subscribeKernelEvents()` to subscribe to `onLog`, `onStatusChange`, `onCostEvent` on the `OpenClawAdapter` kernel, converting `Date` fields to ISO 8601 strings and forwarding as JSON-RPC notifications; added `dispose()` method for cleanup
+  - Created `src/hooks/use-tauri-event.ts`: generic React hook wrapping `@tauri-apps/api/event.listen()` with stable callback ref, automatic cleanup on unmount, and type-safe payload via `TauriEventMap`
+  - Created `src/hooks/use-event-subscriptions.ts`: root-level hook that subscribes to `agent-status`, `agent-log`, and `agent-cost` Tauri events and routes payloads to Zustand stores (`useAgentStore.setStatus`, `useAgentStore.addLog`, `useCostStore.updateToday`)
+  - Updated `src/ipc/client.ts`: added `listenToEvent()` async function for imperative event subscription with type-safe payload inference from `TauriEventMap`
+  - Updated `src/App.tsx`: calls `useEventSubscriptions()` to activate event routing on mount
+  - Updated `src/hooks/index.ts`: barrel exports for `useTauriEvent` and `useEventSubscriptions`
+- **Architecture flow**:
+  - Kernel events (`onLog`, `onStatusChange`, `onCostEvent`) → SidecarContext serializes to JSON-RPC notifications → `process.stdout.write()` → Rust `SidecarState` background reader → `app_handle.emit()` Tauri events → `useTauriEvent` hook → Zustand store updates
+  - Existing Rust bridge already handles `event.log`, `event.status`, `event.cost` notification routing (implemented in P2-B2)
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop including sidecar)
+  - `pnpm test`: 74 tests pass (56 core + 18 cli)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
+
+---
+
 ## Failed Attempts
 
 ### 2026-03-04 10:54:36 | Agent: claude | Iteration: 2
@@ -263,4 +286,18 @@
 Next task per plan: **P2-B3** — Implement write/action operations with error mapping (zh-CN and en).
 [2026-03-04 11:45:42] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
 [2026-03-04 11:45:42] [Agent: claude] Failed on iteration 7.
+```
+
+### 2026-03-04 11:58:56 | Agent: claude | Iteration: 8
+- Task: Unknown Task
+- Exit code: 1
+- Attempts: 1
+- Log: `/Users/shing/Projects/oneclaw/ralph-log.txt`
+- Error excerpt:
+```text
+**P2-B3 complete.** Implemented all 12 write/action sidecar handlers with bilingual error mapping:
+Created `errors.ts` with `SidecarHandlerError` and domain-specific JSON-RPC error codes. Extended `SidecarContext` with lazy-initialized `OpenClawAdapter`, `ChannelAdapter`, and `ProviderHealthManager`. All 26 IPC methods registered in router.
+[<u[?1004l[?2004l[?25h]9;4;0;]0;[?25h[2026-03-04 11:58:48] [Policy][claude] Task completion detected: `P2-B3` Implement write/action operations with error mapping (`zh-CN` and `en`).
+[2026-03-04 11:58:56] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
+[2026-03-04 11:58:56] [Agent: claude] Failed on iteration 8.
 ```
