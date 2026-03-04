@@ -407,3 +407,26 @@ Created `errors.ts` with `SidecarHandlerError` and domain-specific JSON-RPC erro
   - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 14 — P2-C4: Channel page: Feishu setup flow + test message trigger + status
+
+- **Date**: 2026-03-04
+- **Scope**: Implement the full Channel Configuration page with connection status display, Feishu credential setup form, and test message sender
+- **Implementation**:
+  - Created `src/pages/channel-config/ConnectionStatus.tsx`: Connection status card with colored indicator dot (glow for connected), bilingual status labels (zh-CN/en), latency display, error detail panel with code/message/recoverable flag
+  - Created `src/pages/channel-config/FeishuSetupForm.tsx`: Complete Feishu credential form with App ID (text), App Secret (password), Webhook URL (optional), Webhook Token (optional); save & connect button triggers `channel.feishu.setup` IPC; test connection button triggers `channel.feishu.test` IPC; success/error feedback with latency display; bilingual labels and placeholders; required/optional field indicators
+  - Created `src/pages/channel-config/TestMessageSection.tsx`: Test message sender with text input (Enter key support), send button triggers `channel.feishu.sendTest` IPC, success feedback with message ID, error display; disabled state when not connected; bilingual labels
+  - Updated `src/pages/channel-config/index.tsx`: Main page composing ConnectionStatus + FeishuSetupForm + TestMessageSection; fetches initial channel status on mount via `channel.feishu.status` IPC with AbortController cancellation; callbacks wire status updates from setup/test results to connection status display
+- **Design decisions**:
+  - AbortController used for effect cleanup (passes lint strict analysis vs boolean flag)
+  - Form clears sensitive fields (appSecret, webhookToken) after successful setup
+  - Test connection button only shown when channel is not disconnected (must set up first)
+  - Test message section visually disabled (opacity 0.6) when not connected
+  - All IPC calls use `ipcCallSafe()` with proper error display
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
