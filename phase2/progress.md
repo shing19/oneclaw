@@ -351,3 +351,36 @@ Created `errors.ts` with `SidecarHandlerError` and domain-specific JSON-RPC erro
   - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 12 — P2-C2: Cost panel: today/week/month summary and trend view
+
+- **Date**: 2026-03-04
+- **Scope**: Implement dedicated Cost Panel page with summary cards, daily trend chart, provider breakdown, and export functionality
+- **Implementation**:
+  - Added `"cost-panel"` to `PageId` union type in `src/components/layout/types.ts`
+  - Added cost panel nav item (coin icon) to `IconRail.tsx` between dashboard and model-config
+  - Added cost panel title (费用总览 / Cost Overview) to `Sidebar.tsx` PAGE_TITLES
+  - Registered `CostPanelPage` in `AppLayout.tsx` PAGE_COMPONENTS
+  - Created `src/pages/cost-panel/TrendChart.tsx`: CSS bar chart showing daily cost history with configurable date range, responsive bar heights, cost and date labels, empty state
+  - Created `src/pages/cost-panel/ProviderBreakdown.tsx`: Provider cost distribution with percentage bars, sorted by cost descending, 8 distinct provider colors
+  - Created `src/pages/cost-panel/ExportButton.tsx`: CSV/JSON export buttons using `cost.export` IPC, triggers browser download via Blob URL
+  - Created `src/pages/cost-panel/index.tsx`: Main page composing all sub-components, with:
+    - Page header with title and export buttons
+    - Reused `CostCards` component from dashboard for today/week/month summary
+    - Range selector (7d/14d/30d) for trend chart
+    - TrendChart with daily cost data from `cost.history` IPC
+    - ProviderBreakdown with monthly provider cost distribution
+    - Parallel IPC fetches (`cost.summary` + `cost.history`) with cancellation guard
+- **Design decisions**:
+  - Reuses `CostCards` from dashboard (no duplication of summary card logic)
+  - TrendChart uses pure CSS bars (no charting library dependency)
+  - Range selector controls which date range is fetched via `cost.history` IPC
+  - Provider breakdown shows month-level aggregation from `cost.summary` response
+  - Export uses browser Blob API for client-side download
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE

@@ -17,6 +17,12 @@ const NAV_ITEMS: readonly NavItem[] = [
     icon: "M3 3h6v6H3V3zm8 0h6v6h-6V3zM3 11h6v6H3v-6zm8 0h6v6h-6v-6z",
   },
   {
+    id: "cost-panel",
+    label: "费用",
+    // Coin/cost icon
+    icon: "M10 2a8 8 0 100 16 8 8 0 000-16zm1 12.93A6.01 6.01 0 0016 10a6.01 6.01 0 00-5-5.93V3a7 7 0 110 14v-1.07zM9 7h2v1h1a1 1 0 011 1v1a1 1 0 01-1 1h-2v1h2a1 1 0 011 1v1a1 1 0 01-1 1h-1v1H9v-1H8a1 1 0 01-1-1v-1a1 1 0 011-1h2v-1H8a1 1 0 01-1-1V9a1 1 0 011-1h1V7z",
+  },
+  {
     id: "model-config",
     label: "模型",
     // Cube/model icon

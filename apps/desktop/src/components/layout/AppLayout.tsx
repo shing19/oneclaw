@@ -3,6 +3,7 @@ import { useConfigStore } from "@/stores";
 import { useTheme } from "@/hooks/use-theme";
 import { typography } from "@/theme";
 import DashboardPage from "@/pages/dashboard";
+import CostPanelPage from "@/pages/cost-panel";
 import ModelConfigPage from "@/pages/model-config";
 import ChannelConfigPage from "@/pages/channel-config";
 import SettingsPage from "@/pages/settings";
@@ -13,6 +14,7 @@ import type { PageId } from "./types";
 
 const PAGE_COMPONENTS: Record<PageId, React.ComponentType> = {
   dashboard: DashboardPage,
+  "cost-panel": CostPanelPage,
   "model-config": ModelConfigPage,
   "channel-config": ChannelConfigPage,
   settings: SettingsPage,

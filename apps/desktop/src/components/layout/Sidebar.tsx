@@ -4,6 +4,7 @@ import type { PageId } from "./types";
 
 const PAGE_TITLES: Record<PageId, { zh: string; en: string }> = {
   dashboard: { zh: "仪表盘", en: "Dashboard" },
+  "cost-panel": { zh: "费用总览", en: "Cost Overview" },
   "model-config": { zh: "模型配置", en: "Model Config" },
   "channel-config": { zh: "通信配置", en: "Channel Config" },
   settings: { zh: "设置", en: "Settings" },
