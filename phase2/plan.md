@@ -35,7 +35,7 @@ Current codebase is CLI/core focused. Missing major Phase 2 foundations:
 ## Milestone P2-B: Runtime Bridge and IPC (Week 2)
 
 - [x] `P2-B1` Define typed IPC contracts for status/config/start/stop/doctor/cost/model/channel.
-- [ ] `P2-B2` Implement Tauri command layer (or sidecar bridge) for core read operations first.
+- [x] `P2-B2` Implement Tauri command layer (or sidecar bridge) for core read operations first.
 - [ ] `P2-B3` Implement write/action operations with error mapping (`zh-CN` and `en`).
 - [ ] `P2-B4` Add event channel for runtime status/log/cost updates.
 - [ ] `P2-B5` Add integration tests for IPC contract compatibility.

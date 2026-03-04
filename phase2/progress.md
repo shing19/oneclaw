@@ -141,6 +141,45 @@
 
 ---
 
+## Iteration 7 — P2-B2: Implement sidecar bridge for core read operations
+
+- **Date**: 2026-03-04
+- **Scope**: Implement the sidecar process (TypeScript/Bun) that wraps `@oneclaw/core` modules via JSON-RPC 2.0 over stdin/stdout, the Rust Tauri bridge that manages the sidecar lifecycle and routes IPC, and a type-safe frontend IPC client
+- **Implementation**:
+  - Created `src-tauri/sidecar/context.ts`: lazy-initialized service context (ConfigManager, SecretStore, ProviderRegistry, QuotaTracker)
+  - Created 7 handler modules in `src-tauri/sidecar/handlers/`:
+    - `agent.ts`: `agent.status`, `agent.health` — returns default stopped status (kernel not running yet)
+    - `config.ts`: `config.get`, `config.validate` — wraps ConfigManager.load() + validateConfig()
+    - `model.ts`: `model.list`, `model.listPresets`, `model.getQuota` — wraps ProviderRegistry + QuotaTracker
+    - `secret.ts`: `secret.exists`, `secret.list` — wraps SecretStore (values never returned)
+    - `channel.ts`: `channel.feishu.status` — returns disconnected state (no adapter connected yet)
+    - `cost.ts`: `cost.summary`, `cost.history`, `cost.export` — aggregates from QuotaTracker daily/weekly/monthly
+    - `doctor.ts`: `doctor.run` — filesystem, config, secret store checks with bilingual messages
+  - Created `src-tauri/sidecar/router.ts`: JSON-RPC method dispatcher with 14 read methods registered
+  - Created `src-tauri/sidecar/main.ts`: stdin line reader, JSON-RPC dispatch loop, sends `ready` notification on startup
+  - Created `src-tauri/sidecar/tsconfig.json`: strict TypeScript config for sidecar (module: NodeNext)
+  - Created `src-tauri/src/commands/sidecar.rs`: Rust sidecar process manager — spawns bun, manages stdin/stdout, request/response correlation via HashMap + oneshot channels, 30s timeout
+  - Created `src-tauri/src/commands/ipc.rs`: single `ipc_request` Tauri command that bridges frontend invoke() to sidecar
+  - Created `src/ipc/client.ts`: type-safe `ipcCall<M>()` and `ipcCallSafe<M>()` functions using IpcMethodMap generics
+  - Updated `src-tauri/src/commands/mod.rs`: registered ipc and sidecar modules
+  - Updated `src-tauri/src/lib.rs`: added SidecarState management, sidecar spawn in setup, ipc_request in invoke_handler
+  - Updated `src-tauri/Cargo.toml`: added tokio with process/io-util/sync/time/macros features
+  - Updated `package.json`: added `@oneclaw/core` workspace dependency, sidecar typecheck script
+  - Updated `src/ipc/index.ts`: exported client module
+- **Design decisions**:
+  - 14 read-only methods implemented (write/action operations deferred to P2-B3)
+  - Sidecar spawned via `bun run` in dev, compiled binary in production
+  - Request/response correlation via monotonic u64 IDs + HashMap<u64, oneshot::Sender>
+  - Sidecar sends `ready` JSON-RPC notification on startup; Tauri emits it as `sidecar-ready` event
+  - Frontend client returns typed results via generic mapped types (`IpcParams<M>` → `IpcResult<M>`)
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop including sidecar)
+  - `pnpm test`: 74 tests pass (56 core + 18 cli)
+  - `cargo check`: compiles clean
+- **Status**: COMPLETE
+
+---
+
 ## Failed Attempts
 
 ### 2026-03-04 10:54:36 | Agent: claude | Iteration: 2
@@ -155,4 +194,17 @@
 - **lint**: 0 errors, 3 warnings
 | Local quality gates real and passing | **Yes** — typecheck (2 packages), 74 tests (56 core + 18 cli), lint (0 errors, 3 warnings) |
 ^C[2026-03-04 10:54:36] [Agent: claude] Failed on iteration 2.
+```
+
+### 2026-03-04 11:30:52 | Agent: claude | Iteration: 6
+- Task: Unknown Task
+- Exit code: 1
+- Attempts: 1
+- Log: `/Users/shing/Projects/oneclaw/ralph-log.txt`
+- Error excerpt:
+```text
+- **Validation**: typecheck (3 packages), 74 tests, 0 lint errors
+- **JSON-RPC 2.0 base types** — request, response, notification, error with standard + app error codes
+[2026-03-04 11:30:52] [Agent: claude] Task policy failed (rc=91): Task completed but mandatory feedback loops failed.
+[2026-03-04 11:30:52] [Agent: claude] Failed on iteration 6.
 ```

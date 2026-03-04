@@ -24,3 +24,6 @@ export * from "./events.js";
 
 // Unified method map
 export * from "./method-map.js";
+
+// IPC client
+export * from "./client.js";
