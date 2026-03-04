@@ -1970,3 +1970,29 @@
   - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 17 — P2-D4: Verify app config path and secret behavior consistency across platforms
+
+- **Date**: 2026-03-04
+- **Scope**: Add comprehensive cross-platform verification tests for config path resolution, secret store backend auto-detection, encrypted-file round-trips, audit logging, and bilingual error messages
+- **Implementation**:
+  - Created `packages/core/src/config/__tests__/platform-paths.test.ts` (18 tests):
+    - macOS: `~/Library/Application Support/oneclaw/config.json` with all sub-paths
+    - Windows: `%APPDATA%/oneclaw/config.json` with fallbacks for missing/empty/whitespace APPDATA
+    - Linux: `~/.config/oneclaw/config.json` with all sub-paths
+    - `ONECLAW_CONFIG_PATH` override: `.json` extension detection, directory fallback, precedence over platform defaults, ignoring empty/whitespace values
+    - Consistency guarantees: secretsFilePath/backupsDir/dataDir always inside configDir, all platforms produce unique directories
+  - Created `packages/core/src/secrets/__tests__/platform-consistency.test.ts` (17 tests):
+    - Backend auto-detection: macOS → keychain, Linux → secret-service, win32 → encrypted-file (no native backend yet), fallback when tools unavailable, explicit preferredBackend override
+    - Cross-platform round-trip: macOS keychain, Linux secret-service, Windows encrypted-file — all preserve unicode values (Chinese, Greek characters)
+    - Encrypted-file storage: verifies secrets.enc exists and plaintext never appears, correct AES-256-GCM payload structure on all platforms
+    - Audit log: created under dataDir on all platforms, never contains secret values, proper JSON format with operation/key/timestamp/backend fields
+    - Encrypted-file determinism: same password+machineId decrypts across simulated platform switches, different machineId or password fails to decrypt
+    - Bilingual errors: zh-CN produces Chinese messages, en produces English messages
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 140 tests pass (91 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
