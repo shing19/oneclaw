@@ -44,7 +44,7 @@ PARALLEL_AGENT_LIST=()
 DOC_POLICY_REASON=""
 TASK_POLICY_REASON=""
 INSTRUCTIONS_FILE="${INSTRUCTIONS_FILE:-}"
-COMPLETE_WHEN_NO_PATTERN="${COMPLETE_WHEN_NO_PATTERN:-}"
+COMPLETE_WHEN_NO_PATTERN="${COMPLETE_WHEN_NO_PATTERN:-- [ ]}"
 TELEGRAM_CONFIG="${TELEGRAM_CONFIG:-$HOME/.claude/skills/telegram-notify/config.json}"
 AGENT="${AGENT:-}"
 PROJECT_NAME="${PROJECT_NAME:-$(basename "$(pwd)")}"
@@ -286,6 +286,7 @@ build_prompt_file() {
         printf -- '- If a task is marked complete (next unchecked task changes), you MUST run mandatory feedback loops, update docs, then commit and run `git push`.\n'
         printf -- '- If you update documentation completion state (task checkbox/progress completed), you MUST commit and run `git push`.\n'
         printf -- '- If a task attempt fails, append a failure record to progress with task, command, error excerpt, and log path.\n'
+        printf -- '- When ALL tasks in the plan are checked complete, append `<COMPLETE>` on its own line at the end of the progress file.\n'
         printf '\n\n---\n\n## Current Progress\n\n'
         if [[ -f "$PROGRESS_FILE" ]]; then
             cat "$PROGRESS_FILE"
@@ -311,6 +312,7 @@ build_prompt_file_for() {
         printf -- '- If a task is marked complete (next unchecked task changes), you MUST run mandatory feedback loops, update docs, then commit and run `git push`.\n'
         printf -- '- If you update documentation completion state (task checkbox/progress completed), you MUST commit and run `git push`.\n'
         printf -- '- If a task attempt fails, append a failure record to progress with task, command, error excerpt, and log path.\n'
+        printf -- '- When ALL tasks in the plan are checked complete, append `<COMPLETE>` on its own line at the end of the progress file.\n'
         printf '\n\n---\n\n## Current Progress\n\n'
         if [[ -f "$progress_file" ]]; then
             cat "$progress_file"
