@@ -8,17 +8,22 @@ const typedConfigs = [
   ...tseslint.configs.stylisticTypeChecked,
 ].map((config) => ({
   ...config,
-  files: ["**/*.ts"],
+  files: ["**/*.ts", "**/*.tsx"],
 }));
 
 export default tseslint.config(
   {
-    ignores: ["**/node_modules/**", "**/dist/**", "**/coverage/**"],
+    ignores: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/coverage/**",
+      "**/src-tauri/**",
+    ],
   },
   js.configs.recommended,
   ...typedConfigs,
   {
-    files: ["**/*.ts"],
+    files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -69,6 +74,17 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+    },
+  },
+  {
+    files: ["apps/desktop/src/**/*.{ts,tsx}"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "off",
     },
   },
   {
