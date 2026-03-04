@@ -721,9 +721,20 @@ function parseModelConfig(
     nonEmpty: true,
   });
 
-  const defaultModel = expectString(defaultModelRaw, [...path, "defaultModel"], ctx, {
-    pattern: DEFAULT_MODEL_PATTERN,
-  });
+  // defaultModel may be empty on fresh/reset config (no model selected yet).
+  // Only enforce provider/model pattern when non-empty.
+  const defaultModel = expectString(defaultModelRaw, [...path, "defaultModel"], ctx);
+  if (defaultModel !== null && defaultModel !== "" && !DEFAULT_MODEL_PATTERN.test(defaultModel)) {
+    addIssue(
+      ctx,
+      [...path, "defaultModel"],
+      "invalid_string",
+      "String format is invalid. Expected 'provider/model'.",
+      "字符串格式不合法，应为 'provider/model' 格式。",
+      "Use format like 'deepseek/deepseek-chat'.",
+      "请使用如 'deepseek/deepseek-chat' 的格式。",
+    );
+  }
 
   let perModelSettings: Record<string, ModelSettings> | null = null;
   const perModelObject = expectObject(perModelSettingsRaw, [...path, "perModelSettings"], ctx);

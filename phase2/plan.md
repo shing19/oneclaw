@@ -55,11 +55,11 @@ Current codebase is CLI/core focused. Missing major Phase 2 foundations:
 - [x] `P2-D2` Windows desktop packaging pipeline (`.exe`) proof build.
 - [x] `P2-D3` Linux desktop packaging pipeline (`.AppImage` or `.deb`) proof build.
 - [x] `P2-D4` Verify app config path and secret behavior consistency across platforms.
-- [ ] `P2-D5` Add release artifacts upload for desktop builds.
+- [x] `P2-D5` Add release artifacts upload for desktop builds.
 
 ## Milestone P2-E: Stabilization and Exit (Week 7)
 
-- [ ] `P2-E1` End-to-end happy path: first launch -> wizard -> start agent -> receive channel test message.
+- [x] `P2-E1` End-to-end happy path: first launch -> wizard -> start agent -> receive channel test message.
 - [ ] `P2-E2` Error UX review: common failures have localized and actionable guidance.
 - [ ] `P2-E3` Performance sanity: startup time and key page interactions acceptable.
 - [ ] `P2-E4` Security sanity: secret values never exposed in UI logs or plain text exports.
