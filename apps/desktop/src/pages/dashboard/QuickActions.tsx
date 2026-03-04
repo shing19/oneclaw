@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
 import type { AgentStatus } from "@/stores/agent-store";
 import { ipcCallSafe } from "@/ipc/client";
+import type { IpcError } from "@/ipc/client";
 import type { ColorTokens } from "@/theme";
 import { spacing, typography, borderRadius, transitions } from "@/theme";
+import ErrorAlert from "@/components/ErrorAlert";
 
 interface QuickActionsProps {
   status: AgentStatus;
@@ -70,34 +72,41 @@ export default function QuickActions({
   language,
 }: QuickActionsProps): React.JSX.Element {
   const [loading, setLoading] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<IpcError | null>(null);
 
   const handleStart = useCallback(async () => {
     setLoading("start");
+    setActionError(null);
     onStatusChange("starting");
     const result = await ipcCallSafe("agent.start", {} as Record<string, never>);
     if (!result.ok) {
       onStatusChange("error");
+      setActionError(result.error);
     }
     setLoading(null);
   }, [onStatusChange]);
 
   const handleStop = useCallback(async () => {
     setLoading("stop");
+    setActionError(null);
     const result = await ipcCallSafe("agent.stop", {} as Record<string, never>);
     if (result.ok) {
       onStatusChange("stopped");
     } else {
       onStatusChange("error");
+      setActionError(result.error);
     }
     setLoading(null);
   }, [onStatusChange]);
 
   const handleRestart = useCallback(async () => {
     setLoading("restart");
+    setActionError(null);
     onStatusChange("starting");
     const result = await ipcCallSafe("agent.restart", {} as Record<string, never>);
     if (!result.ok) {
       onStatusChange("error");
+      setActionError(result.error);
     }
     setLoading(null);
   }, [onStatusChange]);
@@ -159,6 +168,19 @@ export default function QuickActions({
           loading={loading === "restart"}
         />
       </div>
+      {actionError && (
+        <div style={{ marginTop: spacing.md }}>
+          <ErrorAlert
+            code={actionError.code}
+            message={actionError.message}
+            recoverable={actionError.recoverable}
+            language={language}
+            colors={colors}
+            onDismiss={() => setActionError(null)}
+            compact
+          />
+        </div>
+      )}
     </div>
   );
 }

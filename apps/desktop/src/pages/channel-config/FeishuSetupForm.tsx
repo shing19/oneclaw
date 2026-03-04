@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
 import { ipcCallSafe } from "@/ipc/client";
+import type { IpcError } from "@/ipc/client";
 import type { IpcTestResult, IpcChannelStatus, IpcChannelErrorInfo } from "@/ipc/methods/channel";
 import type { ColorTokens } from "@/theme";
 import { spacing, typography, borderRadius, transitions } from "@/theme";
+import ErrorAlert from "@/components/ErrorAlert";
 
 interface FeishuSetupFormProps {
   colors: ColorTokens;
@@ -26,7 +28,7 @@ export default function FeishuSetupForm({
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [setupResult, setSetupResult] = useState<IpcTestResult | null>(null);
-  const [setupError, setSetupError] = useState<string | null>(null);
+  const [setupError, setSetupError] = useState<IpcError | null>(null);
 
   const t = language === "zh-CN"
     ? {
@@ -93,7 +95,7 @@ export default function FeishuSetupForm({
       setWebhookToken("");
       onSetupComplete(result.data.testResult);
     } else {
-      setSetupError(result.error.message);
+      setSetupError(result.error);
     }
     setSaving(false);
   }, [appId, appSecret, webhookUrl, webhookToken, onSetupComplete]);
@@ -108,7 +110,7 @@ export default function FeishuSetupForm({
       setSetupResult(result.data);
       onStatusRefresh(result.data.status, result.data.error);
     } else {
-      setSetupError(result.error.message);
+      setSetupError(result.error);
     }
     setTesting(false);
   }, [onStatusRefresh]);
@@ -386,18 +388,15 @@ export default function FeishuSetupForm({
       )}
 
       {setupError && (
-        <div
-          style={{
-            marginTop: spacing.lg,
-            padding: `${spacing.sm}px ${spacing.md}px`,
-            backgroundColor: colors.error + "10",
-            border: `1px solid ${colors.error}30`,
-            borderRadius: borderRadius.sm,
-            fontSize: typography.fontSizeSm,
-            color: colors.error,
-          }}
-        >
-          {setupError}
+        <div style={{ marginTop: spacing.lg }}>
+          <ErrorAlert
+            code={setupError.code}
+            message={setupError.message}
+            recoverable={setupError.recoverable}
+            language={language}
+            colors={colors}
+            onDismiss={() => setSetupError(null)}
+          />
         </div>
       )}
     </div>

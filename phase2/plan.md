@@ -60,7 +60,7 @@ Current codebase is CLI/core focused. Missing major Phase 2 foundations:
 ## Milestone P2-E: Stabilization and Exit (Week 7)
 
 - [x] `P2-E1` End-to-end happy path: first launch -> wizard -> start agent -> receive channel test message.
-- [ ] `P2-E2` Error UX review: common failures have localized and actionable guidance.
+- [x] `P2-E2` Error UX review: common failures have localized and actionable guidance.
 - [ ] `P2-E3` Performance sanity: startup time and key page interactions acceptable.
 - [ ] `P2-E4` Security sanity: secret values never exposed in UI logs or plain text exports.
 - [ ] `P2-E5` Complete `phase2/human-review.md` with PASS on required gates.

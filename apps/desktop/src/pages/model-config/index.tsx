@@ -3,9 +3,11 @@ import { useModelStore } from "@/stores/model-store";
 import { useConfigStore } from "@/stores/config-store";
 import { useTheme } from "@/hooks/use-theme";
 import { ipcCallSafe } from "@/ipc/client";
+import type { IpcError } from "@/ipc/client";
 import type { IpcProviderSummary } from "@/ipc/methods/model";
 import type { IpcModelSettings } from "@/ipc/methods/config";
 import { spacing, typography } from "@/theme";
+import ErrorAlert from "@/components/ErrorAlert";
 import ProviderCard from "./ProviderCard";
 import FallbackChain from "./FallbackChain";
 import ModelSettingsPanel from "./ModelSettingsPanel";
@@ -28,6 +30,7 @@ export default function ModelConfigPage(): React.JSX.Element {
   const [apiKeyStatus, setApiKeyStatus] = useState<Record<string, boolean>>({});
   const [perModelSettings, setPerModelSettings] = useState<Record<string, IpcModelSettings>>({});
   const [selectedModel, setSelectedModel] = useState<SelectedModel | null>(null);
+  const [fetchError, setFetchError] = useState<IpcError | null>(null);
 
   // Fetch data on mount
   useEffect(() => {
@@ -52,6 +55,8 @@ export default function ModelConfigPage(): React.JSX.Element {
             enabled: p.enabled,
           })),
         );
+      } else {
+        setFetchError(listResult.error);
       }
 
       if (configResult.ok) {
@@ -185,6 +190,18 @@ export default function ModelConfigPage(): React.JSX.Element {
         height: "100%",
       }}
     >
+      {/* Fetch error */}
+      {fetchError && (
+        <ErrorAlert
+          code={fetchError.code}
+          message={fetchError.message}
+          recoverable={fetchError.recoverable}
+          language={language}
+          colors={colors}
+          onDismiss={() => setFetchError(null)}
+        />
+      )}
+
       {/* Page header */}
       <div>
         <h1

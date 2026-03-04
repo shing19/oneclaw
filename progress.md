@@ -2023,3 +2023,36 @@
   - `pnpm test`: 140 tests pass (91 core + 18 cli + 31 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 18 — P2-E2: Error UX review: common failures have localized and actionable guidance
+
+- **Date**: 2026-03-04
+- **Scope**: Add bilingual error guidance system, reusable ErrorAlert component, fix ipcCallSafe to preserve structured error data, and add error display to all pages that previously silently swallowed errors
+- **Implementation**:
+  - Created `src/components/error-guidance.ts`: bilingual error guidance mapping (20+ error codes → localized title + actionable guidance), `resolveErrorGuidance()` function with 3-level lookup (app code → JSON-RPC code → generic fallback)
+  - Created `src/components/ErrorAlert.tsx`: reusable error alert component with localized title from guidance map, actionable guidance text, technical detail (monospace), recoverable hint, dismiss button; supports compact mode for inline use
+  - Fixed `src/ipc/client.ts`: `ipcCallSafe` now extracts structured error data (code, recoverable) from Tauri invoke errors via `parseIpcError()` — checks `obj.data.code` (JSON-RPC error data shape) and direct fields (SidecarHandlerError shape) instead of always returning generic `IPC_ERROR`
+  - Updated `src/pages/dashboard/QuickActions.tsx`: shows ErrorAlert when start/stop/restart fails (was silently setting "error" status with no explanation)
+  - Updated `src/pages/dashboard/index.tsx`: shows ErrorAlert when initial status/cost fetch fails (was silently swallowing)
+  - Updated `src/pages/model-config/index.tsx`: shows ErrorAlert when provider/config fetch fails (was silently swallowing)
+  - Updated `src/pages/model-config/ProviderCard.tsx`: shows ErrorAlert for API key save and test connection failures (was silently swallowing)
+  - Updated `src/pages/cost-panel/index.tsx`: shows ErrorAlert when cost data fetch fails (was silently swallowing)
+  - Updated `src/pages/channel-config/ConnectionStatus.tsx`: replaced raw error code display with localized guidance from `resolveErrorGuidance()` — shows title, action, and technical detail
+  - Updated `src/pages/channel-config/FeishuSetupForm.tsx`: replaced raw error string display with ErrorAlert component
+  - Updated `src/pages/channel-config/TestMessageSection.tsx`: replaced raw error string display with ErrorAlert component
+  - Updated `src/components/index.ts`: exported ErrorAlert and resolveErrorGuidance
+- **Error guidance coverage**:
+  - Kernel: KERNEL_START_FAILED, KERNEL_STOP_FAILED, KERNEL_ALREADY_RUNNING
+  - Config: CONFIG_LOAD_FAILED, CONFIG_SAVE_FAILED, CONFIG_INVALID
+  - Secret: SECRET_STORE_UNAVAILABLE, SECRET_NOT_FOUND
+  - Channel: CHANNEL_NOT_CONNECTED, CHANNEL_AUTH_FAILED, CHANNEL_SEND_FAILED, CHANNEL_TIMEOUT
+  - Model: MODEL_PROVIDER_UNREACHABLE, MODEL_AUTH_FAILED, MODEL_QUOTA_EXCEEDED
+  - Transport: IPC_ERROR, INTERNAL_ERROR
+  - JSON-RPC fallback: -32001 through -32005
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 162 tests pass (91 core + 18 cli + 53 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE

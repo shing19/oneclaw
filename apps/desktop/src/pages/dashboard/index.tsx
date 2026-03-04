@@ -1,10 +1,12 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useAgentStore } from "@/stores/agent-store";
 import { useCostStore } from "@/stores/cost-store";
 import { useConfigStore } from "@/stores/config-store";
 import { useTheme } from "@/hooks/use-theme";
 import { ipcCallSafe } from "@/ipc/client";
+import type { IpcError } from "@/ipc/client";
 import { spacing } from "@/theme";
+import ErrorAlert from "@/components/ErrorAlert";
 import StatusCard from "./StatusCard";
 import CostCards from "./CostCards";
 import QuickActions from "./QuickActions";
@@ -27,6 +29,8 @@ export default function DashboardPage(): React.JSX.Element {
   const updateWeek = useCostStore((s) => s.updateWeek);
   const updateMonth = useCostStore((s) => s.updateMonth);
 
+  const [fetchError, setFetchError] = useState<IpcError | null>(null);
+
   // Fetch initial data on mount
   useEffect(() => {
     let cancelled = false;
@@ -44,6 +48,8 @@ export default function DashboardPage(): React.JSX.Element {
         if (state === "running" || state === "stopped" || state === "starting" || state === "error") {
           setStatus(state);
         }
+      } else {
+        setFetchError(statusResult.error);
       }
 
       if (costResult.ok) {
@@ -88,6 +94,18 @@ export default function DashboardPage(): React.JSX.Element {
         height: "100%",
       }}
     >
+      {/* Fetch error */}
+      {fetchError && (
+        <ErrorAlert
+          code={fetchError.code}
+          message={fetchError.message}
+          recoverable={fetchError.recoverable}
+          language={language}
+          colors={colors}
+          onDismiss={() => setFetchError(null)}
+        />
+      )}
+
       {/* Top row: Status + Quick Actions */}
       <div style={{ display: "flex", gap: spacing.lg, flexWrap: "wrap" }}>
         <StatusCard

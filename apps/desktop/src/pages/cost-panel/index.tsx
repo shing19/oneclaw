@@ -3,8 +3,10 @@ import { useCostStore } from "@/stores/cost-store";
 import { useConfigStore } from "@/stores/config-store";
 import { useTheme } from "@/hooks/use-theme";
 import { ipcCallSafe } from "@/ipc/client";
+import type { IpcError } from "@/ipc/client";
 import type { IpcDailyCostSummary } from "@/ipc/methods/cost";
 import { spacing, typography } from "@/theme";
+import ErrorAlert from "@/components/ErrorAlert";
 import CostCards from "@/pages/dashboard/CostCards";
 import TrendChart from "./TrendChart";
 import ProviderBreakdown from "./ProviderBreakdown";
@@ -42,6 +44,7 @@ export default function CostPanelPage(): React.JSX.Element {
   const [daily, setDaily] = useState<readonly IpcDailyCostSummary[]>([]);
   const [activeRange, setActiveRange] = useState<RangeKey>("7d");
   const [monthByProvider, setMonthByProvider] = useState<Record<string, number>>({});
+  const [fetchError, setFetchError] = useState<IpcError | null>(null);
 
   // Fetch summary + history on mount and range change
   useEffect(() => {
@@ -77,6 +80,9 @@ export default function CostPanelPage(): React.JSX.Element {
           tokens: 0,
         });
         setMonthByProvider(overview.month.byProvider);
+        setFetchError(null);
+      } else {
+        setFetchError(summaryResult.error);
       }
 
       if (historyResult.ok) {
@@ -121,6 +127,18 @@ export default function CostPanelPage(): React.JSX.Element {
         </h1>
         <ExportButton colors={colors} language={language} />
       </div>
+
+      {/* Fetch error */}
+      {fetchError && (
+        <ErrorAlert
+          code={fetchError.code}
+          message={fetchError.message}
+          recoverable={fetchError.recoverable}
+          language={language}
+          colors={colors}
+          onDismiss={() => setFetchError(null)}
+        />
+      )}
 
       {/* Summary cards */}
       <CostCards

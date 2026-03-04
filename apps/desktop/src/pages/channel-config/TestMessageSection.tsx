@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
 import { ipcCallSafe } from "@/ipc/client";
+import type { IpcError } from "@/ipc/client";
 import type { IpcChannelStatus, IpcSendResult } from "@/ipc/methods/channel";
 import type { ColorTokens } from "@/theme";
 import { spacing, typography, borderRadius, transitions } from "@/theme";
+import ErrorAlert from "@/components/ErrorAlert";
 
 interface TestMessageSectionProps {
   colors: ColorTokens;
@@ -18,7 +20,7 @@ export default function TestMessageSection({
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<IpcSendResult | null>(null);
-  const [sendError, setSendError] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<IpcError | null>(null);
 
   const t = language === "zh-CN"
     ? {
@@ -61,7 +63,7 @@ export default function TestMessageSection({
         setMessage("");
       }
     } else {
-      setSendError(result.error.message);
+      setSendError(result.error);
     }
     setSending(false);
   }, [message]);
@@ -189,18 +191,16 @@ export default function TestMessageSection({
       )}
 
       {sendError && (
-        <div
-          style={{
-            marginTop: spacing.md,
-            padding: `${spacing.sm}px ${spacing.md}px`,
-            backgroundColor: colors.error + "10",
-            border: `1px solid ${colors.error}30`,
-            borderRadius: borderRadius.sm,
-            fontSize: typography.fontSizeSm,
-            color: colors.error,
-          }}
-        >
-          {sendError}
+        <div style={{ marginTop: spacing.md }}>
+          <ErrorAlert
+            code={sendError.code}
+            message={sendError.message}
+            recoverable={sendError.recoverable}
+            language={language}
+            colors={colors}
+            onDismiss={() => setSendError(null)}
+            compact
+          />
         </div>
       )}
     </div>

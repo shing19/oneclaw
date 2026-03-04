@@ -48,9 +48,57 @@ export class IpcError extends Error {
 }
 
 /**
+ * Extract structured error data from a Tauri invoke error.
+ *
+ * Tauri may pass errors as strings or objects with `code`, `message`,
+ * and `data` fields from the JSON-RPC error response.
+ */
+function parseIpcError(error: unknown): IpcError {
+  // Tauri invoke errors may be plain strings
+  if (typeof error === "string") {
+    return new IpcError(error, "IPC_ERROR", true);
+  }
+
+  // Object error — may have structured fields from sidecar
+  if (typeof error === "object" && error !== null) {
+    const obj = error as Record<string, unknown>;
+
+    // Extract message
+    const message =
+      typeof obj["message"] === "string"
+        ? obj["message"]
+        : error instanceof Error
+          ? error.message
+          : "Unknown error";
+
+    // Try to extract code from obj.data.code (JSON-RPC error data shape)
+    let code = "IPC_ERROR";
+    let recoverable = true;
+    const data = obj["data"];
+    if (typeof data === "object" && data !== null) {
+      const d = data as Record<string, unknown>;
+      if (typeof d["code"] === "string") code = d["code"];
+      if (typeof d["recoverable"] === "boolean") recoverable = d["recoverable"];
+    }
+    // Also check direct fields (SidecarHandlerError shape)
+    if (code === "IPC_ERROR" && typeof obj["code"] === "string") {
+      code = obj["code"];
+    }
+    if (typeof obj["recoverable"] === "boolean") {
+      recoverable = obj["recoverable"];
+    }
+
+    return new IpcError(message, code, recoverable);
+  }
+
+  return new IpcError(String(error), "IPC_ERROR", true);
+}
+
+/**
  * Call a JSON-RPC method with structured error handling.
  *
  * Returns `{ ok: true, data }` on success or `{ ok: false, error }` on failure.
+ * Preserves structured error codes and recoverable flags from the sidecar.
  */
 export async function ipcCallSafe<M extends IpcMethodName>(
   method: M,
@@ -63,11 +111,7 @@ export async function ipcCallSafe<M extends IpcMethodName>(
     const data = await ipcCall(method, params);
     return { ok: true, data };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    return {
-      ok: false,
-      error: new IpcError(message, "IPC_ERROR", true),
-    };
+    return { ok: false, error: parseIpcError(error) };
   }
 }
 

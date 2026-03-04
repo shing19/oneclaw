@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
 import { ipcCallSafe } from "@/ipc/client";
+import type { IpcError } from "@/ipc/client";
 import type { IpcProviderSummary, IpcProviderHealth } from "@/ipc/methods/model";
 import type { ColorTokens } from "@/theme";
 import { spacing, typography, borderRadius, transitions } from "@/theme";
+import ErrorAlert from "@/components/ErrorAlert";
 
 interface ProviderCardProps {
   provider: IpcProviderSummary;
@@ -78,10 +80,12 @@ export default function ProviderCard({
   const [savingKey, setSavingKey] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<IpcProviderHealth | null>(null);
+  const [cardError, setCardError] = useState<IpcError | null>(null);
 
   const handleSaveApiKey = useCallback(async () => {
     if (!apiKeyInput.trim()) return;
     setSavingKey(true);
+    setCardError(null);
     const result = await ipcCallSafe("secret.set", {
       key: `oneclaw/provider/${provider.id}/api-key`,
       value: apiKeyInput.trim(),
@@ -89,6 +93,8 @@ export default function ProviderCard({
     if (result.ok) {
       setApiKeyInput("");
       onApiKeySaved(provider.id);
+    } else {
+      setCardError(result.error);
     }
     setSavingKey(false);
   }, [apiKeyInput, provider.id, onApiKeySaved]);
@@ -96,9 +102,12 @@ export default function ProviderCard({
   const handleTestConnection = useCallback(async () => {
     setTesting(true);
     setTestResult(null);
+    setCardError(null);
     const result = await ipcCallSafe("model.testProvider", { providerId: provider.id });
     if (result.ok) {
       setTestResult(result.data.health);
+    } else {
+      setCardError(result.error);
     }
     setTesting(false);
   }, [provider.id]);
@@ -378,6 +387,19 @@ export default function ProviderCard({
                 ? ` / ¥${provider.quota.limit.toFixed(2)}`
                 : ` (${t.unlimited})`}
             </div>
+          )}
+
+          {/* Error feedback */}
+          {cardError && (
+            <ErrorAlert
+              code={cardError.code}
+              message={cardError.message}
+              recoverable={cardError.recoverable}
+              language={language}
+              colors={colors}
+              onDismiss={() => setCardError(null)}
+              compact
+            />
           )}
 
           {/* Model list */}

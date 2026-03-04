@@ -1,6 +1,7 @@
 import type { IpcChannelStatus, IpcChannelErrorInfo } from "@/ipc/methods/channel";
 import type { ColorTokens } from "@/theme";
 import { spacing, typography, borderRadius, transitions } from "@/theme";
+import { resolveErrorGuidance } from "@/components/error-guidance";
 
 interface ConnectionStatusProps {
   status: IpcChannelStatus;
@@ -88,32 +89,48 @@ export default function ConnectionStatus({
         )}
       </div>
 
-      {/* Error details */}
-      {error && (
-        <div
-          style={{
-            marginTop: spacing.md,
-            padding: `${spacing.sm}px ${spacing.md}px`,
-            backgroundColor: colors.error + "10",
-            border: `1px solid ${colors.error}30`,
-            borderRadius: borderRadius.sm,
-            fontSize: typography.fontSizeSm,
-            color: colors.error,
-          }}
-        >
-          <div style={{ fontWeight: typography.fontWeightMedium }}>
-            {error.code}
-          </div>
-          <div style={{ marginTop: spacing.xs, color: colors.textSecondary }}>
-            {error.message}
-          </div>
-          {error.recoverable && (
-            <div style={{ marginTop: spacing.xs, color: colors.textDisabled }}>
-              {language === "zh-CN" ? "此错误可恢复" : "This error is recoverable"}
+      {/* Error details with actionable guidance */}
+      {error && (() => {
+        const guidance = resolveErrorGuidance(language, error.code);
+        return (
+          <div
+            style={{
+              marginTop: spacing.md,
+              padding: `${spacing.sm}px ${spacing.md}px`,
+              backgroundColor: colors.error + "10",
+              border: `1px solid ${colors.error}30`,
+              borderRadius: borderRadius.sm,
+              fontSize: typography.fontSizeSm,
+              color: colors.error,
+            }}
+          >
+            <div style={{ fontWeight: typography.fontWeightMedium }}>
+              {guidance.title}
             </div>
-          )}
-        </div>
-      )}
+            <div style={{ marginTop: spacing.xs, color: colors.textSecondary }}>
+              {guidance.action}
+            </div>
+            {error.message && (
+              <div
+                style={{
+                  marginTop: spacing.sm,
+                  fontSize: 11,
+                  color: colors.textDisabled,
+                  fontFamily: "monospace",
+                  wordBreak: "break-all",
+                }}
+              >
+                [{error.code}] {error.message}
+              </div>
+            )}
+            {error.recoverable && (
+              <div style={{ marginTop: spacing.xs, fontSize: 11, color: colors.textDisabled }}>
+                {language === "zh-CN" ? "此错误可恢复，请按提示操作。" : "This error is recoverable. Follow the guidance above."}
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
