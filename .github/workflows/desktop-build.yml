@@ -1,0 +1,104 @@
+name: Desktop Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/desktop/**"
+      - "packages/core/**"
+      - ".github/workflows/desktop-build.yml"
+  pull_request:
+    paths:
+      - "apps/desktop/**"
+      - "packages/core/**"
+      - ".github/workflows/desktop-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-macos:
+    name: macOS (.dmg)
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            arch: arm64
+          - target: x86_64-apple-darwin
+            arch: x64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/desktop/src-tauri/target
+          key: rust-${{ matrix.target }}-${{ hashFiles('apps/desktop/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            rust-${{ matrix.target }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build sidecar binary
+        working-directory: apps/desktop
+        run: bash scripts/build-sidecar.sh ${{ matrix.target }}
+
+      - name: Verify sidecar binary exists
+        run: |
+          BINARY="apps/desktop/src-tauri/binaries/oneclaw-sidecar-${{ matrix.target }}"
+          test -f "$BINARY" || { echo "Sidecar binary not found: $BINARY"; exit 1; }
+          echo "Sidecar binary size:"
+          ls -lh "$BINARY"
+
+      - name: Build Tauri app (.dmg)
+        working-directory: apps/desktop
+        run: pnpm tauri build --target ${{ matrix.target }} --bundles dmg
+        env:
+          # Skip code signing for proof builds (configure secrets for signed builds)
+          APPLE_SIGNING_IDENTITY: ""
+
+      - name: Verify .dmg output
+        run: |
+          DMG_DIR="apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg"
+          echo "Checking for .dmg in: $DMG_DIR"
+          ls -lh "$DMG_DIR"/*.dmg || { echo "No .dmg found"; exit 1; }
+
+      - name: Upload .dmg artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: oneclaw-macos-${{ matrix.arch }}
+          path: apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+          retention-days: 7

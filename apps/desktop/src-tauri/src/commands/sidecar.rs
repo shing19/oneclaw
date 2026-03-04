@@ -41,18 +41,26 @@ impl SidecarState {
 
     /// Spawn the sidecar process and start reading its stdout.
     pub async fn spawn(&self, app: &tauri::AppHandle) -> Result<(), String> {
-        // Resolve the sidecar entry point.
-        let sidecar_path = resolve_sidecar_path(app);
+        let mode = resolve_sidecar_mode(app);
 
-        let mut child = TokioCommand::new("bun")
-            .arg("run")
-            .arg(&sidecar_path)
-            .stdin(std::process::Stdio::piped())
-            .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::piped())
-            .kill_on_drop(true)
-            .spawn()
-            .map_err(|e| format!("Failed to spawn sidecar: {e}"))?;
+        let mut child = match &mode {
+            SidecarMode::Compiled(path) => TokioCommand::new(path)
+                .stdin(std::process::Stdio::piped())
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
+                .kill_on_drop(true)
+                .spawn()
+                .map_err(|e| format!("Failed to spawn sidecar binary: {e}"))?,
+            SidecarMode::DevSource(path) => TokioCommand::new("bun")
+                .arg("run")
+                .arg(path)
+                .stdin(std::process::Stdio::piped())
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
+                .kill_on_drop(true)
+                .spawn()
+                .map_err(|e| format!("Failed to spawn sidecar via bun: {e}"))?,
+        };
 
         let stdin = child
             .stdin
@@ -178,15 +186,29 @@ impl SidecarState {
     }
 }
 
-/// Resolve the sidecar entry script path.
-fn resolve_sidecar_path(app: &tauri::AppHandle) -> String {
-    // In development, run the TypeScript source directly with bun.
-    // In production, this would be the compiled sidecar binary path.
-    let resource_dir = app
-        .path()
-        .resource_dir()
-        .unwrap_or_default();
+/// How the sidecar process should be launched.
+enum SidecarMode {
+    /// Production: pre-compiled binary at the given path.
+    Compiled(String),
+    /// Development: TypeScript source to run with `bun run`.
+    DevSource(String),
+}
 
+/// Determine whether to run the compiled sidecar binary or the dev TypeScript source.
+fn resolve_sidecar_mode(app: &tauri::AppHandle) -> SidecarMode {
+    // 1. Check for compiled sidecar binary next to the main executable.
+    //    In a bundled macOS .app, external binaries are placed in Contents/MacOS/.
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let binary = exe_dir.join("oneclaw-sidecar");
+            if binary.exists() {
+                return SidecarMode::Compiled(binary.to_string_lossy().to_string());
+            }
+        }
+    }
+
+    // 2. Development mode: find TypeScript source relative to the resource dir.
+    let resource_dir = app.path().resource_dir().unwrap_or_default();
     let dev_path = resource_dir
         .parent()
         .and_then(std::path::Path::parent)
@@ -195,9 +217,9 @@ fn resolve_sidecar_path(app: &tauri::AppHandle) -> String {
         .unwrap_or_default();
 
     if dev_path.exists() {
-        return dev_path.to_string_lossy().to_string();
+        return SidecarMode::DevSource(dev_path.to_string_lossy().to_string());
     }
 
-    // Fallback: assume running from the project root.
-    "apps/desktop/src-tauri/sidecar/main.ts".to_string()
+    // 3. Fallback: assume running from the project root.
+    SidecarMode::DevSource("apps/desktop/src-tauri/sidecar/main.ts".to_string())
 }

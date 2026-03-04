@@ -1,0 +1,2 @@
+# Compiled sidecar binaries (built per-platform during CI/release)
+oneclaw-sidecar-*

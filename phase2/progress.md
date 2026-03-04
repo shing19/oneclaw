@@ -430,3 +430,37 @@ Created `errors.ts` with `SidecarHandlerError` and domain-specific JSON-RPC erro
   - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 15 — P2-D1: macOS desktop packaging pipeline (`.dmg`) proof build
+
+- **Date**: 2026-03-04
+- **Scope**: Implement macOS `.dmg` packaging pipeline with sidecar compilation, Tauri bundle config, and CI workflow
+- **Implementation**:
+  - Updated `src-tauri/tauri.conf.json`: added `externalBin: ["binaries/oneclaw-sidecar"]` for sidecar bundling, added `macOS: { minimumSystemVersion: "10.13" }` for macOS bundle config
+  - Updated `src-tauri/build.rs`: auto-creates placeholder sidecar binary during `cargo check`/`cargo build` using `TARGET` env var, so dev mode works without pre-compiled sidecar; placeholder is a shell script, never executed in dev (sidecar runs via `bun run`)
+  - Updated `src-tauri/src/commands/sidecar.rs`: replaced single-mode `resolve_sidecar_path` with `SidecarMode` enum + `resolve_sidecar_mode` that checks for compiled binary next to main executable first (production), then falls back to TypeScript source (dev); `spawn` method dispatches based on mode — `TokioCommand::new(binary)` for production, `TokioCommand::new("bun").arg("run")` for dev
+  - Created `apps/desktop/scripts/build-sidecar.sh`: cross-platform sidecar compilation script using `bun build --compile`; auto-detects Rust target triple or accepts argument; maps Rust triples to Bun compile targets (darwin-arm64/x64, windows-x64, linux-x64/arm64); outputs to `src-tauri/binaries/oneclaw-sidecar-{triple}`
+  - Created `apps/desktop/src-tauri/binaries/.gitignore`: excludes compiled sidecar binaries from version control
+  - Updated `apps/desktop/package.json`: added `build:sidecar` and `tauri:build` scripts
+  - Created `.github/workflows/desktop-build.yml`: macOS `.dmg` build workflow with:
+    - Matrix strategy for `aarch64-apple-darwin` (ARM64) and `x86_64-apple-darwin` (Intel)
+    - Runs on `macos-latest` with Rust stable, pnpm 10.26.1, Node 20, Bun latest
+    - Rust dependency caching via `actions/cache@v4`
+    - Steps: install deps → build sidecar → verify sidecar binary → `pnpm tauri build --target {triple} --bundles dmg` → verify `.dmg` output → upload artifact
+    - Triggered on push to main (desktop/core paths), PR, or manual dispatch
+    - Skips code signing for proof builds (`APPLE_SIGNING_IDENTITY=""`)
+    - Uploads `.dmg` as artifact with 7-day retention
+- **Design decisions**:
+  - `externalBin` approach: Tauri bundles the compiled sidecar binary alongside the main executable in `Contents/MacOS/`; at runtime, `resolve_sidecar_mode` finds it via `std::env::current_exe().parent()`
+  - Dev/prod detection: checks for compiled binary existence rather than `cfg!(debug_assertions)`, so dev builds with a real sidecar also work
+  - Build.rs placeholder: avoids requiring sidecar compilation for `cargo check` in development; uses `TARGET` env var (set by cargo) instead of `TAURI_ENV_TARGET_TRIPLE` (set later by tauri-build)
+  - Matrix build: separate ARM64 and Intel builds ensure proper sidecar compilation per architecture
+  - Path-scoped workflow trigger: only runs on changes to `apps/desktop/**`, `packages/core/**`, or the workflow file itself
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+  - `cargo check`: compiles clean (placeholder sidecar auto-created)
+- **Status**: COMPLETE
