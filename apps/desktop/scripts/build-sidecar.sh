@@ -40,6 +40,11 @@ esac
 
 OUT_FILE="$OUT_DIR/oneclaw-sidecar-$TARGET_TRIPLE"
 
+# Windows targets require .exe extension for Tauri externalBin resolution.
+case "$TARGET_TRIPLE" in
+  *-windows-*) OUT_FILE="${OUT_FILE}.exe" ;;
+esac
+
 echo "Building sidecar for $TARGET_TRIPLE (bun target: $BUN_TARGET)"
 echo "  Entry: $SIDECAR_ENTRY"
 echo "  Output: $OUT_FILE"

@@ -197,10 +197,15 @@ enum SidecarMode {
 /// Determine whether to run the compiled sidecar binary or the dev TypeScript source.
 fn resolve_sidecar_mode(app: &tauri::AppHandle) -> SidecarMode {
     // 1. Check for compiled sidecar binary next to the main executable.
-    //    In a bundled macOS .app, external binaries are placed in Contents/MacOS/.
+    //    macOS: Contents/MacOS/, Windows: same directory as .exe.
     if let Ok(exe_path) = std::env::current_exe() {
         if let Some(exe_dir) = exe_path.parent() {
-            let binary = exe_dir.join("oneclaw-sidecar");
+            let binary_name = if cfg!(windows) {
+                "oneclaw-sidecar.exe"
+            } else {
+                "oneclaw-sidecar"
+            };
+            let binary = exe_dir.join(binary_name);
             if binary.exists() {
                 return SidecarMode::Compiled(binary.to_string_lossy().to_string());
             }

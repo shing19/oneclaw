@@ -464,3 +464,36 @@ Created `errors.ts` with `SidecarHandlerError` and domain-specific JSON-RPC erro
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
   - `cargo check`: compiles clean (placeholder sidecar auto-created)
 - **Status**: COMPLETE
+
+---
+
+## Iteration 16 — P2-D2: Windows desktop packaging pipeline (`.exe`) proof build
+
+- **Date**: 2026-03-04
+- **Scope**: Implement Windows `.exe` packaging pipeline with NSIS installer, sidecar Windows support, and CI workflow job
+- **Implementation**:
+  - Updated `apps/desktop/scripts/build-sidecar.sh`: added `.exe` suffix for Windows target triples (`*-windows-*`) to match Tauri `externalBin` resolution convention
+  - Updated `src-tauri/src/commands/sidecar.rs`: `resolve_sidecar_mode` now uses `cfg!(windows)` to check for `oneclaw-sidecar.exe` on Windows vs `oneclaw-sidecar` on Unix
+  - Created `src-tauri/icons/icon.ico`: 32x32 RGBA placeholder `.ico` icon for Windows installer
+  - Updated `src-tauri/tauri.conf.json`: added `icon.ico` to bundle icon list; added `windows` bundle config with NSIS installer (English + SimpChinese languages, installer icon), `webviewInstallMode: embedBootstrapper` for offline WebView2 installation
+  - Added `build-windows` job to `.github/workflows/desktop-build.yml`:
+    - Target: `x86_64-pc-windows-msvc` on `windows-latest`
+    - Installs pnpm 10.26.1, Node 20, Bun latest, Rust stable
+    - Rust dependency caching via `actions/cache@v4`
+    - Builds sidecar via `bash scripts/build-sidecar.sh` (Git Bash available on Windows runners)
+    - Verifies sidecar `.exe` binary exists
+    - Builds Tauri app with `--bundles nsis` for NSIS installer output
+    - Verifies `.exe` installer output in `bundle/nsis/` directory
+    - Uploads `.exe` installer as artifact with 7-day retention
+- **Design decisions**:
+  - NSIS installer chosen over MSI/WiX for simpler setup and better CJK language support
+  - `webviewInstallMode: embedBootstrapper` ensures WebView2 installs automatically on Windows 10 systems without it
+  - Sidecar binary naming follows Tauri convention: `oneclaw-sidecar-x86_64-pc-windows-msvc.exe`
+  - Windows CI uses `shell: bash` for sidecar build script (Git Bash on `windows-latest`)
+  - Single x64 target for proof build (ARM64 Windows can be added later)
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+  - `cargo check`: compiles clean
+- **Status**: COMPLETE

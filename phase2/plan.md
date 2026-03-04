@@ -52,7 +52,7 @@ Current codebase is CLI/core focused. Missing major Phase 2 foundations:
 ## Milestone P2-D: Platform and Packaging (Week 6)
 
 - [x] `P2-D1` macOS desktop packaging pipeline (`.dmg`) proof build.
-- [ ] `P2-D2` Windows desktop packaging pipeline (`.exe`) proof build.
+- [x] `P2-D2` Windows desktop packaging pipeline (`.exe`) proof build.
 - [ ] `P2-D3` Linux desktop packaging pipeline (`.AppImage` or `.deb`) proof build.
 - [ ] `P2-D4` Verify app config path and secret behavior consistency across platforms.
 - [ ] `P2-D5` Add release artifacts upload for desktop builds.
