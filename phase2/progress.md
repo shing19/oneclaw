@@ -384,3 +384,26 @@ Created `errors.ts` with `SidecarHandlerError` and domain-specific JSON-RPC erro
   - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 13 — P2-C3: Model config page: provider cards, model selection, fallback chain reorder
+
+- **Date**: 2026-03-04
+- **Scope**: Implement the full Model Configuration page with provider cards, API key management, fallback chain drag-and-drop reorder, and per-model settings drawer
+- **Implementation**:
+  - Created `src/pages/model-config/ProviderCard.tsx`: expandable provider card with logo initial, name, health status dot + label (ok/degraded/unreachable), model count, API key configured status, enable/disable toggle; expanded section has API key input (masked password), save button with IPC `secret.set`, endpoint display, test connection button with `model.testProvider` IPC, quota info, and clickable model list with context window display
+  - Created `src/pages/model-config/FallbackChain.tsx`: drag-and-drop fallback chain reorder with HTML5 drag events, priority numbers (primary badge for #1), drag handle, move up/down buttons, remove button; empty state; bilingual title/description
+  - Created `src/pages/model-config/ModelSettingsPanel.tsx`: slide-in drawer panel for per-model advanced settings — temperature slider (0-2), max tokens input, thinking mode select (7 options), timeout, transport select (sse/websocket/auto), streaming toggle, cache retention select; save/cancel footer buttons
+  - Updated `src/pages/model-config/index.tsx`: main page composing all sub-components; fetches provider list, config, and secret keys on mount via parallel `Promise.all` IPC calls; wires Zustand model store for fallback chain; handles API key save status tracking, provider enable/disable toggle with optimistic update and config persistence, model selection for settings panel, model settings save with full config fetch-merge-update pattern
+- **Design decisions**:
+  - Provider API keys stored as secrets at `oneclaw/provider/{id}/api-key` (consistent with core secret key patterns)
+  - Fallback chain reorder uses both drag-and-drop and button-based movement for accessibility
+  - Model settings panel uses drawer pattern (fixed right panel with backdrop) following LobeHub-style UX
+  - Enable/disable toggle uses optimistic update (immediate UI feedback, config persisted async)
+  - Config updates use fetch-current-merge-update pattern to avoid partial type issues with IPC contracts
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 105 tests pass (56 core + 18 cli + 31 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
