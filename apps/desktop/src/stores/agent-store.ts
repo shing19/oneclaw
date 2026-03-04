@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { sanitizeLogEntry } from "@/utils/log-sanitizer";
 
 /** Agent runtime status. */
 export type AgentStatus = "stopped" | "starting" | "running" | "error";
@@ -26,7 +27,7 @@ export const useAgentStore = create<AgentState>()((set) => ({
 
   addLog: (entry) =>
     set((state) => ({
-      recentLogs: [entry, ...state.recentLogs].slice(0, 20),
+      recentLogs: [sanitizeLogEntry(entry), ...state.recentLogs].slice(0, 20),
     })),
 
   clearLogs: () => set({ recentLogs: [] }),

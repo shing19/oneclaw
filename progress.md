@@ -2085,3 +2085,45 @@
   - `pnpm test`: 177 tests pass (91 core + 18 cli + 68 desktop)
   - `pnpm lint`: 0 errors, 3 pre-existing warnings
 - **Status**: COMPLETE
+
+---
+
+## Iteration 18 — P2-E4: Security sanity: secret values never exposed in UI logs or plain text exports
+
+- **Date**: 2026-03-04
+- **Scope**: Verify through automated testing and defensive code that secret values are never exposed in IPC responses, log displays, cost exports, or error messages
+- **Implementation**:
+  - Created `apps/desktop/src-tauri/sidecar/__tests__/security-sanity.test.ts`: 20-test security suite that:
+    1. Stores known test secrets (API key, app secret, webhook token) via `secret.set`
+    2. Scans all IPC responses for presence of those secret values using deep recursive search + regex pattern matching
+    3. Verifies `secret.list` returns only keys, never values
+    4. Verifies `secret.exists` returns only boolean, no value
+    5. Verifies `secret.set`/`secret.delete` return only `{ok: true}`
+    6. Verifies `config.get` returns `credentialRef` strings, not raw secrets
+    7. Verifies `config.update`/`config.validate` responses contain no secrets
+    8. Verifies `cost.export` CSV and JSON contain no secret values
+    9. Verifies `cost.summary` contains no secrets
+    10. Verifies `doctor.run` bilingual messages expose key count but never key values
+    11. Verifies `channel.feishu.*` responses contain no credentials
+    12. Verifies `agent.status`/`agent.health`/`model.*` contain no secrets
+    13. Verifies error responses from failed operations contain no secrets
+    14. Full wire-format scan: serializes all 16+ method responses to JSON and scans for secret patterns
+  - Created `apps/desktop/src/utils/log-sanitizer.ts`: defensive log sanitizer that masks known credential patterns before UI display:
+    - Masks `sk-*` and `key-*` API key formats
+    - Masks Bearer token strings
+    - Masks `api_key=`, `secret_key=`, `app_secret=`, `webhook_token=` patterns in key=value contexts
+    - Masks `Authorization:` header values
+  - Updated `apps/desktop/src/stores/agent-store.ts`: `addLog()` now passes entries through `sanitizeLogEntry()` before storing
+- **Security audit findings**:
+  - All 26 IPC methods verified: no secret values in any response
+  - Config uses `credentialRef` / `appSecretRef` / `webhookTokenRef` patterns (references, not raw values)
+  - Secret handler architecture correctly returns only keys and boolean existence, never values
+  - Cost export contains only financial data (amounts, tokens, requests)
+  - Doctor checks report key count, not key names or values
+  - Frontend forms use `type="password"` and clear secrets after save
+  - Log sanitizer adds defense-in-depth for any upstream credential leaks
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 197 tests pass (91 core + 18 cli + 88 desktop)
+  - `pnpm lint`: 0 errors, 3 pre-existing warnings
+- **Status**: COMPLETE
