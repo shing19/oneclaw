@@ -113,6 +113,34 @@
 
 ---
 
+## Iteration 6 — P2-B1: Define typed IPC contracts for all JSON-RPC methods
+
+- **Date**: 2026-03-04
+- **Scope**: Define typed TypeScript IPC contracts for all JSON-RPC methods (agent, config, model, secret, channel, cost, doctor) and event notifications
+- **Implementation**:
+  - Created `src/ipc/jsonrpc.ts`: JSON-RPC 2.0 base types (request, response, notification, error), standard error codes, application error codes, type guards
+  - Created `src/ipc/methods/agent.ts`: 5 methods — `agent.start`, `agent.stop`, `agent.restart`, `agent.status`, `agent.health`; serializable mirrors of core `KernelStatus`, `HealthReport`, `ErrorInfo` with ISO string dates
+  - Created `src/ipc/methods/config.ts`: 4 methods — `config.get`, `config.update`, `config.reset`, `config.validate`; full `IpcOneclawConfig` shape mirroring core `OneclawConfig` with serializable types
+  - Created `src/ipc/methods/model.ts`: 5 methods — `model.list`, `model.listPresets`, `model.setFallbackChain`, `model.testProvider`, `model.getQuota`; `IpcProviderSummary` with health + quota
+  - Created `src/ipc/methods/secret.ts`: 4 methods — `secret.set`, `secret.delete`, `secret.exists`, `secret.list`; values never returned to frontend (security)
+  - Created `src/ipc/methods/channel.ts`: 4 methods — `channel.feishu.setup`, `channel.feishu.test`, `channel.feishu.status`, `channel.feishu.sendTest`; serializable `IpcTestResult`, `IpcSendResult`
+  - Created `src/ipc/methods/cost.ts`: 3 methods — `cost.summary`, `cost.history`, `cost.export`; `IpcCostOverview` with today/week/month, `IpcCostHistory` with daily breakdown
+  - Created `src/ipc/methods/doctor.ts`: 1 method — `doctor.run`; bilingual `IpcDoctorCheck` with zh-CN/en labels
+  - Created `src/ipc/events.ts`: 4 event types — `SidecarReadyEvent`, `LogEvent`, `StatusEvent`, `CostEventPayload`; Tauri event name constants; `TauriEventMap` and `JsonRpcNotificationMap` for type-safe listeners
+  - Created `src/ipc/method-map.ts`: unified `IpcMethodMap` interface (26 methods total); `IpcMethodName`, `IpcParams<M>`, `IpcResult<M>` utility types for compile-time dispatch safety
+  - Created `src/ipc/index.ts`: barrel export for all contracts
+- **Design decisions**:
+  - All `Date` fields serialized as ISO 8601 strings (JSON-RPC transport)
+  - Secret values never exposed in responses (only `exists` and `list` keys)
+  - Doctor check labels are bilingual objects (`{zh-CN, en}`)
+  - Method map uses mapped types for compile-time params↔result enforcement
+- **Validation**:
+  - `pnpm typecheck`: 3 packages pass (core, cli, desktop)
+  - `pnpm test`: 74 tests pass (56 core + 18 cli)
+- **Status**: COMPLETE
+
+---
+
 ## Failed Attempts
 
 ### 2026-03-04 10:54:36 | Agent: claude | Iteration: 2
